@@ -1,0 +1,13 @@
+Explain the steps you're going to take to fix this issue.
+Show code snippets that you will need to modify.
+Then review the code snippets and make sure you're correct.
+Determine where best to add logging to help you debug and verify the issue.
+
+Finally, implement the changes (including logging) after you've explained, shown, and reviewed the code snippets.
+
+Explain the steps you're going to take to fix this issue.
+Show code snippets that you will need to modify.
+Then review the code snippets and make sure you're correct.
+Determine where best to add logging to help you debug and verify the issue.
+
+Finally, implement the changes (including logging) after you've explained, shown, and reviewed the code snippets.

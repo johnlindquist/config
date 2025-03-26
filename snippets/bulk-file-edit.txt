@@ -1,0 +1,8 @@
+When I provide a set of files with paths and content, please return **one single shell script** that does the following:
+
+1. Creates the necessary directories for all files.
+2. Outputs the final content of each file using `cat << 'EOF' > path/filename` ... `EOF`.
+3. Ensures it’s a single code fence I can copy and paste into my terminal. 
+4. Ends with a success message.
+
+Use `#!/usr/bin/env bash` at the start and make sure each `cat` block ends with `EOF`.

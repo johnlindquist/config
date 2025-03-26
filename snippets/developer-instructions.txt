@@ -1,0 +1,117 @@
+<OVERVIEW>
+  Explain the overarching goal or purpose of this set of changes. Provide important context and describe the main features or objectives, so the developer (or AI agent) understands why these tasks are needed.
+</OVERVIEW>
+
+<FILES_TO_MODIFY>
+  <!-- 
+    List each file path, with clear labels:
+      * existing files
+      * new files
+      * files to be removed
+  -->
+  1. /path/to/your/existingFile.js (Existing)
+  2. /path/to/your/newFile.js (New)
+  3. /path/to/your/fileToRemove.js (Remove)
+</FILES_TO_MODIFY>
+
+<CODE_SNIPPETS>
+  <!--
+    Provide the exact code snippets to be inserted, removed, or modified, 
+    one file at a time. Each snippet should handle a single, isolated change. 
+    Make sure each snippet is small enough to be executed without confusion.
+  -->
+
+  <FILE name="/path/to/your/existingFile.js">
+    <CHANGE>
+      <!-- Single, small change #1 -->
+      <PURPOSE>
+        Briefly explain why this change is necessary (e.g., fixes bug #123, 
+        improves performance, etc.).
+      </PURPOSE>
+      <CODE>
+        // Show only the lines of code that will be changed:
+        // e.g., 
+        // - remove: console.log("Debugging...");
+        // + add: console.log("Refined output...");
+      </CODE>
+    </CHANGE>
+    
+    <CHANGE>
+      <!-- Single, small change #2 -->
+      <PURPOSE>
+        Explain why this second change is needed.
+      </PURPOSE>
+      <CODE>
+        // Code snippet for the second change
+      </CODE>
+    </CHANGE>
+  </FILE>
+
+  <FILE name="/path/to/your/newFile.js">
+    <CHANGE>
+      <PURPOSE>
+        Explain what this new file does and why it's needed.
+      </PURPOSE>
+      <CODE>
+        // Entire content of the new file or the snippet to be inserted
+      </CODE>
+    </CHANGE>
+  </FILE>
+
+  <FILE name="/path/to/your/fileToRemove.js">
+    <!-- 
+      Since this file is to be removed, clarify if there's any explanation
+      or if it's simply a deletion.
+    -->
+    <CHANGE>
+      <PURPOSE>
+        Explain why we're removing this file.
+      </PURPOSE>
+      <CODE>
+        // Instructions: remove the file entirely.
+      </CODE>
+    </CHANGE>
+  </FILE>
+</CODE_SNIPPETS>
+
+<DETAILED_TASK_BREAKDOWN>
+  <!-- 
+    Break down each change above into the smallest possible sub-task, following
+    this pattern: 
+  -->
+
+  <TASK>
+    <DESCRIPTION>
+      Describe the task in detail, referencing the file and snippet. 
+      Explain the purpose.
+    </DESCRIPTION>
+    <CODE_SNIPPET>
+      <!-- The actual snippet to apply for this sub-task only. -->
+    </CODE_SNIPPET>
+    <VERIFICATION>
+      <!-- 
+        Explicitly detail how to confirm this sub-task was completed. 
+        For example:
+          - Confirm the console output 
+          - Confirm a certain line exists in a file 
+          - Run a specific test script 
+      -->
+    </VERIFICATION>
+  </TASK>
+
+  <!-- Repeat <TASK> blocks for each small piece of work. -->
+</DETAILED_TASK_BREAKDOWN>
+
+<STEPS>
+  <!-- 
+    Provide a concise, numbered summary of all the tasks, in order.
+    This is the “checklist” or "table of contents" of everything above.
+  -->
+  1. Task #1 – Summarize the file, code changes, and verification steps.
+  2. Task #2 – Summarize the file, code changes, and verification steps.
+  3. Task #3 – Continue until all tasks are listed...
+</STEPS>
+
+<END>
+"Please execute EVERY step of this plan to completion. Rely solely on my instructions and reasoning, don’t make any of your own decisions. Go!"
+</END>

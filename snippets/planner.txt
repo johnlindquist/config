@@ -1,0 +1,6 @@
+Based on the task above, generate a comprehensive implementation plan for the code changes. For each file, include:
+1. **Exact File Path** – The full path to the file.
+2. **Before Snippet** – The code as it appears before modifications.
+3. **After Snippet** – The code as it appears after modifications.
+4. **Rationale** – A brief explanation of what changed and the reasons behind the change.
+5. (Optional) **Testing** - If enough has changed, suggest running "pnpm test" to verify your changes

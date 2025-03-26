@@ -1,0 +1,61 @@
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs and temp files
+*.log
+logs/
+tmp/
+temp/
+*.tmp
+
+# Credential files and tokens
+**/credentials
+**/credentials.json
+*.token
+*_token
+*_tokens
+auth_tokens
+*.pem
+*.key
+*.cert
+*.crt
+
+# Cache files
+.cache/
+cache/
+__pycache__/
+*.py[cod]
+*$py.class
+node_modules/
+.npm/
+
+# History files
+.bash_history
+.zsh_history
+.node_repl_history
+.python_history
+
+# Local environment files
+.env
+.env.local
+.envrc
+
+# Application-specific files that may contain sensitive data
+**/configstore/
+**/simple-update-notifier/
+**/auth0/
+**/gh/auth.yml
+
+# Databases
+*.sqlite
+*.db
+
+# IDE settings
+.idea/
+.vscode/ 

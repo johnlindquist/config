@@ -1,0 +1,3 @@
+Review the risk of committing this change and the impact it might have on the project that might not be obvious.
+Try and expose edge cases.
+Write out your report to a "/risks/YYYY-MM-DD-HH-MM-SS-report.txt" file in the project root.

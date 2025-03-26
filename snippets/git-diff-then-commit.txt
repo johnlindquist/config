@@ -1,0 +1,43 @@
+Execute the following Git Commit Steps
+
+1. Check current branch:
+   git branch --show-current | cat
+   BRANCH CHECK!
+      - Ensure you're on the intended branch
+      - If wrong branch: git checkout <correct-branch> and restart
+
+2. Stage all changes:
+   git add .
+
+3. Review staged changes:
+   git status | cat
+   SAFETY CHECKS!
+      - Look for .env files, secrets, or other sensitive files that should not be committed
+      - Check for large files: git diff --staged --stat | cat
+      - If found: git reset and STOP
+
+4. Review actual changes:
+   git diff --staged | cat
+   CODE REVIEW!
+      - Verify all changes are intentional
+      - Look for debug code, console.logs
+      - Check for hardcoded values
+      
+5. Choose commit type:
+   - For fixes: git commit -m "fix($scope): $message"
+   - For features: git commit -m "feat($scope): $message"
+   - Other types: build, chore, ci, docs, perf, refactor, revert, style, test
+   
+   Commit Format Rules:
+   - Type must be lowercase
+   - Scope is optional, must be in parentheses
+   - Message must be imperative: "add" not "added"
+   - No period at end of message
+   
+6. Push changes:
+   git push
+
+Examples:
+fix: git add . && git commit -m "fix(auth): handle expired tokens" && git push
+feat: git add . && git commit -m "feat(ui): add dark mode toggle" && git push
+perf: git add . && git commit -m "perf(api): optimize database queries" && git push
