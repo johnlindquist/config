@@ -287,7 +287,7 @@
                        :move_to_previous_display "/bin/bash /Users/johnlindquist/.config/scripts/move_to_previous_display.sh"
                        :move_window_east "/bin/bash /Users/johnlindquist/.config/scripts/move_window_east.sh"
                        :move_window_west "/bin/bash /Users/johnlindquist/.config/scripts/move_window_west.sh"
-                       :restart_yabai "/bin/bash /Users/johnlindquist/.config/scripts/restart_yabai.sh"
+                       :restart_yabai "/opt/homebrew/bin/yabai --restart-service"
                        
                        :fix_floats "/bin/bash /Users/johnlindquist/.config/scripts/fix_floats.sh"
                        }
@@ -810,7 +810,6 @@
                                 [:-e [:move_window_to_next_empty_space]] ; Equal+K -> move right
                                 [:-x [:remove_current_space]]
                                 [:-y [:remove_empty_spaces_current_display]]
-                                [:-f [:fix_floats]]
                                 [:-d [:move_to_next_display]]
                                 [:-r [:restart_yabai]]
                                 

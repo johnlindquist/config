@@ -3248,19 +3248,6 @@
           "type" : "basic"
         }, {
           "from" : {
-            "key_code" : "e"
-          },
-          "to" : [ {
-            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/fix_floats.sh"
-          } ],
-          "conditions" : [ {
-            "name" : "equal-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
             "key_code" : "g"
           },
           "to" : [ {
@@ -3277,7 +3264,7 @@
             "key_code" : "s"
           },
           "to" : [ {
-            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/restart_yabai.sh"
+            "shell_command" : "/opt/homebrew/bin/yabai --restart-service"
           } ],
           "conditions" : [ {
             "name" : "equal-mode",
