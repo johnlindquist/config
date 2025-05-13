@@ -1,1622 +1,1394 @@
-{;       
- :default true
- :alone 500
- :delay 200
- :held 500
- :simlayer-threshold 140
- :modifiers {:super-hyper [:command :shift :control :option :fn]
-             :hyper [:command :shift :control :option]
-             :cos [:command :shift :option]
-             :cst [:command :shift :control]
-             :co [:command :option]
-             :cs [:command :shift]
-             :ct [:command :control]
-             :to [:control :option]
-             :ts [:control :shift]
-             :os [:option :shift]}
-             ;
+{
+ ;; --- GLOBAL SETTINGS ---
+ :default             true                ; Apply rules by default
+ :alone               500                 ; Timeout (ms) for 'alone' state detection
+ :delay               200                 ; Delay (ms) for sequence keys
+ :held                500                 ; Timeout (ms) for 'held' state detection
+ :simlayer-threshold  140                 ; Timeout (ms) for simultaneous key press detection (simlayers)
 
- :froms {;alia
-         :delete {:key :delete_or_backspace}
-         :return {:key :return_or_enter}
-         :tilde {:key :grave_accent_and_tilde}
+ ;; --- CUSTOM MODIFIER ALIASES ---
+ :modifiers           {:super-hyper [:command :shift :control :option :fn] ; All modifiers including Fn
+                       :hyper       [:command :shift :control :option]     ; Cmd+Shift+Ctrl+Opt
+                       :cos         [:command :shift :option]              ; Cmd+Shift+Opt
+                       :cst         [:command :shift :control]             ; Cmd+Shift+Ctrl
+                       :co          [:command :option]                     ; Cmd+Opt
+                       :cs          [:command :shift]                      ; Cmd+Shift
+                       :ct          [:command :control]                    ; Cmd+Ctrl
+                       :to          [:control :option]                     ; Ctrl+Opt
+                       :ts          [:control :shift]                      ; Ctrl+Shift
+                       :os          [:option :shift]}                      ; Opt+Shift
 
-         ;colemak froms (for easier mnemonics)
-         :-q {:key :q}
-         :-w {:key :w}
-         :-f {:key :e}
-         :-p {:key :r}
-         :-g {:key :t}
-         :-j {:key :y}
-         :-l {:key :u}
-         :-u {:key :i}
-         :-y {:key :o}
-         :-semicolon {:key :p}
+ ;; --- INPUT KEY ALIASES (:froms) ---
+ :froms               {
+                       ;; Standard Aliases
+                       :delete       {:key :delete_or_backspace}
+                       :return       {:key :return_or_enter}
+                       :tilde        {:key :grave_accent_and_tilde}
 
-         :-a {:key :a}
-         :-r {:key :s}
-         :-s {:key :d}
-         :-t {:key :f}
-         :-d {:key :g}
-         :-h {:key :h}
-         :-n {:key :j}
-         :-e {:key :k}
-         :-i {:key :l}
-         :-o {:key :semicolon}
+                       ;; Colemak Layout Aliases (for easier mnemonics in rules)
+                       :-q          {:key :q}
+                       :-w          {:key :w}
+                       :-f          {:key :e}           ; Colemak 'F' is QWERTY 'E'
+                       :-p          {:key :r}           ; Colemak 'P' is QWERTY 'R'
+                       :-g          {:key :t}           ; Colemak 'G' is QWERTY 'T'
+                       :-j          {:key :y}           ; Colemak 'J' is QWERTY 'Y'
+                       :-l          {:key :u}           ; Colemak 'L' is QWERTY 'U'
+                       :-u          {:key :i}           ; Colemak 'U' is QWERTY 'I'
+                       :-y          {:key :o}           ; Colemak 'Y' is QWERTY 'O'
+                       :-semicolon  {:key :p}           ; Colemak ';' is QWERTY 'P'
 
-         :-z {:key :z}
-         :-x {:key :x}
-         :-c {:key :c}
-         :-v {:key :v}
-         :-b {:key :b}
-         :-k {:key :n}
-         :-m {:key :m}
-         :left_click {:pkey :button1}}
+                       :-a          {:key :a}
+                       :-r          {:key :s}           ; Colemak 'R' is QWERTY 'S'
+                       :-s          {:key :d}           ; Colemak 'S' is QWERTY 'D'
+                       :-t          {:key :f}           ; Colemak 'T' is QWERTY 'F'
+                       :-d          {:key :g}           ; Colemak 'D' is QWERTY 'G'
+                       :-h          {:key :h}
+                       :-n          {:key :j}           ; Colemak 'N' is QWERTY 'J'
+                       :-e          {:key :k}           ; Colemak 'E' is QWERTY 'K'
+                       :-i          {:key :l}           ; Colemak 'I' is QWERTY 'L'
+                       :-o          {:key :semicolon}   ; Colemak 'O' is QWERTY ';'
 
+                       :-z          {:key :z}
+                       :-x          {:key :x}
+                       :-c          {:key :c}
+                       :-v          {:key :v}
+                       :-b          {:key :b}
+                       :-k          {:key :n}           ; Colemak 'K' is QWERTY 'N'
+                       :-m          {:key :m}
 
+                       ;; Mouse Buttons
+                       :left_click   {:pkey :button1}
+                       :right_click  {:pkey :button2} ; Added for clarity based on usage later
+                       }
 
-         ;
+ ;; --- OUTPUT ACTION ALIASES (:tos) ---
+ :tos                 {
+                       ;; Basic Keys
+                       :delete       {:key :delete_or_backspace}
+                       :return       {:key :return_or_enter}
+                       :tilde        {:key :grave_accent_and_tilde}
 
+                       ;; macOS & App Launchers
+                       :spotlight    {:key :f13} ; Often used as a custom spotlight trigger
+                       :alfred       {:key :spacebar :modi :option} ; Opt+Space
+                       :emoji_picker {:key :spacebar :modi :ct}     ; Ctrl+Cmd+Space
+                       :open_1password {:key :backslash :modi :command} ; Cmd+\
 
- :tos {;
-       :spotlight {:key :f13}
-       :shift_click {:pkey :button1 :modi :left_shift}
+                       ;; Screenshots & Recording
+                       :restore_screenshot {:key :7 :modi :cs} ; Cmd+Shift+4 (macOS default region capture)
+                       :capture_screenshot {:key :4 :modi :cs} ; Cmd+Shift+4 (macOS default region capture)
+                       :record_screen    {:key :6 :modi :cs} ; Custom shortcut? (macOS default is Cmd+Shift+5)
+                       :take_screenshot  {:key :6 :modi :cs} ; Alias for record_screen?
 
-       :delete {:key :delete_or_backspace}
-       :return {:key :return_or_enter}
-       :tilde {:key :grave_accent_and_tilde}
+                       ;; Mouse Actions
+                       :shift_click  {:pkey :button1 :modi :left_shift}
 
-       ;shortcuts
-       :alfred {:key :spacebar :modi :option} ;!spacebar
-       :autocomplete {:key :spacebar :modi :control} ;!Tspacebar
-       :command_palette {:key :p :modi :cs}
+                       ;; General Editing & Navigation
+                       :go_back      {:key :hyphen :modi :control} ; Ctrl+- (Common in IDEs)
+                       :go_forward   {:key :hyphen :modi :ts}      ; Ctrl+Shift+- (Common in IDEs)
+                       :go_home      {:key :up_arrow :modi :command} ; Cmd+Up
+                       :go_end       {:key :down_arrow :modi :command} ; Cmd+Down
+                       :expand_selection {:key :right_arrow :modi :cst} ; Ctrl+Shift+Cmd+Right (IDE specific?)
+                       :shrink_selection {:key :left_arrow :modi :cst}  ; Ctrl+Shift+Cmd+Left (IDE specific?)
+                       :insert_line_below {:key :return_or_enter :modi :command} ; Cmd+Enter
+                       :insert_line_above {:key :return_or_enter :modi :cs}      ; Cmd+Shift+Enter
+                       :delete_line {:key :k :modi :cs} ; Custom: Cmd+Shift+K
+                       :wrap_emmet  {:key :p :modi :hyper} ; Custom: Hyper+P
 
-       :capture_screenshot {:key :4 :modi :cs}
-       :record_screen {:key :6 :modi :cs}
-       :cursor_find_match {:key :d :modi :command}
-       :cursor_select_all {:key :l :modi :cs}
-       :cursor_above {:key :up_arrow :modi :co}
-       :cursor_below {:key :down_arrow :modi :co}
-       :chrome_tab_switcher {:key :a :modi :cs}
-       :superkey {:key :0 :modi :hyper}
-       :acejump {:key :j :modi :cos}
-       :acejump_line {:key :l :modi :cos}
-       :acejump_selection {:key :s :modi :cos}
-       :acejump_multi {:key :m :modi :cos}
+                       ;; IDE/Editor Specific Actions (VSCode-like?)
+                       :fix_with_ai {:key :d :modi :cs} ; Cmd+Shift+P
+                       :command_palette {:key :p :modi :cs} ; Cmd+Shift+P
+                       :cursor_find_match {:key :d :modi :command} ; Cmd+D
+                       :cursor_select_all {:key :l :modi :cs}    ; Cmd+Shift+L
+                       :cursor_above {:key :up_arrow :modi :co}   ; Cmd+Opt+Up
+                       :cursor_below {:key :down_arrow :modi :co} ; Cmd+Opt+Down
+                       :acejump {:key :j :modi :cos}             ; Custom: Cmd+Opt+Shift+J
+                       :acejump_line {:key :l :modi :cos}         ; Custom: Cmd+Opt+Shift+L
+                       :acejump_selection {:key :s :modi :cos}    ; Custom: Cmd+Opt+Shift+S
+                       :acejump_multi {:key :m :modi :cos}        ; Custom: Cmd+Opt+Shift+M
+                       :close_all    [{:key :r :modi :command} {:key :w}] ; Custom Sequence? Cmd+R then W?
+                       :close_others [{:key :t :modi :co}] ; Cmd+Opt+T (VSCode default)
+                       :developer_tools [{:key :i :modi :co}] ; Cmd+Opt+I (Browser Dev Tools)
+                       :find_in_project {:key :f :modi :cs} ; Cmd+Shift+F
+                       :replace_in_project {:key :h :modi :cs} ; Cmd+Shift+H
+                       :focus_git    {:key :g :modi :ts} ; Ctrl+Shift+G (VSCode Source Control)
+                       :focus_editor {:key :e :modi :hyper} ; Custom: Hyper+E
+                       :focus_editor_left {:key :i :modi :hyper} ; Custom: Hyper+I
+                       :focus_editor_right {:key :n :modi :hyper} ; Custom: Hyper+N
+                       :focus_explorer {:key :e :modi :cs} ; Cmd+Shift+E (VSCode Explorer)
+                       :focus_terminal {:key :t :modi :hyper} ; Custom: Hyper+T
+                       :start_debugger {:key :f5}
+                       :restart_debugger {:key :f5 :modi :cs} ; Cmd+Shift+F5
+                       :go_to_references {:key :f12 :modi :shift} ; Shift+F12
+                       :go_to_symbol {:key :o :modi :cs} ; Cmd+Shift+O
+                       :go_to_symbol_in_workspace {:key :o :modi :cos} ; Cmd+Opt+Shift+O ? (Cmd+T in VSCode)
+                       :go_to_hints {:key :spacebar :modi :cs} ; Cmd+Shift+Space (Parameter Hints)
+                       :search_everywhere {:key :p :modi :co} ; Cmd+Opt+P ? (Go To File is Cmd+P)
+                       :go_to_implementations {:key :f12 :modi :command} ; Cmd+F12
+                       :go_to_definition {:key :f12}
+                       :go_to_line {:key :g :modi :control} ; Ctrl+G
+                       :go_to_prev_problem {:key :f8 :modi :os} ; Opt+Shift+F8
+                       :go_to_next_problem {:key :f8 :modi :option} ; Opt+F8
+                       :new_terminal {:key :grave_accent_and_tilde :modi :ts} ; Ctrl+Shift+` (VSCode)
+                       :open_next_editor {:key :right_arrow :modi :co} ; Cmd+Opt+Right (Often Next Tab)
+                       :open_prev_editor {:key :left_arrow :modi :co}  ; Cmd+Opt+Left (Often Prev Tab)
+                       :focus_next_editor_group {:key :f16 :modi :option} ; Custom: Opt+F16
+                       :focus_prev_editor_group {:key :f16 :modi :os}   ; Custom: Opt+Shift+F16
+                       :peek_definition {:key :f12 :modi :option} ; Opt+F12
+                       :peek_implementations {:key :f12 :modi :cs} ; Cmd+Shift+F12
+                       :peek_declaration {:key :f19 :modi :control} ; Custom: Ctrl+F19
+                       :peek_references {:key :f19 :modi :command} ; Custom: Cmd+F19
+                       :peek_type {:key :f19 :modi :shift} ; Custom: Shift+F19
+                       :replace {:key :f :modi :co} ; Cmd+Opt+F (Replace in file)
+                       :rename {:key :f2} ; Standard Rename
+                       :fold {:key :open_bracket :modi :co} ; Cmd+Opt+[
+                       :unfold {:key :close_bracket :modi :co} ; Cmd+Opt+]
+                       :toggle_fold [{:key :r :modi :command} {:key :l :modi :command}] ; Custom Sequence: Cmd+R then Cmd+L ?
+                       :split_window {:key :backslash :modi :command} ; Cmd+\ (VSCode Split Editor)
+                       :toggle_sidebar {:key :b :modi :command} ; Cmd+B (VSCode Toggle Sidebar)
+                       :go_to_file {:key :p :modi :command} ; Cmd+P (VSCode Go To File)
 
-       :close_all [{:key :r :modi :command} {:key :w}]
-       :close_others [{:key :t :modi :co}]
-       :developer_tools [{:key :i :modi :co}]
+                       ;; Symbols
+                       :open_brace   {:key :open_bracket :modi :shift}  ; {
+                       :close_brace  {:key :close_bracket :modi :shift} ; }
+                       :open_paren   {:key :9 :modi :shift}             ; (
+                       :close_paren  {:key :0 :modi :shift}             ; )
+                       :less_than    {:key :comma :modi :shift}          ; <
+                       :greater_than {:key :period :modi :shift}         ; >
 
-       :delete_line {:key :k :modi :cs} ;!CSk
+                       ;; Chrome Specific
+                       :chrome_tab_switcher {:key :a :modi :cs} ; Custom: Cmd+Shift+A (Built-in is Ctrl+Tab / Ctrl+Shift+Tab)
+                       :open_dev_tools {:key :i :modi :co} ; Cmd+Opt+I
+                       :chrome_full_screen {:key :f :modi :ct} ; Ctrl+Cmd+F
+                       :focus_omnibar {:key :l :modi :command} ; Cmd+L
+                       :chrome_go_back {:key :open_bracket :modi :command} ; Cmd+[
+                       :chrome_go_forward {:key :close_bracket :modi :command} ; Cmd+]
 
-       :find_in_project {:key :f :modi :cs} ;!CSf
-       :replace_in_project {:key :h :modi :cs} ;!CSh
+                       ;; Ableton Live Specific
+                       :add_midi_clip {:key :m :modi :cs} ; Cmd+Shift+M
+                       :add_midi_track {:key :t :modi :cs} ; Cmd+Shift+T
+                       :loop_selection {:key :l :modi :command} ; Cmd+L
+                       :toggle_clip_device_view {:key :tab :modi :shift} ; Shift+Tab
+                       :narrow_grid {:key :1 :modi :command} ; Cmd+1
+                       :widen_grid {:key :2 :modi :command} ; Cmd+2
+                       :snap_to_grid {:key :4 :modi :command} ; Cmd+4
+                       :split_clip {:key :e :modi :command} ; Cmd+E
 
-       :focus_git {:key :g :modi :ts} ;!TSg
-       :focus_editor {:key :e :modi :hyper}
-       :focus_editor_left {:key :i :modi :hyper}
-       :focus_editor_right {:key :n :modi :hyper}
-       :focus_explorer {:key :e :modi :cs} ;:!CSOe
-       :focus_terminal {:key :t :modi :hyper}
-       :start_debugger {:key :f5}
-       :restart_debugger {:key :f5 :modi :cs}
+                       ;; Window Management / Display Layouts (Likely custom scripts/apps)
+                       :display_layout_1 {:key :1 :modi :hyper} ; Custom: Hyper+1
+                       :display_layout_2 {:key :2 :modi :hyper} ; Custom: Hyper+2
 
+                       ;; Terminal / Tmux
+                       :tmux {:key :b :modi :control} ; Standard Tmux prefix Ctrl+B
+                       :tmux_new_pane {:key :5 :modi :shift} ; Standard Tmux split vertical % (Shift+5)
+                       :terminal_previous_tab {:key :open_bracket :modi :cs} ; Cmd+Shift+[ (Standard macOS)
+                       :terminal_next_tab {:key :close_bracket :modi :cs} ; Cmd+Shift+] (Standard macOS)
 
-       :go_to_references {:key :f12 :modi :shift}
-       :go_to_symbol {:key :o :modi :cs}
-       :go_to_symbol_in_workspace {:key :o :modi :cos}
-       :go_to_hints {:key :spacebar :modi :cs}
-       :search_everywhere {:key :p :modi :co}
-       :go_to_implementations {:key :f12 :modi :command}
-       :go_to_definition {:key :f12}
-       :go_to_line {:key :g :modi :control}
-       :go_to_prev_problem {:key :f8 :modi :os}
-       :go_to_next_problem {:key :f8 :modi :option}
-       :go_home {:key :up_arrow :modi :command}
-       :go_end {:key :down_arrow :modi :command}
+                       ;; Slack Specific
+                       :slack_previous {:key :open_bracket :modi :command} ; Cmd+[ (History Back)
+                       :slack_next {:key :close_bracket :modi :command} ; Cmd+] (History Forward)
 
-       :new_terminal {:key :grave_accent_and_tilde :modi :ts}; !TS`
+                       ;; Utilities
+                       :superkey {:key :0 :modi :hyper} ; Custom trigger: Hyper+0
+                       :toggle_screen_brush {:key :tab :modi :option} ; Custom: Opt+Tab (Annotation tool?)
+                       :autocomplete {:key :spacebar :modi :control} ; Ctrl+Space (macOS standard suggestion)                       
+                       }
 
-       :open_next_editor {:key :right_arrow :modi :co}
-       :open_prev_editor {:key :left_arrow :modi :co}
-       :focus_next_editor_group {:key :f16 :modi :option}
-       :focus_prev_editor_group {:key :f16 :modi :os}
+ ;; --- SCRIPT TEMPLATES ---
+ ;; Templates for generating shell commands using osascript, security, kenv, etc.
+ :templates           {
+                       :beep "osascript -e 'beep'"
+                       :beep2 "osascript -e 'beep 2'"
+                       :new-note "osascript -e 'tell application id \"com.runningwithcrayons.Alfred\" to run trigger \"new-note\" in workflow \"com.johnlindquist.new-note\" with argument \"\"'"
+                       :new-blog "osascript -e 'tell application id \"com.runningwithcrayons.Alfred\" to run trigger \"new-blog\" in workflow \"com.johnlindquist.new-blog\" with argument \"\"'"
+                       :alfred "osascript -e 'tell application \"Alfred 4\" to run trigger \"%s\" in workflow \"%s\" with argument \"%s\"'"
+                       :code-project "~/.kenv/bin/code-project \"%s\""
+                       :delay "osascript -e 'delay \"%s\"'"
+                       :km "osascript -e 'tell application \"Keyboard Maestro Engine\" to do script \"%s\"'"
+                       :type "osascript -e 'tell application \"System Events\" to keystroke \"%s\"'"
+                       :type-secret "osascript -e '
+                                     set out to do shell script \"security find-generic-password -a $USER -s %s -w\"
+                                     tell application \"System Events\" to keystroke out
+                                     '"
+                       :kit "~/.kit/kar \"%s\""
+                       :focus "~/.kit/kar focus \"%s\""
+                       :launch "osascript -e 'tell application \"%s\" to activate'"                       
+                       :open-chrome "osascript -e 'tell application \"Google Chrome\"\nactivate\nopen location \"%s\"\nend tell'" 
+                       ;; Inside your :templates map in karabiner.edn
 
-       :peek_definition {:key :f12 :modi :option}
-       :peek_implementations {:key :f12 :modi :cs}
-       :peek_declaration {:key :f19 :modi :control}
-       :peek_references {:key :f19 :modi :command}
-       :peek_type {:key :f19 :modi :shift}
+:focus-or-open-chrome "/usr/bin/osascript /Users/johnlindquist/.config/focus-tab.scpt \"%s\""
+:open-new-tab "/usr/bin/osascript /Users/johnlindquist/.config/open-tab.scpt \"%s\""
+                       :open "open \"%s\""
+                       :open-a "open -a '%s'"
+                       :restream "osascript -e 'tell application \"Restream Chat\" to activate'"
+                       :zsh "zsh ~/.zfunc/'%s'"
+                       :print "osascript -e '
+                                set the clipboard to do shell script \"echo $PLEASE\"
+                                tell application \"System Events\"
+                                    keystroke \"v\" using command down
+                                end tell
+                                '"
+                       :modify "~/.simple/bin/modify --%s"
+                       :pad "~/.simple/bin/pad"
+                       :test "osascript -e 'say \"poop\"'"
+                       :copy-transcribe-low "open -g -a 'Audio Hijack' ~/transcripts/copy-transcribe-low.ahcommand"
+                       :paste-transcribe-low "open -g -a 'Audio Hijack' ~/transcripts/paste-transcribe-low.ahcommand"
+                       :copy-transcribe-high "open -g -a 'Audio Hijack' ~/transcripts/copy-transcribe-high.ahcommand"
+                       :paste-transcribe-high "open -g -a 'Audio Hijack' ~/transcripts/paste-transcribe-high.ahcommand"
+                       :transcribe "open -g -a 'Audio Hijack' ~/transcripts/transcribe.ahcommand"
+                       :paste "osascript -e '
+                               set the clipboard to \"%s\"
+                               tell application \"System Events\"
+                                   keystroke \"v\" using command down
+                               end tell
+                               '"
+                       :paste-enter "osascript -e '
+                                    set the clipboard to \"%s\"
+                                    tell application \"System Events\"
+                                        keystroke \"v\" using command down
+                                    end tell
+                                    delay 0.1
+                                    tell application \"System Events\"
+                                        keystroke return
+                                    end tell
+                                    '"
+                       :read-paste-enter "osascript -e '
+                                        set theFile to POSIX file \"%s\"
+                                          set fileContents to read theFile as «class utf8»
+                                          set the clipboard to fileContents
+                                          tell application \"System Events\"
+                                              keystroke \"v\" using command down
+                                          end tell
+                                          delay 0.1
+                                          tell application \"System Events\"
+                                              keystroke return
+                                          end tell
+                                          '"
+                       :datamuse "osascript -e '
+                                 tell application id \"com.runningwithcrayons.Alfred\" to run trigger \"datamuse\" in workflow \"com.johnlindquist.datamuse\" with argument \"%s\"
+                                 '"
 
-       :go_back {:key :hyphen :modi :control}
-       :go_forward {:key :hyphen :modi :ts}
+                       :open_new_space_and_focus "/bin/bash /Users/johnlindquist/.config/scripts/open_new_space_and_focus.sh"
+                       :space_right "/bin/bash /Users/johnlindquist/.config/scripts/space_right.sh"
+                       :space_right_by_display "/bin/bash /Users/johnlindquist/.config/scripts/space_right_by_display.sh"
+                       :space_left "/bin/bash /Users/johnlindquist/.config/scripts/space_left.sh"
+                       :space_left_by_display "/Users/johnlindquist/.config/scripts/space_left_by_display.sh"
+                       :space_right_wrap "/Users/johnlindquist/.config/scripts/space_right_wrap.sh"
+                       :space_left_wrap "/Users/johnlindquist/.config/scripts/space_left_wrap.sh"
+                       :move_window_right "/bin/bash /Users/johnlindquist/.config/scripts/move_window_right.sh"
+                       :move_window_left "/bin/bash /Users/johnlindquist/.config/scripts/move_window_left.sh"
+                       :move_window_right_half "/bin/bash /Users/johnlindquist/.config/scripts/move_window_right_half.sh"
+                       :move_window_left_half "/bin/bash /Users/johnlindquist/.config/scripts/move_window_left_half.sh"
+                       :move_window_to_next_empty_space "/bin/bash /Users/johnlindquist/.config/scripts/move_window_to_next_empty_space.sh"
+                       :move_window_to_previous_empty_space "/bin/bash /Users/johnlindquist/.config/scripts/move_window_to_previous_empty_space.sh"
+                       :remove_current_space "/bin/bash /Users/johnlindquist/.config/scripts/remove_current_space.sh"
+                       :remove_empty_spaces_current_display "/bin/bash /Users/johnlindquist/.config/scripts/remove_empty_spaces_current_display.sh"
+                       :move_to_next_display "/bin/bash /Users/johnlindquist/.config/scripts/move_to_next_display.sh"
+                       :move_to_previous_display "/bin/bash /Users/johnlindquist/.config/scripts/move_to_previous_display.sh"
+                       :move_window_east "/bin/bash /Users/johnlindquist/.config/scripts/move_window_east.sh"
+                       :move_window_west "/bin/bash /Users/johnlindquist/.config/scripts/move_window_west.sh"
+                       :restart_yabai "/bin/bash /Users/johnlindquist/.config/scripts/restart_yabai.sh"
+                       
+                       :fix_floats "/bin/bash /Users/johnlindquist/.config/scripts/fix_floats.sh"
+                       }
 
-       :replace {:key :f :modi :co}
-       :rename {:key :2 :modi :hyper}
-       :fold {:key :open_bracket :modi :co}
-       :unfold {:key :close_bracket :modi :co}
-       :toggle_fold [{:key :r :modi :command} {:key :l :modi :command}]
+ ;; --- APPLICATION IDENTIFIERS ---
+ ;; Used for application-specific rules (`:condi`)
+ :applications        {
+                       :ableton    ["com.ableton.live"]
+                       :chrome     ["com.google.Chrome"]
+                       :terminal   ["com.apple.Terminal", "com.googlecode.iterm2"] ; Added iTerm2 example
+                       :code       ["com.microsoft.VSCode", "com.todesktop.230313mzl4w4u92", "com.todesktop.23052492jqa5xjo", "com.exafunction.windsurf", "com.visualstudio.code.insiders", "dev.warp.Warp-Stable"] ; Added Insiders, Warp example
+                       :fcp        ["com.apple.FinalCut"]
+                       :miro       ["com.electron.realtimeboard"]
+                       :screenflow ["net.telestream.screenflow10"]
+                       :screenstudio ["com.timpler.screenstudio"]
+                       :slack      ["com.tinyspeck.slackmacgap"]
+                       :windows    ["com.microsoft.rdc.macos", "com.parallels.desktop.appstore"] ; RDP, Parallels
+                       ;; :webstorm ["com.jetbrains.Webstorm"] ; Example if needed
+                       }
 
-       :split_window {:key :backslash :modi :command}; !Cbackslash
+ ;; --- STANDARD LAYERS (Tap/Hold) ---
+ ;; Layers activated by holding a key, with different behavior on tap.
+ :layers              {
+                       :caps_lock-mode {:key :caps_lock :alone {:key :escape}} ; Tap Caps for Esc, Hold for layer
 
-       :toggle_sidebar {:key :b :modi :command} ;!Cb
+                       :close-bracket-mode {:key :close_bracket} ; Hold ']' for layer
 
-       :expand_selection {:key :right_arrow :modi :cst}
-       :shrink_selection {:key :left_arrow :modi :cst}
+                       ;; Escape Mode: Tap Esc normally, Hold Esc to activate layer AND reset other modes
+                       :escape-mode    {:key :escape
+                                        :params  {:basic.to_if_alone_timeout_milliseconds 200
+                                                :basic.to_if_held_down_threshold_milliseconds 200}
+                                        :alone [;; reset all modes on tap
+                                                {:key :escape}
+                                                {:set ["fn-mode" 0]}
+                                                {:set ["opt-mode" 0]}
+                                                {:set ["shift-opt-mode" 0]}
+                                                {:set ["movement-mode" 0]}
+                                                {:set ["cursor-mode" 0]}
+                                                {:set ["delete-mode" 0]}
+                                                {:set ["nav-mode" 0]}
+                                                {:set ["snippet-mode" 0]}
+                                                {:set ["kit-mode" 0]}
+                                                {:set ["button2-mode" 0]} ; Added missing modes? Check if needed
+                                                {:set ["button4-mode" 0]}
+                                                {:set ["button5-mode" 0]}
+                                                ]}
 
-       :go_to_file {:key :p :modi :command}
-       :insert_line_below {:key :return_or_enter :modi :command} ;!Creturn_or_enter
-       :insert_line_above {:key :return_or_enter :modi :cs} ;!Creturn_or_enter
-       :wrap_emmet {:key :p :modi :hyper}
+                       :f23-mode       {:key :f23 :alone {:key :vk_none}} ; Use F23 as a layer trigger
+                       :launch-mode    {:key :f24 :alone {:key :spacebar :modi :left_option}} ; Hold F24 for layer, Tap for Alfred
+                       :non-mode       {:key :non_us_backslash :alone {:key :non_us_backslash}} ; European backslash key layer
+                       :num-mode       {:key :keypad_num_lock :alone {:key :vk_none}} ; Num Lock layer
+                       :shift-mode     {:key :shift} ; Simple shift layer (less common, usually handled by OS)
+                       :tab-mode       {:key :tab} ; Hold Tab for layer
+                       :home-mode      {:key :home} ; Hold Home for layer
 
-       ;named symbols
-       :open_brace {:key :open_bracket :modi :shift}
-       :close_brace {:key :close_bracket :modi :shift}
+                       :tilde-mode     {:key :grave_accent_and_tilde :alone {:key :grave_accent_and_tilde}} ; Hold Tilde for layer, Tap for Tilde
 
-       :open_paren {:key :9 :modi :shift}
-       :close_paren {:key :0 :modi :shift}
+                       :fn-mode        {:key :fn :alone {:key :home}} ; Hold Fn for layer, Tap for Home
+                       :equal-mode     {:key :equal_sign} ; Hold '=' for layer
+                       :hyphen-mode    {:key :hyphen} ; Hold '-' for layer
+                       }
 
-       :less_than {:key :comma :modi :shift}
-       :greater_than {:key :period :modi :shift}
+ ;; --- SIMLAYERS (Simultaneous Key Presses) ---
+ ;; Layers activated by pressing multiple keys *simultaneously*.
+ :simlayers           {
+                       ;; Top Row Simlayers
+                       :zero-mode          {:key :0} ; Press 0 + another key
+                       :quick-mode         {:key :q} ; Press Q + another key
+                       :close-mode         {:key :w} ; Press W + another key (for closing things)
+                       :finder-mode        {:key :e} ; Press E + another key ('F' in Colemak, for Finder actions)
+                       :peek-mode          {:key :r} ; Press R + another key ('P' in Colemak, for Peek actions)
+                       :go-mode            {:key :t} ; Press T + another key ('G' in Colemak, for Go actions)
+                       :t-mode             {:key :t} ; Duplicate of :go-mode? Or different context?
+                       :presentation-mode  {:key :p} ; Press P + another key (';' in Colemak, for presentations)
+                       :backslash-mode     {:key :backslash} ; Press \ + another key
 
-       :emoji_picker {:key :spacebar :modi :ct} ;!CTspacebar
+                       ;; Home Row Simlayers (with trackpad avoidance)
+                       ;; :condi ensures the layer only activates if NOT touching the trackpad
+                       :opt-mode           {:key :a  :condi ["multitouch_extension_finger_count_total" 0]} ; A + key (Option layer)
+                       :shift-opt-mode     {:key :s  :condi ["multitouch_extension_finger_count_total" 0]} ; S + key ('R' Colemak, Shift+Option layer)
+                       :shift-mode         {:key :d  :condi ["multitouch_extension_finger_count_total" 0]} ; D + key ('S' Colemak, Shift layer)
+                       :movement-mode      {:key :f  :condi ["multitouch_extension_finger_count_total" 0]} ; F + key ('T' Colemak, Arrow movement layer)
+                       :cursor-mode        {:key :g  :condi ["multitouch_extension_finger_count_total" 0]} ; G + key ('D' Colemak, Cursor actions layer)
+                       :delete-mode        {:key :j} ; J + key ('N' Colemak, Deletion layer)
+                       :nav-mode           {:key :k} ; K + key ('E' Colemak, Navigation layer)
+                       :i-mode             {:key :l} ; L + key ('I' Colemak, seems unused in rules?)
+                       :period-mode        {:key :period} ; . + key (URL opening and focusing layer)
+                       :comma-mode         {:key :comma} ; , + key (URL opening layer)
+                       :semicolon-mode     {:key :semicolon} ; ; + key ('O' Colemak, Special character layer)
+                       :launch-mode        {:key :u} ; U + key ('L' Colemak, App launching layer) - Note: also defined in :layers with F24 trigger
+                       :open-mode          {:key :semicolon} ; ; + key ('O' Colemak, Project opening layer) - Note: conflicts with :semicolon-mode if 'O' Colemak is ';' Qwerty
+                       :snippet-mode       {:key :quote} ; ' + key ('O' Colemak? Seems incorrect, ' is ' on Qwerty, P on Colemak - Check Colemak mapping) - Snippet layer
+                       :emoji-mode         {:key :z} ; Z + key (Emoji layer)
 
-       :open_1password {:key :backslash :modi :command} ;!OCbackslash
+                       ;; Bottom Row Simlayers
+                       :command-mode       {:key :c} ; C + key (Command layer)
+                       :command-shift-mode {:key :v} ; V + key (Command Shift layer)
+                       :bookmark-mode      {:key :b} ; B + key (Bookmark layer)
+                       :kit-mode           {:key :n} ; N + key ('K' Colemak, Script Kit layer)
+                       :media-mode         {:key :m} ; M + key (Media keys layer)
+                       :slash-mode         {:key :slash} ; / + key (Seems unused?)
 
-       :take_screenshot {:key :6 :modi :cs} ;!CS6
+                       ;; Special Key Simlayers
+                       :spacebar-mode      {:key :spacebar} ; Space + key (Symbol layer)
+                       :password-mode      {:key :quote :condi :shift-mode} ; Shift + ' + key (Password entry layer) - Check conditions
+                       }
 
-       :toggle_screen_brush {:key :tab :modi :option} ;!Otab
+ ;; --- DEVICE IDENTIFIERS ---
+ :devices             {
+                       ;; Map device names to their vendor/product IDs for device-specific rules
+                       :moonlander [{:product_id 6505 :vendor_id 12951}]
+                       :kinesis    [{:product_id 259 :vendor_id 10730}]
+                       :kinesisb   [{:product_id 65535 :vendor_id 1452}] ; Built-in? Check IDs
+                       :kinesisv   [{:product_id 258 :vendor_id 1452}] ; Built-in? Check IDs
+                       :apple      [{:device_id 864 :vendor_id 10730}] ; Example - check your specific Apple keyboard ID
+                       ;; :macbook [{:product_id 832 :vendor_id 1452}] ; Example MacBook keyboard
+                       }
 
-       ;chrome
-       :open_dev_tools {:key :i :modi :co} ;:!COl
-       :chrome_full_screen {:key :f :modi :ct}
-       :focus_omnibar {:key :l :modi :command}
-       :chrome_go_back {:key :open_bracket :modi :command}
-       :chrome_go_forward {:key :close_bracket :modi :command}
+ ;; --- MAIN RULE DEFINITIONS ---
+ :main                [
+                       {:des   "Global Modifier Rules"
+                        :rules [
+                                ;; Global modifier rules
+                                [:left_option :left_option nil {:alone {:key :semicolon :modi :left_command}}]
+                                
+                                ]}
+                        
+                       ;; --- Device Specific Rules ---
+                       {:des   "Windows RDP/Parallels Remapping"
+                        :rules [:windows ; Apply only when :windows apps are frontmost
+                                ;; Swap Cmd and Ctrl for Windows compatibility
+                                [:##left_command :left_control]
+                                [:##left_control :left_command]
+                                ;; Example app-specific override within windows context
+                                [:condi :windows :escape-mode]
+                                ;; [:-f {:key :f :modi :ts}] ; Ctrl+Shift+F in escape-mode only under windows
+                                ]}
 
+                       {:des   "Apple Keyboard Specific Tweaks"
+                        :rules [
+                                ;; :apple ; Apply only to the specified :apple device
+                                ;; Example remappings for a specific Apple keyboard
+                                ;; [:slash :left_command :!windows {:alone :slash}] ; Slash -> Cmd (except in windows), Tap Slash
+                                ;; [:##period :left_control :!windows {:alone :period}] ; Period -> Opt (except in windows), Tap Period
+                                [:!Oslash [:period :slash]] ; Opt+Slash -> ". /" sequence
+                                ;; [:m :left_control :!windows {:alone :m}] ; M -> Ctrl (except in windows), Tap M
+                                ;; Comma activates escape-mode temporarily while held
+                                ;; [:comma {:set ["escape-mode" 1]} nil {:afterup {:set ["escape-mode" 0]} :alone :comma}]
+                                ;; Shift keys become Delete/FwdDelete when tapped alone
+                                [:##left_shift :left_shift nil {:alone :delete}]
+                                [:##right_shift :right_shift nil {:alone :delete_forward}]
+                                ;; Fn key modifications (example commented out)
+                                ;; [:fn :super_hyper nil {:alone :key :spacebar :modi :left_option}] ; Fn tap -> Alfred, Hold -> SuperHyper
+                                ;; [[:fn :left_control] {:key :return_or_enter :modi :cs}] ; Fn+Ctrl -> Cmd+Shift+Enter
+                                ]}
+                        ; Note: Kinesis/Moonlander specific rules commented out in original, add back if needed
 
-       ;ableton
-       :add_midi_clip {:key :m :modi :cs};!CSm
-       :add_midi_track {:key :t :modi :cs}
-       :loop_selection {:key :l :modi :command}
-       :toggle_clip_device_view {:key :tab :modi :shift}
-       :narrow_grid {:key :1 :modi :command}
-       :widen_grid {:key :2 :modi :command}
-       :snap_to_grid {:key :4 :modi :command}
-       :split_clip {:key :e :modi :command}
-       ;
+                       {:des   "Global Alfred Trigger"
+                        :rules [;; Map PageUp tap to Alfred (can be adapted to other keys like Left Shift)
+                                [:page_up :page_up nil {:alone :alfred}]
+                                ;; [:left_shift :left_shift nil {:alone :alfred}] ; Example using Left Shift tap
+                                ]}
+                        
 
-       :display_layout_1 {:key :1 :modi :hyper}
-       :display_layout_2 {:key :2 :modi :hyper}
+                       ;; --- Mouse & Trackpad Rules ---
+                       {:des   "Basic Mouse Button Actions"
+                        :rules [; Right Click + A/B (Example - seems incomplete?)
+                                ;; Simulate Cmd+Key shortcuts with Left Click + Key
+                                ;; [{:sim [{:pkey :button1} {:key :a}]} :!Ca] ; LeftClick+A -> Cmd+A (Select All)
+                                ;; [{:sim [{:pkey :button1} {:key :c}]} :!Cc] ; LeftClick+C -> Cmd+C (Copy)
+                                ;; [{:sim [{:pkey :button1} {:key :v}]} :!Cv] ; LeftClick+V -> Cmd+V (Paste)
+                                ;; [{:sim [{:pkey :button1} {:key :x}]} :!Cx] ; LeftClick+X -> Cmd+X (Cut)
+                                ;; [{:sim [{:pkey :button1} {:key :z}]} :!Cz] ; LeftClick+Z -> Cmd+Z (Undo)
 
-;;        :terminal_new_pane [:!Tb :!S5]
-       :tmux {:key :b :modi :control}
-       :tmux_new_pane {:key :5 :modi :shift}
-       :terminal_previous_tab {:key :open_bracket :modi :cs}
-       :terminal_next_tab {:key :close_bracket :modi :cs}
+                                ;; Mouse Chord Actions
+                                [[{:pkey :button1} {:pkey :button2}] :mission_control :!screenflow] ; Left+Right Click -> Mission Control (except in Screenflow)
+                                ;; Simultaneous mouse‑button chord
 
-       :slack_previous {:key :open_bracket :modi :command}
-       :slack_next {:key :close_bracket :modi :command}
+                                ;; Mouse Button Layers (Hold button to activate layer)
+                                [{:pkey :button4} ["button4-mode" 1] nil {:alone [:space_left_by_display] :afterup ["button4-mode" 0]}] ; Hold Btn4 for layer, Tap -> Ctrl+Left
+                                [{:pkey :button5} ["button5-mode" 1] nil {:alone [:space_right_by_display] :afterup ["button5-mode" 0]}] ; Hold Btn5 for layer, Tap -> Ctrl+Right
+                                [{:pkey :button2} ["button2-mode" 1] nil {:alone :button2 :afterup ["button2-mode" 0]}] ; Hold RightClick for layer, Tap -> RightClick
+                                ]}
 
-       ;;
-       }
-       ;snippets
+                ;;        {:des   "Button2 Mode (Right Click Hold)"
+                ;;         :rules [:button2-mode
+                ;;                 ;; Remap keys while Right Click is held
+                ;;                 [:a [{:pkey :button1} :!Ca]] ; RClick+A -> LeftClick then Cmd+A
+                ;;                 [:s :shift_click] ; RClick+S -> Shift+LeftClick
+                ;;                 [:d [{:pkey :button1} :!Cd]] ; RClick+D -> LeftClick then Cmd+D
+                ;;                 [:c [{:pkey :button1} :!Cc]] ; RClick+C -> LeftClick then Cmd+C
+                ;;                 [:x [{:pkey :button1} :!Cx]] ; RClick+X -> LeftClick then Cmd+X
+                ;;                 [:v [{:pkey :button1} :!Cv]] ; RClick+V -> LeftClick then Cmd+V
+                ;;                 ;; Remap Left Click while Right Click is held
+                ;;                 ;; In Screenflow: Shift+Click then Cmd+Delete
+                ;;                 [{:pkey :button1} [{:pkey :button1 :modi :left_shift} :!Cdelete_or_backspace] :screenflow]
+                ;;                 ;; Default (commented out in original): [{:pkey :button1} {:pkey :button1 :modi :left_shift}] Shift+Click
+                ;;                 ]}
 
+                       {:des   "Button4 Mode (Button4 Hold)"
+                        :rules [:button4-mode
+                                ;; Remap Left Click while Button4 is held
+                                [{:pkey :button1} :shift_click] ; Btn4+LeftClick -> Shift+LeftClick
+                                ]}
 
- :templates {;
-             :beep "osascript -e 'beep'"
-             :beep2 "osascript -e 'beep 2'"
-             :new-note "osascript -e 'tell application id \"com.runningwithcrayons.
-             \" to run trigger \"new-note\" in workflow \"com.johnlindquist.new-note\" with argument \"\"'"
-             :new-blog "osascript -e 'tell application id \"com.runningwithcrayons.Alfred\" to run trigger \"new-blog\" in workflow \"com.johnlindquist.new-blog\" with argument \"\"'"
-             :alfred "osascript -e 'tell application \"Alfred 4\" to run trigger \"%s\" in workflow \"%s\" with argument \"%s\"'"
-             :code-project "~/.kenv/bin/code-project \"%s\""
-             :delay "osascript -e 'delay \"%s\"'"
-             :km "osascript -e 'tell application \"Keyboard Maestro Engine\" to do script \"%s\"'"
-             :type "osascript -e 'tell application \"System Events\" to keystroke \"%s\"'"
-             :type-secret "osascript -e '
-                           set out to do shell script \"security find-generic-password -a $USER -s %s -w\"
-                           
-                           tell application \"System Events\" to keystroke out
-                           '"
-             :kit "~/.kit/kar \"%s\""
-             :focus "~/.kit/kar focus \"%s\""
-             :launch "osascript -e 'tell application \"%s\" to activate'"
-             :open-chrome ". ~/.kenv/bin/open-chrome %s"
-             :open "open \"%s\""
-             :open-a "open -a '%s'"             
-             :restream "osascript -e 'tell application \"Restream Chat\" to activate'"
-             :zsh "zsh ~/.zfunc/'%s'"
-             :print "osascript -e '
-                        set the clipboard to do shell script \"echo $PLEASE\"
-                        tell application \"System Events\"
-                                keystroke \"v\" using command down
-                        end tell
-                     '"
-             :modify "~/.simple/bin/modify --%s"
-             :pad "~/.simple/bin/pad"
-             :test "osascript -e 'say \"poop\"'"
-             :copy-transcribe-low "open -g -a 'Audio Hijack' ~/transcripts/copy-transcribe-low.ahcommand"
-             :paste-transcribe-low "open -g -a 'Audio Hijack' ~/transcripts/paste-transcribe-low.ahcommand"
-             :copy-transcribe-high "open -g -a 'Audio Hijack' ~/transcripts/copy-transcribe-high.ahcommand"
-             :paste-transcribe-high "open -g -a 'Audio Hijack' ~/transcripts/paste-transcribe-high.ahcommand"
-             :transcribe "open -g -a 'Audio Hijack' ~/transcripts/transcribe.ahcommand"
-                :paste "osascript -e '
-                set the clipboard to \"%s\"
-                tell application \"System Events\"
-                        keystroke \"v\" using command down
-                end tell
-                '"
-                :paste-enter "osascript -e '                        
-                        set the clipboard to \"%s\"
-                        tell application \"System Events\"
-                                keystroke \"v\" using command down
-                        end tell
-                        delay 0.1
-                        tell application \"System Events\"
-                                keystroke return
-                        end tell
-                        '"  
-                :read-paste-enter "osascript -e '                        
-                        set fileContents to do shell script \"cat \" & quoted form of \"%s\"
-                        set the clipboard to fileContents
-                        tell application \"System Events\"
-                                keystroke \"v\" using command down
-                        end tell
-                        delay 0.1
-                        tell application \"System Events\"
-                                keystroke return
-                        end tell
-                        '"
-             
-             :datamuse "osascript -e '
-                      tell application id \"com.runningwithcrayons.Alfred\" to run trigger \"datamuse\" in workflow \"com.johnlindquist.datamuse\" with argument \"%s\"
-                      '"}
-
-             ;
-     
-
-
- :applications {;
-                :ableton ["com.ableton.live"]
-                :chrome ["com.google.Chrome"]
-                :terminal ["com.apple.Terminal"]
-                :code ["com.microsoft.VSCode", "com.todesktop.230313mzl4w4u92", "com.todesktop.23052492jqa5xjo", "com.exafunction.windsurf"]
-                :fcp ["com.apple.FinalCut"]
-                :miro ["com.electron.realtimeboard"]
-                :screenflow ["net.telestream.screenflow10"]
-                :screenstudio ["com.timpler.screenstudio"]
-                :slack ["com.tinyspeck.slackmacgap"]
-                :windows ["com.microsoft.rdc.macos", "com.parallels.desktop.appstore"]
-                }
-                ;; :webstorm ["com.jetbrains.Webstorm"]
-                ;
-
-; Layers Are Typically "Thumb Keys" or "Pinky Keys"
- :layers {;
-          :caps_lock-mode {:key :caps_lock :alone
-                           {:key :escape}}
-
-          :close-bracket-mode {:key :close_bracket}
-          :escape-mode {:key :escape :alone [;; reset all modes
-                {:key :escape}
-                {:set ["fn-mode" 0]}
-                {:set ["opt-mode" 0]}
-                {:set ["shift-opt-mode" 0]}
-                {:set ["movement-mode" 0]}
-                {:set ["cursor-mode" 0]}
-                {:set ["delete-mode" 0]}
-                {:set ["nav-mode" 0]}
-                {:set ["snippet-mode" 0]}
-                {:set ["kit-mode" 0]}]}
+                       {:des   "Button5 Mode (Button5 Hold)"
+                        :rules [:button5-mode
+                                ;; Remap Left Click while Button5 is held
+                                [{:pkey :button1} :shift_click] ; Btn5+LeftClick -> Shift+LeftClick
+                                ]}
         
-          :f23-mode {:key :f23 :alone  {:key :vk_none}}
-          :launch-mode {:key :f24 :alone {:key :spacebar :modi :left_option}}
-          :non-mode {:key :non_us_backslash :alone {:key :non_us_backslash}}
-          :num-mode {:key :keypad_num_lock :alone {:key :vk_none}}
-          :shift-mode {:key :shift}
-          :tab-mode {:key :tab}
-
-          :tilde-mode {:key :grave_accent_and_tilde :alone {:key :grave_accent_and_tilde}}
-          :fn-mode {:key :fn :alone {:key :home}}
-          :equal-mode {:key :equal_sign}
-          :hyphen-mode {:key :hyphen}
-        
-  
-
-
-          ;testing left thumb + right thumb
-          ;:right-click {:pkey "button2"}
-          ;
-          ;
-          }
-
-
-
-          ;
- :simlayers {;             
-
-             ;top row
-             :zero-mode {:key :0}
-             :quick-mode {:key :q}
-             :close-mode {:key :w} ;
-             :finder-mode {:key :e}; "f" in colemak
-             :peek-mode {:key :r} ;"p" in colemak             
-             :go-mode {:key :t} ;"g" in colemak             
-             :t-mode {:key :t} ;"g" in colemak             
-             :presentation-mode {:key :p} ;"semicolon" in colemak             
-             :backslash-mode {:key :backslash} ;unused 🤔
-             ;end top row
-
-             ;begin homerow simlayer
-             ;I use my trackpad with these keys as well. The :condi makes sure I'm not touching the trackpad
-        ;;      :fn-mode {:key :hyphen :alone {:key :hyphen} :condi ["multitouch_extension_finger_count_total" 0]}
-             :opt-mode {:key :a  :condi ["multitouch_extension_finger_count_total" 0]}
-             :shift-opt-mode {:key :s :condi ["multitouch_extension_finger_count_total" 0]}; "r" in colemak
-             :shift-mode {:key :d :condi ["multitouch_extension_finger_count_total" 0]}; "s" in colemak
-             :movement-mode {:key :f :condi ["multitouch_extension_finger_count_total" 0]}; "t" in colemak
-             :cursor-mode {:key :g  :condi ["multitouch_extension_finger_count_total" 0]}; "d" in colemak
-             :delete-mode {:key :j}; "n" in colemak
-             :nav-mode {:key :k}; "e" in colemak
-             :i-mode {:key :l}; "i" in colemak
-             :period-mode {:key :period}; "i" in colemak
-             :comma-mode {:key :comma}
-             :semicolon-mode {:key :semicolon}; "i" in colemak
-             :launch-mode {:key :u}; "l" in colemak
-             :open-mode {:key :semicolon}; "k" in colemak
-             :snippet-mode {:key :quote}; "o" in colemak
-             :emoji-mode {:key :z}
-             ;end homerow
-
-             ;begin bottom row
-             :command-mode {:key :c}
-             :bookmark-mode {:key :b}
-             :kit-mode {:key :n}
-             :media-mode {:key :m}
-             :slash-mode {:key :slash}
-             ;end bottom row                                                    
-
-
-             ;begin special keys
-             :spacebar-mode {:key :spacebar}
-             :password-mode {:key :quote :condi :shift-mode}}
-             ;end special keys
-
-
-
-
-
-
- ;
-
- :devices {;; Note - I'm currently using a Kinesis Advantage keyboard for my defaults
-           ;; and my macbook hasn't left my desk in a looooooong time...
-          ;; :macbook [{:product_id 832 :vendor_id 1452}]
-           ;ttabttttttttt
-
-           :moonlander [{:product_id 6505 :vendor_id 12951}]
-           :kinesis [{:product_id 259 :vendor_id 10730}]
-           :kinesisb [{:product_id 65535 :vendor_id 1452}]
-           :kinesisv [{:product_id 258 :vendor_id 1452}]
-           :apple [{:device_id 864 :vendor_id 10730}]}
-
- :main [;
-        {:des "Right Click"
-         :rules [:right-click
-                 [:a :b]]}
-
-        {:des   "Mouse Layers"
-         :rules [;
-                 [{:sim [{:pkey :button1} {:key :a}]} :!Ca]
-                 [{:sim [{:pkey :button1} {:key :c}]} :!Cc]
-                 [{:sim [{:pkey :button1} {:key :v}]} :!Cv]
-                 [{:sim [{:pkey :button1} {:key :x}]} :!Cx]
-                 [{:sim [{:pkey :button1} {:key :z}]} :!Cz]
-                
-
-                 [[{:pkey :button1} {:pkey :button2}] :mission_control :!screenflow]
-                 [[{:pkey :button1} {:pkey :button4}] :!Tdown_arrow]
-                
-
-                 [{:pkey :button4} ["button4-mode" 1] nil {:alone :!Tleft_arrow :afterup ["button4-mode" 0]}]
-                 [{:pkey :button5} ["button5-mode" 1] nil {:alone :!Tright_arrow :afterup ["button5-mode" 0]}]
-                 [{:pkey :button2} ["button2-mode" 1] nil {:alone :button2 :afterup ["button2-mode" 0]}]
-                 ;
-                 ]}
-
-
-        {:des "button2-mode"
-        :rules [:button2-mode
-        ;; middle row
-                [:a [{:pkey :button1} :!Ca]]
-                [:s [{:pkey :button1 :modi :left_shift}]]
-                [:d [{:pkey :button1} :!Cd]]
-                [:c [{:pkey :button1} :!Cc]]
-        ;; bottom row
-                [:x [{:pkey :button1} :!Cx]]
-                [:c [{:pkey :button1} :!Cc]]
-                [:v [{:pkey :button1} :!Cv]]
-
-        ;; basic right-click
-                ;; [{:pkey :button1} {:pkey :button2}]
-
-                [{:pkey :button1} [{:pkey :button1 :modi :left_shift} :!Cdelete_or_backspace] :screenflow]
-
-        ]
-        }
-
- 
-
-        {:des "button5-mode"
-        :rules [:button5-mode
-                
-                [{:pkey :button1} {:pkey :button1 :modi :left_shift}]
-        ]
-        }
-
-        {:des "button4-mode"
-        :rules [:button4-mode
-                
-                [{:pkey :button1} {:pkey :button1 :modi :left_shift}]
-        ]
-        }
-
-        {:des "hyphen-mode"
-         :rules [:hyphen-mode
-                 [:-n :!CTOSf]
-                 [:-s [:paste-enter "Let’s check this in!
-
-Run this in a single command:
-git add . && git commit -m “add a good message here” , just use mutliple “-m”
-
-then, after a successful commit, git push"]]
-
-[:-g [:read-paste-enter "/Users/johnlindquist/.config/snippets/git-diff-then-commit.txt"]]
-[:-d [:read-paste-enter "/Users/johnlindquist/.config/snippets/developer-instructions.txt"]]
-[:-t [:read-paste-enter "/Users/johnlindquist/.config/snippets/think-and-fix.txt"]]
-[:-w [:read-paste-enter "/Users/johnlindquist/.config/snippets/commit-push-watch.txt"]]
-[:-p [:read-paste-enter "/Users/johnlindquist/.config/snippets/planner.txt"]]
-[:-e [:read-paste-enter "/Users/johnlindquist/.config/snippets/execute.txt"]]
-[:-i [:read-paste-enter "/Users/johnlindquist/.config/snippets/execute-test.txt"]]
-[:-c [:read-paste-enter "/Users/johnlindquist/.config/snippets/continue.txt"]]
-                 ;-
-                 ]
-                 
-                 
-                 }
-
-        {:des "equal-mode"
-         :rules [:equal-mode
-                ;; [{:pkey :button1} [{:pkey :button1} :x :delete_forward]]
-                ;; [{:pkey :button2} [{:pkey :button1} :delete_forward :spacebar]]
-
-                
-                [{:pkey :button1} [{:pkey :button1 :modi :left_shift} :!Cdelete_or_backspace]]
-                [{:pkey :button5} :!Tright_arrow]
-                [{:pkey :button4} :!Tleft_arrow]
-
-                [:-h :!Tleft_arrow]
-                [:-i :!Tright_arrow]
-                [:-c :!CSc]
-                [:home {:key :home :modi :hyper}]
-                 
-                 ;=
-                 ]}
-
-        {:des "Actions Mode"
-         :rules [:actions-mode
-                [{:pkey :button1} {:pkey :button1 :modi :left_shift}]
-                 [:-s :capture_screenshot]
-                 [:-r :record_screen]
-                 ;
-                 ]}
-
-
-        {:des "windows"
-         :rules [:windows
-                 [:##left_command :left_control]
-                 [:##left_control :left_command]
-                
-                [:condi :windows :escape-mode]
-
-                 [:-f {:key :f :modi :ts}]
-                
-                 ]}
-        {:des "apple"
-         :rules [
-                ;;  [:slash :left_command :!windows {:alone :slash}]
-                ;;  [:##period :left_option :!windows {:alone :period}]
-                 [:!Oslash [:period :slash]]
-                ;;  [:m :left_control :!windows {:alone :m}]
-                 [:comma {:set ["escape-mode" 1]} nil {:afterup {:set ["escape-mode" 0]} :alone :comma}]
-                 [:##left_shift :left_shift nil {:alone :delete}]
-                 [:##right_shift :right_shift nil {:alone :delete_forward}]
-                ;;  [:fn :super_hyper nil {:alone :key :spacebar :modi :left_option}]
-                ;;  [[:fn :left_control] {:key :return_or_enter :modi :cs}]
-                 
-			;; right arrow -> fn interesting example, don't delete
-			;; {
-			;; 	:from {:key_code :right_arrow}
-			;; 	:to [{:apple_vendor_top_case_key_code :keyboard_fn}]
-			;; 	:conditions [{
-			;; 		:identifiers [{:vendor_id 0 :product_id 0}]
-			;; 		:type :device_if
-			;; 	}]
-			;; 	:type :basic
-			;; }
-                 ;
-                 ]
-        }
-
-
-                 ;
-
-
-
-        ;; {:des "moonlander"
-        ;;  :rules [:moonlander
-        ;;          [:left_shift :left_shift nil {:alone :alfred}]]}
-
-        ;; {:des "kinesis"
-        ;;  :rules [:kinesis
-        ;;          [:left_shift :left_shift nil {:alone :alfred}]]}
-
-        ;; {:des "kinesisv"
-        ;;  :rules [:kinesisv
-        ;;          [:left_shift :left_shift nil {:alone :alfred}]
-
-        ;;          ]}
-        {:des "alfred"
-         :rules [
-                ;; [:home :alfred]
-                 [:page_up :page_up nil {:alone :alfred}]]}
-
-
-
-
-
-
-
-
-
-
-
-
-        {:des "quick-mode"
-
-         :rules [:quick-mode
-                [:g ["/opt/homebrew/bin/goku 2>&1 | /opt/homebrew/bin/terminal-notifier -sound default"]]
-                [:d ["date +\"%Y-%m-%d %H:%M:%S\" | tee >(pbcopy) | /opt/homebrew/bin/terminal-notifier -sound default -message"]]
-                 ;
-                 ]}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                ;;  [:-d [:datamuse "describe"]]
-                ;;  [:-f [:datamuse "follow"]]
-                ;;  [:-g [:alfred "giphy" "dev.kejadlen.giphy" " "]]
-                ;;  [:-l [:datamuse "sounds"]];sounds Like
-                ;;  [:-n [:datamuse "noun"]] ;
-                ;;  [:-o ["~/.kit/kar google-it"]] ;Google (similar to my autocomplete)
-                ;;  [:-r [:datamuse "rhyme"]]
-                ;;  [:-s [:datamuse "spell"]]
-                ;;  [:-t [:datamuse "trigger"]] ;
-                ;;  [:-x [:datamuse "antonym"]] ;x Opposite
-                ;;  [:-y [:datamuse "synonym"]]
-                ;;  [:-i [:kit "egghead-instructors"]]
-                 ;
-
-         ;
-
-
-        {:des "Displays"
-         ;
-         :rules [:zero-mode
-                                 ;
-                 [:1 :display_layout_1]
-                 [:2 :display_layout_2]
-                 [:3 :!CSTO3]
-                 [:4 :!CSTO4]]}
-                                 ;
-
-
-        {:des "close"
-         :simlayer-threshold 200
-         :rules [:close-mode
-                 ;[:-m [:modify "wrap-markdown-link"]]
-                 ;[:-e :wrap_emmet]
-                 [:condi :code :close-mode]
-                 [:-a :close_all]
-                 [:-o :close_others]
-
-                ;;  [:condi :chrome :close-mode]
-                ;;  [:-a :close_all]
-                ;;  [:-o :close_others]
-                 ;
-                 ]}
-                 ;
-
-        {:des "finder"
-         :rules [:finder-mode
-                 [:-a "open /Applications"]
-                 [:-d "open ~/Downloads"]
-                 [:-h "open ~"]
-                 [:-j ["~/.kit/kar fenced-js"]] ;; fenced js
-
-                 [:-b [:tilde :tilde :tilde :b :a :s :h :return_or_enter :return_or_enter :tilde :tilde :tilde :up_arrow]]]} ;; fenced bash
-                 ;
-
-        {:des "peek mode"
-         :rules [:peek-mode
-                 [:-h :peek_definition]
-                 [:-e :peek_implementations]
-                 [:-n :peek_references]
-                 [:-i :peek_declaration]
-                 [:-o :peek_type]]}
-
-
-        {:des "go"
-         :rules [:go-mode
-                 [:-r :go_to_references];
-                 [:-w :go_to_symbol_in_workspace];
-                 [:-s :go_to_symbol];
-                 [:-h :go_to_hints];
-                ;;  [:-h :search_everywhere];
-                 [:-i :go_to_implementations];
-                 [:-n :go_to_symbol]; g,d is impossible in colemak
-                 [:-o :go_to_definition]; g,d is impossible in colemak
-                 [:-l :go_to_line]; g,d is impossible in colemak
-                 [:comma :go_to_prev_problem]; g,d is impossible in colemak
-                 [:period :go_to_next_problem]]}; g,d is impossible in colemak
-
-                 ;
-
-
-        ;begin homerow      
-        {:des "fn-mode"
-         :rules [:fn-mode
-                 [:##d :left_shift]
-                 [:##h :!Fleft_arrow]
-                 [:##j :!Fdown_arrow]
-                 [:##k :!Fup_arrow]
-                 [:##l :!Fright_arrow]
-                 
-                 [:##spacebar {:key :return_or_enter}]
-                 [:##left_command {:key :return_or_enter :modi :cs}]
-                 [:##z {:key :i :modi :command}]
-                 [:##c {:key :l :modi :command}]
-                 [:##x {:key :i :modi :cos}]
-                 ]}
-                ;  ;
-
-
-        {:des "shift-opt"
-         :rules [:shift-opt-mode
-                 [:##h :!OSleft_arrow]
-                 [:##j :!OSdown_arrow]
-                 [:##k :!OSup_arrow]
-                 [:##l :!OSright_arrow]
-
-                 [:##spacebar {:pkey :button1 :modi :left_command}]
-                 [:##left_shift :##button2]]}
-
-                ;;  [:condi :chrome]
-                ;;  [:-n :chrome_go_back]
-                ;;  [:-e :chrome_go_forward]
-
-                 ;
-
-
-        {:des "shift"
-         :rules [:shift-mode
-                 [:##h :!Sleft_arrow]
-                 [:##j :!Sdown_arrow]
-                 [:##k :!Sup_arrow]
-                 [:##l :!Sright_arrow]
-
-                 [:left_shift :shrink_selection]
-                 [:return_or_enter :insert_line_above]
-
-                 [:semicolon :expand_selection]
-                 [:quote :shrink_selection]
-
-                 [:##m :!Spage_down]
-                 [:##comma :!Spage_up]
-
-
-                 [:##y :!Shome :windows]
-                 [:##o :!Send :windows]
-
-                 [:##y :!CSleft_arrow]
-                 [:##o :!CSright_arrow]
-                 ;
-                 ]}
-                 ;
-
-        {:des "f23-mode"
-         :rules [:f23-mode
-                 [:-i :!SOi]
-        ]}
-
-        {:des "movement"
-         :rules [:movement-mode
-
-                 [:##h :left_arrow]
-                 [:##j :down_arrow]
-                 [:##k :up_arrow]
-                 [:##l :right_arrow]
-
-                 [:semicolon :autocomplete]
-
-                 [:return_or_enter :insert_line_below]
-                ;;  [:left_shift :shrink_selection]
-                ;;  [:right_shift :expand_selection]
-
-                 [:##y [:!Shome :escape] :windows]
-                 [:##o :end :windows]
-
-                 [:##y :!Cleft_arrow]
-                 [:##o :!Cright_arrow]
-                 ;
-                 ]}
-                 ;
-
-
-        {:des "cursor"
-         :rules [:cursor-mode
-                 [:h :cursor_find_match]
-                 [:j :cursor_below]
-                 [:k :cursor_above]
-                 [:-j :acejump]
-                 [:-l :acejump_line]
-                 [:-m :acejump_multi]
-                 [:left_shift :cursor_select_all]
-                 [:l :developer_tools]
-                 ;
-                 ]}
-                 ;
-
-
-        {:des "delete"
-         :rules [:delete-mode
-                 [:escape :delete_line :code]
-                 [:escape :!Cdelete_or_backspace]
-                 [:hyphen :delete_line :code]
-                 [:caps_lock :delete_line :code]
-                 [:hyphen :!Cdelete_or_backspace]
-                 [:a :!Odelete_or_backspace nil {:held :delete_line}]
-                 [:s :delete_or_backspace]
-                 [:d :delete_forward]
-                 [:f :!Odelete_forward]
-                 [:g :!Cdelete_forward]
-                 [:e :!COSf]
-                 ;
-                 ]}
-                 ;
-
-
-
-;; "terminal" must come before "nav-mode" to catch the "nav-mode" condition first
-;; Consider the last defined rule to be a "fallback" or "catch-all"
-        {:des "terminal"
-         :rules [:terminal
-                 [:!Cr [:tmux :tmux_new_pane]]
-
-                 [:condi :terminal :nav-mode]
-                 [:-a :terminal_previous_tab]
-                 [:-t :terminal_next_tab]
-
-
-                 ;
-                 ]}
-
-                 ;
-
-
-        {:des "slack"
-         :rules [:slack
-                 [:left_command :left_command nil {:alone :!Ct}]
-                 [:condi :slack :nav-mode]
-                 [:-a :slack_previous]
-                 [:-t :slack_next]
-                         ;
-                 ]}
-
-
-
-        {:des "editor"
-         :rules [:nav-mode
-                 [:hyphen :focus_next_editor_group]
-                 [:-a :open_prev_editor]
-                 [:-r :go_back]
-                 [:-s :go_forward]
-                 [:-t :open_next_editor]
-                 [:-d :focus_prev_editor_group]
-
-                 [:condi :slack]]}
-                 ;
-
-        {:des "quick-actions"
-        
-        }
-
-
-
-        {:des "open"
-         :rules [:open-mode
-                ;;  [:-c [:code-project "~/.config"]]                 
-                 [:-k ["/usr/local/bin/cursor ~/.config"]]
-                 [:-g ["/opt/homebrew/bin/goku | /opt/homebrew/bin/terminal-notifier -sound default"]]
-                 [:-w ["~/.kit/kar ~/.kit/cli/edit.js ~/.kenv/scripts/wiki-ten"]]]}
-                ;;  [:-k ["~/.kit/kar update-karabiner-config"]] ;; 
-                ;;  [:-b [:code-project "~/.bin"]]
-                ;;  [:-z  [:code-project "~/.zfunc"]]
-                ;;  [:-r  [:code-project "~/.zshrc"]]
-
-                ;;  [:-l [:code-project "~/projects/automatoes.com/_layouts"]]
-                ;;  [:-e [:code-project "~/projects/egghead-io-nextjs"]]
-                ;;  [:-r [:code-project "~/projects/egghead-rails"]]
-                ;;  [:-t [:code-project "~/projects/thoughts"]]
-                ;;  [:-s ["open simple://scripts/simple-switch"]] ; --disable-renderer-accessibility
-                ;;  [:-h ["open simple://scripts/say-hi \"yo\""]]
-                ;;  [:-p [:pad]]
-                 ;
-
-
-        {:des "password"
-         :rules [[[:quote :1] [:type-secret "OTHER_PASSWORD"]]
-                 [[:quote :2] [:type-secret "MAC_PASSWORD"]]
-                 [[:quote :5] [:type-secret "ADDRESS_1"]]]}
-                 ;
-
-
-
-        {:des "snippets"
-         :rules [:snippet-mode
-                 [:-c [:c :o :n :s :o :l :e :period :l :o :g :open_paren :close_paren :left_arrow]]  ;console.log()
-                 [:-a [:a :w :a :i :t :spacebar]]  ;await 
-                 [:-s [:a :s :y :n :c :spacebar]]  ;async
-                 [:-n [:spacebar :c :l :a :s :s :!Sn :a :m :e :equal_sign :!Squote :!Squote :left_arrow]] ;className="" 
-                ;;  [:-l [:open_bracket :a :l :t :close_bracket :open_paren :close_paren :left_arrow :left_arrow]] ;[]()
-                 [:-e [:type-secret "BUSINESS_EMAIL"]] ;
-                 [:-g [:type-secret "PERSONAL_EMAIL"]]
-                 [:-x [:type-secret "SPAM_EMAIL"]]
-                 [:-j [:type-secret "USERNAME"]]]}
-                 ;
-
-
-        ;bottom row
-
-        {:des "emoji"
-         :rules [:emoji-mode
-                 [:-a [:paste ""]] ;                
-                 [:-b [:paste "😊"]] ;blush
-                 [:-c [:paste "👏"]] ;clap
-                 [:-d [:paste "🧐"]] ;dignified
-                 [:-e :emoji_picker]
-                 [:-f [:paste "🔥"]] ;facepalm
-                 [:-g [:paste "😬"]] ;grimace
-                 [:-h [:paste "😍"]] ;heart-eyes
-                 [:-i [:paste "👀"]] ;I
-                 [:-j [:paste "😂"]] ;joking
-                 [:-k [:paste ""]] ;
-                 [:-l [:paste "❤️"]] ;love
-                 [:-m [:paste "🤯"]] ;mind blown 
-                 [:-n :emoji_picker] ;
-                 [:-o [:paste "💩"]] ;pOop
-                 [:-p [:paste "🎉"]] ;party
-                 [:-q [:paste "🤫"]] ;quiet
-                 [:-r [:paste "🏎"]] ;racecar
-                 [:-s [:paste "😢"]] ;sad
-                 [:-t [:paste "🤔"]] ;thinking
-                 [:-u [:paste "🤷‍♂️"]] ;shrUg
-                 [:-v [:paste "😎"]] ;very cool
-                 [:-w [:paste "😉"]] ;wink:
-                 [:-x [:paste "😵"]] ;x-eyes
-                 [:-y [:paste "😅"]] ;sweatY
-                 [:left_command [:paste "👍"]]
-                 [:left_option [:paste "👎"]]]}
-                 ;
-
-
-        {:des "command mode"
-         :rules [:command-mode
-                ;;  [:-n [:new-note]] ;h
-                ;;  [:-t ["~/.simple/bin/new-thought"]] ;a script that creates a new journal mdx file and open in code
-                ;;  [:-b [:new-blog]] ;a script that creates a new blog md file and open in code
-
-                 [:##h :!Cleft_arrow]
-                 [:##j :!Cdown_arrow]
-                 [:##k :!Cup_arrow]
-                 [:##l :!Cright_arrow]
-
-                 [:-n :go_end]
-                 [:-e :go_home]]}
-
-        {:des "bookmark mode"
-         :rules [:bookmark-mov
-
-                 [:-m :!COk]
-                 [:-l :!COTb]
-
-
-                 ;
-                 ]}
-
-        {:des "media"
-         :rules [:media-mode
-                 [:-f :vk_consumer_next]
-                 [:-p :vk_consumer_play]
-                 [:-t ["~/.simple/bin/title-case"]]
-                 [:-a [:open_bracket :open_bracket]]]}
-
-                 ;
-
-
-        {:des "modify"
-         :rules [:modify]}
-
-                 ;
-
-
-        ;special keys
-        {:des "testing thumb chords"
-         :rules [:f24-shift-mode
-                 [:a "say poop"]]}
-                 ;
-
-
-
-        ;apps           
-        {:des "ableton"
-         :rules [[:condi :ableton ["multitouch_extension_finger_count_total" 0]]
-                ;
-                ;  [:left_control :left_control nil {:alone :!CSm}]
-                ;;  [:left_command :left_command nil {:alone :toggle_clip_device_view}]
-                ;;  [:right_shift :right_shift nil {:alone :toggle_clip_device_view}]
-                ;;  [:right_alt :right_alt nil {:alone :!COp}]
-
-                 [:tilde :!COb]
-
-                 [[:spacebar :s] :f9]
-                 [[:spacebar :a] [:open_bracket :open_bracket]]
-
-
-                 ; trackpad 1
-                 [:condi :ableton :multitouch_extension_finger_count_total]
-                 [:tab :!Stab]
-                 [:left_option [:!Ce :!Cj]]
-                 [:-b [:shift_click :add_midi_clip]]
-                 [:-q [:q :q]]
-                 [:-w :!COl]
-                 [:-d [:button1 :button1]]
-
-
-                 [:-g :!C4]
-                 [:hyphen :!C1]
-                 [:equal_sign :!C2]
-
-                ;;  [:g [:button1 :button1]]
-
-
-                 [:-f :!Stab]
-                 [:-p :!COp]
-
-                 [:left_shift [:button1 :delete_or_backspace]]
-                 [:delete_or_backspace [:button1 :delete_or_backspace]]
-
-                 [:1 :narrow_grid]
-                 [:2 :widen_grid]
-                 [:-g :snap_to_grid]
-
-                 ;;  
-
-                 ;trackpad 2
-                 [:condi :ableton ["multitouch_extension_finger_count_total" 2]]
-                 [:-a :!COb]
-                 [:-r :loop_selection]
-                 [:-s :split_clip]
-                 [:-t :loop_selection]
-                ; trackpad 3
-                 [:condi :ableton ["multitouch_extension_finger_count_total" 3]]
-                 [:-t :add_midi_track]]}
-                 ;
-; 
-
-        {:des "chrome"
-         :rules [:chrome
-                 [:left_command :left_command nil {:alone [:!Ct]}]
-
-                ;;  [:left_option :left_option nil {:alone ["open simple://scripts/list-chrome-tabs"]}]
-                ;;  [:right_option :focus_omnibar]
-                ;;  [:left_control :left_option nil {:alone [:!CSt]}]
-                ;;  [{:key :right_option :modi :left_command} :!COi]
-                ;;  [:-d :open_dev_tools]                 
-
-                 [:condi :chrome ["multitouch_extension_finger_count_total" 1]]
-
-                 [:condi :chrome ["multitouch_extension_finger_count_total" 2]]
-                 [:-d :open_dev_tools]
-                 [:-a :!COleft_arrow]
-                 [:-t :!COright_arrow]
-
-                 [:condi :chrome :escape-mode]
-                 [:-f :chrome_full_screen]
-
-                 [:condi :chrome :opt-mode]
-                 [:-o :chrome_tab_switcher]]}
-                ;;  [:grave_accent_and_tilde :a nil {:delayed {:invoked [:y] :canceled [:x]}}]
-                 ;
-                 ;
-
-        {:des "presentation-mode" :rules [
-                :presentation-mode 
-                [:-f :toggle_fold]
-                [:-r :rename]
-                [:-a ["~/.kenv/bin/focus-tab http://localhost:8080/angular"]]
-                [:-t ["~/.kenv/bin/focus-tab http://localhost:8080/typescript"]]
-                [:-w ["~/.kenv/bin/focus-tab http://localhost:8080/."]]
-                [:-c ["~/.kenv/bin/focus-tab http://localhost:3000/"]]
-                
-                ;
-                ]}
-
-
-        {:des "opt"
-         :rules [:opt-mode
-                        ;;  [:##y :home]
-
-                        ;;  [:##o :end]
-                 [:left_shift :!CSO0]
-                 [:semicolon :acejump]
-                 [:-b [:acejump :open_brace]]
-                 [:spacebar :acejump]
-                 [:escape :acejump_line]
-                 [:-l :acejump_line]
-                 [:tab [:acejump_line :acejump_selection]]
-                 [:-u [:acejump_line :acejump_selection]]
-                 [:-s [:acejump_selection]]
-                 [:-m :acejump_multi]
-                 [:left_shift :acejump_selection]
-                 [:-t :superkey]
-
-                 [:##h :!Oleft_arrow]
-                 [:##j :!Odown_arrow]
-                 [:##k :!Oup_arrow]
-                 [:##l :!Oright_arrow]
-
-                 ;
-                 ]}
-                         ;
-
-
-
-        {:des "code"
-         :rules [:code
-                 [:left_command :left_command nil {:alone :go_to_file}]
-                ;;  [:left_option :left_option nil {:alone :focus_terminal}]
-                ;;  [:right_option :right_option nil {:alone :command_palette}]
-                 [:left_control :left_control nil {:alone :command_palette}]
-                 [:right_control :right_control nil {:alone :command_palette}]
-                ;;  [:!Cs :replace];
-
-
-                ;;  [:home :start_debugger]
-                ;;  [:end :restart_debugger]
-
-                 [:condi :code :modify-mode]
-                 ;view
-                 ;note - I try to keep these on my left hand so I can keep my right on the mouse
-                 [:condi :code :escape-mode]
-                 [:-g :focus_git] ;; SCM
-                 [:-a :focus_editor] ;; 
-                 [:-e :focus_editor] ;; 
-                 [:-h :focus_editor_left] ;; 
-                 [:-i {:key :i :modi :cos}] ;; 
-                 [:-x :focus_explorer] ;; 
-                ;;  [:-t :focus_terminal] ;; 
-                ;;  [:-s :!!s] ;; Status Bar
-                ;;  [:-t :focus_terminal]
-                ;;  [:-n :new_terminal]
-                 [:-f :find_in_project]
-                 [:-r :replace_in_project]
-                 [:-z [:!Ck :z]] ;zen mode
-                 [:-v :!!v]
-                 [:-x :!!x]
-                 [:-p :!!r] ;toggle panel
-                 [:delete_or_backspace :!Cb]
-                 [:delete_forward :!COb]
-
-                 [:semicolon :!!semicolon]
-
-
-                ;;  [:left_shift :!Cb]
-                 ; [:-a :toggle_sidebar]
-
-                 ;trackpad
-                 [:condi :code ["multitouch_extension_finger_count_total" 1]]
-                 [:left_command :left_command nil {:alone :start_debugger}]
-                ;;  [:left_option :left_option nil {:alone :restart_debugger}]
-
-                 ;trackpad 2
-                 [:condi :code ["multitouch_extension_finger_count_total" 2]]
-                 [:-t [:button1 :f2]]]}
-
-
-                 ;
-
-
-
-        {:des "final cut pro"
-         :rules [:fcp
-                 [{:pkey :button3}
-                  [:h {:pkey :button1}]
-
-                  {:afterup {:key :a}}]
-                 [:condi :fcp :multitouch_extension_finger_count_total]
-                 [:delete_or_backspace [:button1 :delete_or_backspace]]]}
-
-        {:des "miro"
-         :rules [[:condi :miro :multitouch_extension_finger_count_total]
-                 [:delete_or_backspace [:escape :button1 :delete_or_backspace]]
-                 [:a [:escape :n :button1]]
-
-                 [:condi :miro ["multitouch_extension_finger_count_total" 2]]
-                 [:f [:escape :n :button1]]
-                 [:c [:!Cc :button1 :!Cv]]]}
-                 ;
-
-
-
-        {:des "screenstudio"
-         :rules [:screenstudio
-                 [:x [:c :x]]
-                 ;
-                 ]}
-
-        {:des "screenflow"
-         :rules [:screenflow
-                 ; mouse
-                ;;  [{:pkey :button2}
-                ;;   [:h {:pkey :button1}]
-                                 
-                [{:pkey :button3} [:h {:pkey :button1}] nil {:afterup {:key :a}}]
-
-
-                  
-
-
-                ;;   {:afterup {:key :a}}]
-
-
-                ;;   [:-t [{:pkey :button1}]]
-                ;;   [:-s :t]
-                  [:left_command :left_command nil {:alone [{:pkey :button1 :modi :left_shift} :!Cdelete_or_backspace]}]
-                
-                ;;  [{:pkey :button2}
-                ;;   [{:pkey :button1 :modi :left_shift} :!Cdelete_or_backspace]]
-
-                 ;trackpad
-                 [:condi :screenflow :multitouch_extension_finger_count_total]
-                 [:spacebar :spacebar]
-                 [:d [{:pkey :button1 :modi :left_shift} :!Cdelete_or_backspace]]
-                 [:a :!COsemicolon]
-                 
-                 
-                 [:condi :screenflow :button2-mode]
-                 [{:pkey :button1} [{:pkey :button1 :modi :left_shift} :!Cdelete_or_backspace]]
-                 ;
-                 ]}
-                 ;        
-
-        {:des "trackpad"
-         :rules [;
-                 :multitouch_extension_finger_count_total
-                 [:-t :button1]
-
-
-                 [:w :!Cw]
-                ;;  [:e :!Ct]
-                 [:-f :!Cright_arrow] ; forward
-                 [:-b :!Cleft_arrow] ; back
-                 [:r :!Cl]
-
-                 [:a {:pkey :button1 :modi :left_option}]
-                 [:s :button2]
-
-                 [:d {:pkey :button1 :modi :left_shift}]
-                 ;Allow "a" to be left_option in other apps
-                 [:g {:pkey :button1 :modi :left_command}]
-
-                 [:z :!Cz]
-                ;  [:non_us_backslash :!CSz]
-                 [:x :!Cx]
-                 [:c :!Cc]
-                 [:v :!Cv]
-                ;;  [:b :!Cb]
-
-                 [:delete [:button1 :delete]]
-                 [:hyphen [{:pkey :button1} :delete_line]]
-
-                 ;trackpad 
-                 [:condi ["multitouch_extension_finger_count_total" 2]]
-                 [:x [{:pkey :button1 :modi :shift} :!Cx]]
-                 [:c [:button1 :!Cc]]
-                 [:v [:button1 :!Cv]]
-                 [:left_command :return_or_enter]
-                 [:delete [{:pkey :button1 :modi :shift} :delete]]
-
-                ;;  [:##f :button2]
-
-                 ;trackpad 3
-                 [:condi ["multitouch_extension_finger_count_total" 3]]
-                 [:-s :capture_screenshot]
-                 [:-r :record_screen]
-
-                ;;  [:a :!COleft_arrow]
-                ;;  [:s :!Cleft_arrow]
-                ;;  [:d :!Cright_arrow]
-                ;;  [:f :!COright_arrow]
-
-                 ;trackpad 4
-                 [:condi ["multitouch_extension_finger_count_total" 4]]
-                 [:##f :return_or_enter]]}
-                 ;
-
-
-
-        {:des "caps_lock"
-         :rules [:caps_lock-mode
-                 [:##caps_lock :##escape]
-                 [:a :caps_lock]
-                 [:spacebar [:spacebar :equal_sign :spacebar]]
-                 [:-g :focus_git]
-                 [:-n :hyphen]
-                 [:-e {:key :hyphen :modi :left_shift}]
-                 ]}
-                 ; I don't use a caps_lock key on my keyboard
-                 ;
-
-        {:des "kit-mode"
-         :simlayer-threshold 200
-         :rules [:kit-mode
-
-                 [:-q ["~/.kit/kar kit-discussions"]]
-                 [:-s ["/usr/local/bin/cursor ~/.kit"]]
-                 [:-r ["/usr/local/bin/cursor ~/dev/rubrics"]]
-                 [:-d ["/usr/local/bin/cursor ~/dev/kit-docs"]]
-                 [:-g ["/usr/local/bin/cursor ~/dev/script-generator"]]
-                 [:-v ["/usr/local/bin/cursor ~/.kenv"]]
-                ;;  [:-v ["/usr/local/bin/cursor ~/dev/kenv"]]
-                 [:-t ["/usr/local/bin/cursor ~/dev/kit"]]
-                 [:-c ["/usr/local/bin/cursor ~/dev/clickup_frontend"]]
-                 [:-g ["/usr/local/bin/cursor ~/dev/globals"]]
-                ;;  [:-i ["/usr/local/bin/cursor ~/dev/kit-internal"]]
-                 [:-a ["/usr/local/bin/cursor ~/dev/app"]]
-                 [:-s ["/usr/local/bin/cursor ~/dev/scriptkit.com"]]
-                 [:-w ["/usr/local/bin/cursor ~/dev/workshop"]]
-                 [:-x ["/usr/local/bin/cursor ~/dev/exercises"]]
-
-                 [:1 ["~/.kenv/bin/focus-tab github.com/johnlindquist/kitapp/actions"]]
-                 [:2 ["~/.kenv/bin/focus-tab github.com/johnlindquist/kitapp/releases"]]
-                 [:3 ["~/.kenv/bin/focus-tab github.com/johnlindquist/kit/discussions"]]
-                 
-                 
-                 ]}
-
-        {:des "launch"
-         :rules
-         [:launch-mode
-
-          [:1 :open_1password]
-          [:spacebar :!Tdown_arrow]
-        ;;   [:-a [:launch "Activity Monitor"]]
-        ;;   [:-o [:launch "Loopback"]]
-          ;; [:-t ["~/.kit/kar ~/.kit/main/app-launcher.js"]]
-        ;;   [:-e [:launch "Karabiner-EventViewer"]]
-          [:-a "~/.kit/kar jump-mouse-to-active-app"]
-          [:-v [:launch "Cursor Nightly"]]
-          [:-d [:launch "Discord"]]
-          [:-f [:launch "Finder"]];
-          [:-g [:launch "Google Chrome"]]
-        ;;   [:-u [:launch "Music"]]
-          [:-t [:launch "iTerm"]]
-          [:-c [:launch "Cursor"]]
-          [:-k "launchctl kickstart -k org.pqrs.karabiner.karabiner_console_user_server"] ;restart karabiner
-          [:-y [:launch "YouTube Music"]]
-          [:-r [:launch "Restream Chat"]]
-          [:-s [:launch "Slack"]]
-          [:-w [:launch "Windsurf"]]
-        ;;   [:-c [:launch "ClickUp"]] ;
-          [:-v [:launch "VLC"]];
-          [:-z [:launch "zoom.us"]]
-        ;;   [:-u [:launch "Console.app"]]
-          [:-x [:launch "Users/johnlindquist/Applications/Chrome Apps.localized/Messages.app"]]
-        ;;   [:button1 {:pkey :button1 :modi :left_command}]
-
-          ;
-]};
-                 ;
-
-        {:des "close-bracket-mode"
-        :rules
-        [
-                :close-bracket-mode
-        [:-a ["~/Downloads/mwm maximize"]]
-
-        [:-w ["~/Downloads/mwm top-left width-50% height-50%"]]
-        [:-f ["~/Downloads/mwm center-top width-50% height-50%"]]
-        [:-p ["~/Downloads/mwm top-right width-50% height-50%"]]
-        [:-r ["~/Downloads/mwm center-left width-50% height-100%"]]
-        [:-s ["~/Downloads/mwm center width-90% height-90%"]]
-        [:-t ["~/Downloads/mwm center-right width-50% height-100%"]]
-        [:-z ["~/Downloads/mwm bottom-left width-50% height-50%"]]
-        [:-x ["~/Downloads/mwm center-bottom width-50% height-50%"]]
-        [:-c ["~/Downloads/mwm bottom-right width-50% height-50%"]]
-        [:spacebar ["~/Downloads/mwm display-next"]]
-        ]
-        
-        }
-
-        {:des "escape-mode" :rules
-         [:escape-mode
-          ;
-        ;;   [:-k {:set ["kit-mode" 1]} nil {:afterup {:set ["kit-mode" 0]}}]
-
-        ;;   [:condi :escape-mode ["kit-mode" 0]]
-        [:-w [:launch "Windsurf"]]
-        [:-s :spotlight]
-          [:-t :mission_control]
-        ;;   [:-a ["~/.kit/kar ~/.kit/main/app-launcher.js"]]
-        ;;   [:-c ["~/Downloads/layout center width-90% height-90%"]]
-        ;;   [:-n ["~/.kit/kar journal"]]
-        ;;   [:-w ["~/.kit/kar ~/.kit/cli/edit.js ~/.kenv/scripts/wiki-ten.js"]]
-        ;;   [:-b ["~/.kit/kar bugs"]]
-        ;;   [:-i ["~/.kit/kar script-ideas"]]
-        ;;   [:-r ["~/.kit/kar rhyme-finder"]]
-
-          [:1 :!CO1]
-          [:2 :!CO2]
-          [:3 :!CO3]
-          [:4 :!CO4]
-          [:5 :!CO5]
-          [:6 :!CO6]
-          [:7 :!CO7]
-          [:0 :!CO0]
-          ]}
-          ;
-
-
-
-
-
-
-
-
-
-        {:des "spacebar"
-         :rules [:spacebar-mode
-                 ;symbols [](){}<>
-                 [:a :open_bracket]
-                 [:s :close_bracket]
-
-                 [:d :open_paren]
-                 [:f :close_paren]
-
-                 [:tab [:open_bracket :open_bracket]]
-
-                 [:j :open_brace]
-                 [:k :close_brace]
-
-                 [:l :less_than]
-                 [:semicolon :greater_than]
-
-                 ;symbol sequences
-                 [:hyphen [:!S4 :!Sopen_bracket :!Sclose_bracket :left_arrow]]; ${}
-                 [:caps_lock [:!S4 :!Sopen_bracket :!Sclose_bracket :left_arrow]]; ${}
-                 [:left_shift [:spacebar :equal_sign :spacebar]]; =
-                 [:q [:!S9 :!S0 :equal_sign :greater_than :spacebar]];()=> 
-                 [:e [:!S9 :!S9 :!S0 :equal_sign :greater_than :spacebar :open_brace :close_brace :!S0 :left_arrow :left_arrow]];(()=> {})
-
-                 [:g [:spacebar :equal_sign :greater_than :spacebar]]; =>
-                 [:h [:equal_sign :open_brace :close_brace :left_arrow]];={}
-                 [:b [:equal_sign :open_brace :close_brace :left_arrow]];={}
-                 [:quote [:equal_sign :!Squote :!Squote :left_arrow]]]};=""
-
-                 ;macros
-
-
-                 ;
-
-
-
-        {:des "special characters"
-         :rules [:semicolon-mode
-                 ;special characters: !@#$%^&*()
-                ;;  [:##a :!S1]
-                ;;  [:##s :!S2]
-                ;;  [:##d :!S3]
-                ;;  [:##f :!S4]; 
-                ;;  [:##g :!S5]
-                ;;  [:##h :!S6]
-                ;;  [:##j :!S7]
-                ;;  [:##k :!S8]
-                ;;  [:##l :!S9]
-                ;;  [:##semicolon :!S0]
-                 [:-e :!S1]; ! exclaim
-                 [:-a :!S2]; @ at
-                 [:-h :!S3]; # hash
-                 [:-d :!S4]; $ dollar
-                 [:-p :!S5]; % percent
-                 [:-c :!S6]; ^ caret
-                 [:-s :!S7]; & amperSand
-                 [:-b :!S8] ; * bullet
-
-                ;;  [:spacebar :!Csemicolon]
-
-                 ;
-                 ]}
-
-
-
-        {:des "tab-mode"
-         :rules [:tab-mode
-                 [:-r :record_screen]
-                 [:-s :capture_screenshot]
-                 [:-i :!SOi]
-                 
-                 ]}
-
-        {:des "comma-mode"
-         :rules [:comma-mode
-
-                 [:-c [:copy-transcribe-low]]
-                 [:-v [:paste-transcribe-low]]
-                 [:-s [:copy-transcribe-high]]
-                 [:-t [:transcribe]]
-                ;;  [:-t [:paste-transcribe-high]]
-                 [:-t :!COS0]
-
-                 ;
-]};
-        {:des "period-mode"
-         :rules [:period-mode
-                 ;open urls
-                 [:-c [:open-chrome "chat.openai.com/"]]
-                 [:-e [:open-chrome "egghead.io"]]
-                 [:-g [:open-chrome "mail.google.com"]]
-                 [:-p [:open-chrome "perplexity.ai"]]
-                 [:-j [:open-chrome "js.new"]];
-                 [:-k [:open-chrome "github.com/search?q=extension%3A.edn+filename%3Akarabiner.edn&type=Code&ref=advsearch&l=&l="]]
-                 [:-l [:open-chrome "localhost:4200"]]
-                 [:-m [:open-chrome "youtube.com/watch?v=jfKfPfyJRdk&ab_channel=LofiGirl"]]
-                 [:-n [:open-chrome "staging.clickup.com/333/docs/ad-910069/ad-2678529"]]
-                 [:-r [:open-chrome "roamresearch.com/#/app/egghead"]]
-                 [:-s [:open-chrome "staging.clickup.com"]]
-                 [:-t [:open-chrome "github.com/johnlindquist/kit/actions"]]
-                 [:-a [:open-chrome "github.com/johnlindquist/kitapp/actions"]]
-                 [:-u [:open-chrome "egghead.io/lessons/new"]];Upload
-                 [:-x [:open-chrome "x.com"]]
-                ;;  "g" for goodtime
-                 [:-g [:open-chrome "meet.goodtime.io/links"]]
-                ;;  "w" for "whenlw"
-                 [:-w [:open-chrome "calendar.google.com/calendar/u/1/r"]]
-                 [:-y [:open-chrome "youtube.com"]]
-                 ]}
-
-
-        {:des "apple slash-mode"
-         :rules [[:slash :left_command nil {:alone :slash}]
-                ;;  [:period :left_option :!windows {:alone :period}]
-                 [:left_shift :left_shift nil {:alone :delete}]
-                 [:right_shift :right_shift nil {:alone :delete_forward}]]}
-
-
-
-;
-
-
-        ;; I like the idea behind "modes" when slamming down a few keys at the same time, but never landed on something I like
-        ;; {:des "chords"
-        ;;  :rules [;
-        ;;         [{:sim [:a :s :d :f] :simo {:interrupt false
-        ;;                                      :dorder :insensitive
-        ;;                                      :uorder :insensitive
-        ;;                                      }} {:set ["asdmovement-mode" 1]}]
-
-        ;;          :asdmovement-mode
-        ;;          [:c [:c :o :n :s :o :l :e ] nil {:afterup {:set ["asdmovement-mode" 0]}}]
-
-        ;;          ;
-        ;;          ]
-        ;;  }
-
-
-        {:des "colemak"
-         :rules [;
-                 [:##e :f]
-                 [:##r :p]
-                 [:##t :g]
-                 [:##y :j]
-                 [:##u :l]
-                 [:##i :u]
-                 [:##o :y]
-                 [:##p :semicolon]
-
-                 [:##s :r]
-                 [:##d :s]
-                 [:##f :t]
-                 [:##g :d]
-                 [:##j :n]
-                 [:##k :e]
-                 [:##l :i]
-                 [:##semicolon :o]
-
-                 [:##n :k]
-
-                 [:close_bracket :a]]}]}
-                 ;
-
-
-
-
-        ;
-
-
-
-
-
-;; rule [:period ["media-mode" 1] nil {:afterup ["media-mode" 0] :alone :period}]
-;;       |_____| |_______________| |_| |_________________________________________|
-;;        <from>    <to>      <conditions>         <other options>
-
-    ;; !  | means mandatory
-    ;; #  | means optional
-    ;; C  | left_command
-    ;; T  | left_control
-    ;; O  | left_option
-    ;; S  | left_shift
-    ;; F  | fn
-    ;; Q  | right_command
-    ;; W  | left_control
-    ;; E  | right_option
-    ;; R  | right_shift
-    ;; 
-    ;; !! | mandatory command + control + optional + shift (hyper)
-    ;; ## | optional any
-;; 
+                      ;; --- Trackpad Rules (Grouped by Finger Count - Method 2: Individual Conditions) ---
+
+                      {:des   "Trackpad: 1 Finger Actions"
+                       :rules [
+                               ;; Apply these rules only when exactly 1 finger is on the trackpad
+                               [:-t :button1                                ["multitouch_extension_finger_count_total" 1]] ; T (F Colemak) -> Left Click
+                               [:w :!Cw                                     ["multitouch_extension_finger_count_total" 1]] ; W -> Cmd+W (Close)
+                               [:-f :!Cright_arrow                           ["multitouch_extension_finger_count_total" 1]] ; F (E Colemak) -> Cmd+Right (Forward?)
+                               [:-b :!Cleft_arrow                            ["multitouch_extension_finger_count_total" 1]] ; B -> Cmd+Left (Back?)
+                               [:r :!Cl                                     ["multitouch_extension_finger_count_total" 1]] ; R (P Colemak) -> Cmd+L (Focus Location Bar?)
+                               [:a {:pkey :button1 :modi :left_option}     ["multitouch_extension_finger_count_total" 1]] ; A -> Opt+Click
+                               [:s :button2                                 ["multitouch_extension_finger_count_total" 1]] ; S (R Colemak) -> Right Click
+                               [:d {:pkey :button1 :modi :left_shift}      ["multitouch_extension_finger_count_total" 1]] ; D (S Colemak) -> Shift+Click
+                               [:g {:pkey :button1 :modi :left_command}    ["multitouch_extension_finger_count_total" 1]] ; G (D Colemak) -> Cmd+Click
+                               [:z :!Cz                                     ["multitouch_extension_finger_count_total" 1]] ; Z -> Cmd+Z (Undo)
+                               [:x :!Cx                                     ["multitouch_extension_finger_count_total" 1]] ; X -> Cmd+X (Cut)
+                               [:c :!Cc                                     ["multitouch_extension_finger_count_total" 1]] ; C -> Cmd+C (Copy) <--- Check this
+                               [:v :!Cv                                     ["multitouch_extension_finger_count_total" 1]] ; V -> Cmd+V (Paste)
+                               [:delete [:button1 :delete]                  ["multitouch_extension_finger_count_total" 1]] ; Delete -> LeftClick + Delete
+                               [:hyphen [{:pkey :button1} :delete_line]     ["multitouch_extension_finger_count_total" 1]] ; Hyphen -> LeftClick + Delete Line (Custom Action)
+                               ]}
+
+                      {:des   "Trackpad: 2 Fingers Actions"
+                       :rules [
+                               ;; Apply these rules only when exactly 2 fingers are on the trackpad
+                               [:x [{:pkey :button1 :modi :shift} :!Cx]     ["multitouch_extension_finger_count_total" 2]] ; X -> Shift+Click then Cmd+X
+                               [:c [:button1 :!Cc]                          ["multitouch_extension_finger_count_total" 2]] ; C -> LeftClick then Cmd+C <--- Check this
+                               [:v [:button1 :!Cv]                          ["multitouch_extension_finger_count_total" 2]] ; V -> LeftClick then Cmd+V
+                               ;; REMOVED/COMMENTED: [:left_command :return_or_enter ["multitouch_extension_finger_count_total" 2]]
+                               [:delete [{:pkey :button1 :modi :shift} :delete] ["multitouch_extension_finger_count_total" 2]] ; Delete -> Shift+Click then Delete
+                               ]}
+
+                      {:des   "Trackpad: 3 Fingers Actions"
+                       :rules [
+                               ;; Apply these rules only when exactly 3 fingers are on the trackpad
+                               [:-a :restore_screenshot                     ["multitouch_extension_finger_count_total" 3]] ; S (R Colemak) -> Capture Screenshot
+                               [:-s :capture_screenshot                     ["multitouch_extension_finger_count_total" 3]] ; S (R Colemak) -> Capture Screenshot
+                               [:-r :record_screen                          ["multitouch_extension_finger_count_total" 3]] ; R (P Colemak) -> Record Screen
+                               ]}
+
+                      {:des   "Trackpad: 4 Fingers Actions"
+                       :rules [
+                               ;; Apply these rules only when exactly 4 fingers are on the trackpad
+                               [:##f :return_or_enter                       ["multitouch_extension_finger_count_total" 4]] ; F -> Enter (## means optional mods)
+                               ]}
+                        
+                       ;; --- Application Specific Rules ---
+                       {:des   "Ableton Live"
+                        :rules [:ableton ; Apply only when Ableton is frontmost
+                                ;; Trackpad Avoidance (0 fingers)
+                                [:condi :ableton ["multitouch_extension_finger_count_total" 0]]
+                                [:tilde :!COb] ; Tilde -> Cmd+Opt+B (Toggle Browser)
+                                [[:spacebar :s] :f9] ; Space+S -> F9 (Record)
+                                [[:spacebar :a] [:open_bracket :open_bracket]] ; Space+A -> '[[' sequence?
+
+                                ;; Trackpad Interaction (1 finger)
+                                [:condi :ableton ["multitouch_extension_finger_count_total" 1]]
+                                [:tab :!Stab] ; Tab -> Shift+Tab (Toggle Clip/Device View)
+                                [:left_option [:!Ce :!Cj]] ; Left Opt -> Cmd+E (Split), Cmd+J (Consolidate) ?
+                                [:-b [:shift_click :add_midi_clip]] ; B -> Shift+Click then Add MIDI Clip
+                                [:-q [:q :q]] ; Q -> QQ ?
+                                [:-w :!COl] ; W -> Cmd+Opt+L (Toggle Loop)
+                                [:-d [:button1 :button1]] ; D (S Colemak) -> Double Click
+                                [:-g :!C4] ; G (T Colemak) -> Cmd+4 (Toggle Grid Snap)
+                                [:hyphen :!C1] ; - -> Cmd+1 (Narrow Grid)
+                                [:equal_sign :!C2] ; = -> Cmd+2 (Widen Grid)
+                                [:-f :!Stab] ; F (E Colemak) -> Shift+Tab
+                                [:-p :!COp] ; P (R Colemak) -> Cmd+Opt+P (Toggle Plugin Windows)
+                                [:left_shift [:button1 :delete_or_backspace]] ; Left Shift -> Click + Backspace
+                                [:delete_or_backspace [:button1 :delete_or_backspace]] ; Delete -> Click + Backspace
+                                [:1 :narrow_grid] ; 1 -> Narrow Grid
+                                [:2 :widen_grid] ; 2 -> Widen Grid
+
+                                ;; Trackpad Interaction (2 fingers)
+                                [:condi :ableton ["multitouch_extension_finger_count_total" 2]]
+                                [:-a :!COb] ; A -> Cmd+Opt+B
+                                [:-r :loop_selection] ; R (S Colemak) -> Loop Selection (Cmd+L)
+                                [:-s :split_clip] ; S (D Colemak) -> Split Clip (Cmd+E)
+                                [:-t :loop_selection] ; T (F Colemak) -> Loop Selection (Cmd+L)
+
+                                ;; Trackpad Interaction (3 fingers)
+                                [:condi :ableton ["multitouch_extension_finger_count_total" 3]]
+                                [:-t :add_midi_track] ; T (F Colemak) -> Add MIDI Track
+                                ]}
+
+                       {:des   "Google Chrome"
+                        :rules [:chrome ; Apply only when Chrome is frontmost
+                                ;; Tap Left Cmd for Ctrl+T (New Tab), Hold for Cmd
+                                [:left_command :left_command nil {:alone [:!Ct]}]
+                                ;; [:left_option :left_option nil {:alone ["open simple://scripts/list-chrome-tabs"]}] ; Tap Left Opt for custom script
+                                ;; [:right_option :focus_omnibar] ; Tap Right Opt for Cmd+L
+                                ;; [:left_control :left_option nil {:alone [:!CSt]}] ; Tap Ctrl for Cmd+Shift+T (Reopen Tab), Hold for Opt
+
+                                ;; Trackpad Interaction (2 fingers)
+                                [:condi :chrome ["multitouch_extension_finger_count_total" 2]]
+                                [:-d :open_dev_tools] ; D (S Colemak) -> Open Dev Tools
+                                [:-a :!COleft_arrow] ; A -> Cmd+Opt+Left (Prev Tab)
+                                [:-t :!COright_arrow] ; T (F Colemak) -> Cmd+Opt+Right (Next Tab)
+
+                                ;; Escape Mode in Chrome
+                                [:condi :chrome :escape-mode]
+                                [:-f :chrome_full_screen] ; Esc+F -> Toggle Full Screen
+
+                                ;; Opt Mode (A-Simlayer) in Chrome
+                                [:condi :chrome :opt-mode]
+                                [:-o :chrome_tab_switcher] ; A+O (semicolon Colemak) -> Tab Switcher (Cmd+Shift+A)
+                                ]}
+
+                       {:des   "VS Code / Cursor"
+                        :rules [:code ; Apply only when :code apps are frontmost
+                                ;; Tap Left Cmd for Go To File (Cmd+P), Hold for Cmd
+                                [:left_command :left_command nil {:alone :go_to_file}]
+                                ;; Tap Left Ctrl for Command Palette (Cmd+Shift+P), Hold for Ctrl
+                                [:left_control :left_control nil {:alone :command_palette}]
+                                ;; Tap Right Ctrl for Command Palette (Cmd+Shift+P), Hold for Ctrl
+                                [:right_control :right_control nil {:alone :command_palette}]
+                                ;; [:home :start_debugger] ; Tap Home for F5
+                                ;; [:end :restart_debugger] ; Tap End for Cmd+Shift+F5
+
+                                ;; Escape Mode in Code (View/Focus Switching)
+                                [:condi :code :escape-mode]
+                                [:-g :focus_git]        ; Esc+G (T Colemak) -> Focus Git View (Ctrl+Shift+G)
+                                [:-a :focus_editor]     ; Esc+A -> Focus Editor (Hyper+E)
+                                [:-e :focus_editor]     ; Esc+E (K Colemak) -> Focus Editor (Hyper+E)
+                                [:-h :focus_editor_left] ; Esc+H -> Focus Left Editor (Hyper+I)
+                                [:-i {:key :i :modi :cos}] ; Esc+I (L Colemak) -> Cmd+Opt+Shift+I ?
+                                [:-x :focus_explorer]   ; Esc+X -> Focus Explorer (Cmd+Shift+E)
+                                [:-f :find_in_project]  ; Esc+F (E Colemak) -> Find in Project (Cmd+Shift+F)
+                                [:-r :replace_in_project] ; Esc+R (P Colemak) -> Replace in Project (Cmd+Shift+H)
+                                [:-z [:!Ck :z]]         ; Esc+Z -> Cmd+K Z (Toggle Zen Mode)
+                                [:delete_or_backspace :toggle_sidebar] ; Esc+Delete -> Toggle Sidebar (Cmd+B)
+                                ;; [:delete_forward :!COb] ; Esc+FwdDelete -> Cmd+Opt+B (Toggle Bottom Panel?)
+
+                                ;; Trackpad Interaction (1 finger) in Code
+                                [:condi :code ["multitouch_extension_finger_count_total" 1]]
+                                ;; Tap Left Cmd for Start Debugger (F5), Hold for Cmd
+                                [:left_command :left_command nil {:alone :start_debugger}]
+                                ;; [:left_option :left_option nil {:alone :restart_debugger}] ; Tap Left Opt for Restart Debugger
+
+                                ;; Trackpad Interaction (2 fingers) in Code
+                                [:condi :code ["multitouch_extension_finger_count_total" 2]]
+                                [:-t [:button1 :f2]] ; T (F Colemak) -> Left Click then F2 (Rename)
+                                ]}
+
+                       {:des   "Terminal / iTerm"
+                        :rules [:terminal ; Apply only when :terminal apps are frontmost
+                                ;; Tmux: Ctrl+R -> Prefix + % (New Vertical Pane)
+                                [:!Cr [:tmux :tmux_new_pane]]
+
+                                ;; Nav Mode (K-Simlayer) in Terminal
+                                [:condi :terminal :nav-mode]
+                                [:-a :terminal_previous_tab] ; K+A -> Previous Tab (Cmd+Shift+[)
+                                [:-t :terminal_next_tab]     ; K+T (F Colemak) -> Next Tab (Cmd+Shift+])
+                                ]}
+
+                       {:des   "Slack"
+                        :rules [:slack ; Apply only when Slack is frontmost
+                                ;; Tap Left Cmd for Ctrl+T (Find Conversation?), Hold for Cmd
+                                [:left_command :left_command nil {:alone :!Ct}]
+
+                                ;; Nav Mode (K-Simlayer) in Slack
+                                [:condi :slack :nav-mode]
+                                [:-a :slack_previous] ; K+A -> Previous History (Cmd+[)
+                                [:-t :slack_next]     ; K+T (F Colemak) -> Next History (Cmd+])
+                                ]}
+
+                       {:des   "Final Cut Pro"
+                        :rules [:fcp ; Apply only when FCP is frontmost
+                                ;; Button3 Hold -> Hold H (Hand tool), Tap -> A (Select tool)
+                                [{:pkey :button3} [:h {:pkey :button1}] nil {:afterup {:key :a}}]
+                                ;; Trackpad Interaction
+                                [:condi :fcp :multitouch_extension_finger_count_total]
+                                ;; Delete -> Click + Backspace
+                                [:delete_or_backspace [:button1 :delete_or_backspace]]
+                                ]}
+
+                       {:des   "Miro"
+                        :rules [:miro ; Apply only when Miro is frontmost
+                                ;; Trackpad Interaction (1 finger)
+                                [:condi :miro ["multitouch_extension_finger_count_total" 1]]
+                                ;; Delete -> Esc + Click + Backspace
+                                [:delete_or_backspace [:escape :button1 :delete_or_backspace]]
+                                ;; A -> Esc + N (Text tool) + Click
+                                [:a [:escape :n :button1]]
+
+                                ;; Trackpad Interaction (2 fingers)
+                                [:condi :miro ["multitouch_extension_finger_count_total" 2]]
+                                ;; F -> Esc + N (Text tool) + Click
+                                [:f [:escape :n :button1]]
+                                ;; C -> Cmd+C (Copy) + Click + Cmd+V (Paste)
+                                [:c [:!Cc :button1 :!Cv]]
+                                ]}
+
+                       {:des   "ScreenFlow"
+                        :rules [:screenflow ; Apply only when ScreenFlow is frontmost
+                                ;; Button3 Hold -> Hold H (Hand tool), Tap -> A (Select tool)
+                                [{:pkey :button3} [:h {:pkey :button1}] nil {:afterup {:key :a}}]
+                                ;; Tap Left Cmd -> Shift+Click + Cmd+Delete, Hold for Cmd
+                                [:left_command :left_command nil {:alone [{:pkey :button1 :modi :left_shift} :!Cdelete_or_backspace]}]
+
+                                ;; Trackpad Interaction
+                                [:condi :screenflow :multitouch_extension_finger_count_total]
+                                [:spacebar :spacebar] ; Space -> Play/Pause
+                                ;; D -> Shift+Click + Cmd+Delete
+                                [:d [{:pkey :button1 :modi :left_shift} :!Cdelete_or_backspace]]
+                                ;; A -> Cmd+Opt+; (Add Video Action)
+                                [:a :!COsemicolon]
+
+                                ;; Button2 Mode (Right Click Hold) in Screenflow
+                                [:condi :screenflow :button2-mode]
+                                ;; Left Click -> Shift+Click + Cmd+Delete
+                                [{:pkey :button1} [{:pkey :button1 :modi :left_shift} :!Cdelete_or_backspace]]
+                                ]}
+
+                       {:des   "Screen Studio"
+                        :rules [:screenstudio ; Apply only when ScreenStudio is frontmost
+                                ;; X -> C X sequence? (Maybe Cut?)
+                                [:x [:c :x]]
+                                ]}
+
+
+                       ;; --- Layer Rules (Tap/Hold Triggers) ---
+                       {:des   "Caps Lock Mode (Tap Esc, Hold Layer)"
+                        :rules [:caps_lock-mode
+                                ;; Remap keys while Caps Lock is held
+                                [:##caps_lock :##escape] ; Allow Caps Lock + Esc -> Esc
+                                [:a :caps_lock]        ; Caps+A -> Actual Caps Lock toggle
+                                [:spacebar [:spacebar :equal_sign :spacebar]] ; Caps+Space -> " = "
+                                [:-g :focus_git]        ; Caps+G (T Colemak) -> Focus Git
+                                [:-n :hyphen]           ; Caps+N (J Colemak) -> Hyphen
+                                [:-e {:key :hyphen :modi :left_shift}] ; Caps+E (K Colemak) -> Underscore
+                                ]}
+
+                       {:des   "Escape Mode (Hold Esc)"
+                        :rules [:escape-mode
+                                ;; Application specific rules are defined within app blocks (:code, :chrome, etc.)
+                                ;; General rules for Escape Mode
+                                [:-w {:key :w :modi :hyper}] ; Esc+W -> window
+                                [:-f {:key :f :modi :hyper}] ; Esc+F -> Focus
+                                [:-s :spotlight]         ; Esc+S (D Colemak) -> Spotlight
+                                [:-t :mission_control]   ; Esc+T (F Colemak) -> Mission Control
+                                ;; Number row -> Cmd+Opt+Number (Switch Spaces/Desktops?)
+                                [:1 :!CO1]
+                                [:2 :!CO2]
+                                [:3 :!CO3]
+                                [:4 :!CO4]
+                                [:5 :!CO5]
+                                [:6 :!CO6]
+                                [:7 :!CO7]
+                                [:0 :!CO0]
+
+                                [{:pkey :button1} [{:pkey :button1} [:read-paste-enter "/Users/johnlindquist/.config/snippets/continue.txt"]]]
+
+                                
+                                ]}
+
+                       {:des   "Fn Mode (Hold Fn, Tap Home)"
+                        :rules [:fn-mode
+                                ;; Remap keys while Fn is held (like traditional Fn layer)
+                                ;; Homerow arrows with Shift
+                                [:##d :left_shift] ; Fn+D (S Colemak) -> Shift
+                                [:##h :!Fleft_arrow] ; Fn+H -> Fn+Left Arrow
+                                [:##j :!Fdown_arrow] ; Fn+J (Y Colemak) -> Fn+Down Arrow
+                                [:##k :!Fup_arrow]   ; Fn+K (E Colemak) -> Fn+Up Arrow
+                                [:##l :!Fright_arrow]; Fn+L (U Colemak) -> Fn+Right Arrow
+                                ;; Space/Cmd remapping
+                                [:##spacebar {:key :return_or_enter}] ; Fn+Space -> Enter
+                                [:##left_command {:key :return_or_enter :modi :cs}] ; Fn+Cmd -> Cmd+Shift+Enter
+                                ;; Bottom row remapping
+                                [:##z {:key :i :modi :command}] ; Fn+Z -> Cmd+I ?
+                                [:##c {:key :l :modi :command}] ; Fn+C -> Cmd+L ?
+                                [:##x {:key :i :modi :cos}] ; Fn+X -> Cmd+Opt+Shift+I ?
+                                ]}
+
+                       {:des   "Hyphen Mode (Hold Hyphen)"
+                        :rules [:slash-mode
+                                ;; Git/Code related snippets while holding Hyphen
+                                [:-n :!CTOSf] ; Hyphen+N (J Colemak) -> Ctrl+Cmd+Opt+Shift+F ?
+                                [:-s [:read-paste-enter "/Users/johnlindquist/.config/snippets/commit-push-pr.txt"]]
+                                [:-g [:read-paste-enter "/Users/johnlindquist/.config/snippets/git-diff-then-commit.txt"]]
+                                [:-d [:read-paste-enter "/Users/johnlindquist/.config/snippets/developer-instructions.txt"]]
+                                [:-t [:read-paste-enter "/Users/johnlindquist/.config/snippets/think-and-fix.txt"]]
+                                [:-w [:read-paste-enter "/Users/johnlindquist/.config/snippets/commit-push-watch.txt"]]
+                                ;; [:-p [:read-paste-enter "/Users/johnlindquist/.config/snippets/planner.txt"]]
+                                [:-e [:read-paste-enter "/Users/johnlindquist/.config/snippets/execute.txt"]]
+                                ;; [:-i [:read-paste-enter "/Users/johnlindquist/.config/snippets/execute-test.txt"]]
+                                [:-c [:read-paste-enter "/Users/johnlindquist/.config/snippets/continue.txt"]]
+                                [:-p [:read-paste-enter "/Users/johnlindquist/.config/snippets/project.txt"]]
+                                [:-b [:read-paste-enter "/Users/johnlindquist/.config/snippets/break-down-problem.txt"]]
+                                [:-i [:read-paste-enter "/Users/johnlindquist/.config/snippets/improve.txt"]]
+                                ]}
+
+                       {:des   "Equal Mode (Hold Equal)"
+                        :rules [:equal-mode
+                                ;; Mouse/Arrow interactions while holding Equal
+                                ;; [{:pkey :button1} [{:pkey :button1} :x :delete_forward]] ; Equal+LClick -> LClick + X + FwdDelete ?
+                                ;; [{:pkey :button2} [{:pkey :button1} :delete_forward :spacebar]] ; Equal+RClick -> LClick + FwdDelete + Space ?
+                                [{:pkey :button1} [{:pkey :button1 :modi :left_shift} :!Cdelete_or_backspace]] ; Equal+LClick -> Shift+Click + Cmd+Delete
+                                ;; [{:pkey :button6} :!Tright_arrow] ; Equal+Btn5 -> Ctrl+Right COMMENTED OUT
+                                ;; [{:pkey :button6} ["/Users/johnlindquist/.config/scripts/space_right.sh"]] ; Equal+Btn6 -> jump/make space right
+
+                                ;; [{:pkey :button4} :!Tleft_arrow] ; Equal+Btn4 -> Ctrl+Left COMMENTED OUT
+                                ;; [{:pkey :button4} ["/Users/johnlindquist/.config/scripts/space_left.sh"]] ; Equal+Btn4 -> jump/make space left
+                                ;; [:-h :!Tleft_arrow] ; Equal+H -> Ctrl+Left COMMENTED OUT
+                                [:-m [:move_window_east]]
+                                [:comma [:move_window_west]]
+                                [:-h [:space_left]] ; Equal+H -> jump/make space left
+                                [:-n [:move_window_to_previous_empty_space]] ; Equal+J -> move left
+                                [:-e [:move_window_to_next_empty_space]] ; Equal+K -> move right
+                                [:-x [:remove_current_space]]
+                                [:-y [:remove_empty_spaces_current_display]]
+                                [:-f [:fix_floats]]
+                                [:-d [:move_to_next_display]]
+                                [:-r [:restart_yabai]]
+                                
+                                ;; [:-i :!Tright_arrow] ; Equal+I (L Colemak) -> Ctrl+Right COMMENTED OUT
+                                [:-i [:space_right]] ; Equal+I -> jump/make space right
+                                [:-c :!CSc] ; Equal+C -> Cmd+Shift+C
+                                [:home {:key :home :modi :hyper}] ; Equal+Home -> Hyper+Home
+                                ]}
+
+                       {:des   "Tab Mode (Hold Tab)"
+                        :rules [:tab-mode
+                                ;; Actions while holding Tab
+                                [:-a :restore_screenshot] ; Tab+A (P Colemak) -> Restore Screenshot
+                                [:-r :record_screen] ; Tab+R (P Colemak) -> Record Screen
+                                [:-s :capture_screenshot] ; Tab+S (R Colemak) -> Capture Screenshot
+                                [:-i :!SOi] ; Tab+I (L Colemak) -> Shift+Opt+I ?
+                                ]}
+
+                       {:des   "Home Mode (Hold Home)"
+                        :rules [:home-mode
+                                ;; Actions while holding Home
+                            ;; Colemak Top Row -> F1-F10 with :hyper
+                        [:-q {:key :f1 :modi :hyper}]
+                        [:-w {:key :f2 :modi :hyper}]
+                        [:-f {:key :f3 :modi :hyper}]
+                        [:-p {:key :f4 :modi :hyper}]
+                        [:-g {:key :f5 :modi :hyper}]
+                        [:-j {:key :f6 :modi :hyper}]
+                        [:-l {:key :f7 :modi :hyper}]
+                        [:-u {:key :f8 :modi :hyper}]
+                        [:-y {:key :f9 :modi :hyper}]
+                        [:semicolon {:key :f10 :modi :hyper}]
+
+                        ;; Colemak Middle Row -> F11-F20 with :hyper
+                        [:-a {:key :f11 :modi :hyper}]
+                        [:-r {:key :f12 :modi :hyper}]
+                        [:-s {:key :f13 :modi :hyper}]
+                        [:-t {:key :f14 :modi :hyper}]
+                        [:-d {:key :f15 :modi :hyper}]
+                        [:-h {:key :f16 :modi :hyper}]
+                        [:-n {:key :f17 :modi :hyper}]
+                        [:-e {:key :f18 :modi :hyper}]
+                        [:-i {:key :f19 :modi :hyper}]
+                        [:-o {:key :f20 :modi :hyper}]
+
+                        ;; Colemak Bottom Row -> F1-F10 with [:super :hyper]
+                        [:-z {:key :f1 :modi :super-hyper}]
+                        [:-x {:key :f2 :modi :super-hyper}]
+                        [:-c {:key :f3 :modi :super-hyper}]
+                        [:-v {:key :f4 :modi :super-hyper}]
+                        [:-b {:key :f5 :modi :super-hyper}]
+                        [:-k {:key :f6 :modi :super-hyper}]
+                        [:-m {:key :f7 :modi :super-hyper}]
+                        [:comma {:key :f8 :modi :super-hyper}]
+                        [:period {:key :f9 :modi :super-hyper}]
+                        [:slash {:key :f10 :modi :super-hyper}]
+                        [:return_or_enter [:fix_with_ai]]
+
+                                ]}
+
+                                               {:des   "Close Bracket Mode (Hold ])"
+                        :rules [:button2-mode
+                                ;; Window Management via 'mwm' script while holding ']'
+                                [:2 ["/opt/homebrew/bin/mwm move-left"]] ; ]+2 -> Move Left
+                                [:3 ["/opt/homebrew/bin/mwm center"]] ; ]+3 -> Center
+                                [:4 ["/opt/homebrew/bin/mwm move-right"]] ; ]+4 -> Move Right
+                                [:-q ["/opt/homebrew/bin/mwm maximize-height"]] ; ]+4 -> Maximize Height
+                                [:-a ["/opt/homebrew/bin/mwm maximize"]] ; ]+A -> Maximize
+                                [:-w ["/opt/homebrew/bin/mwm left width-34% height-100%"]] ; ]+W -> Left 1/3 Column
+                                [:-f ["/opt/homebrew/bin/mwm center width-34% height-100%"]] ; ]+F (E Colemak) -> Top Half
+                                [:-p ["/opt/homebrew/bin/mwm right width-34% height-100%"]] ; ]+P (Semicolon Colemak) -> Right 1/3 Column
+                                [:-r ["/opt/homebrew/bin/mwm left width-50% height-100%"]] ; ]+R (S Colemak) -> Left Half
+                                [:-s ["/opt/homebrew/bin/mwm center width-75% height-75%"]] ; ]+S (D Colemak) -> Center 75%
+                                [:-t ["/opt/homebrew/bin/mwm right width-50% height-100%"]] ; ]+T (F Colemak) -> Right Half
+                                [:-z ["/opt/homebrew/bin/mwm left width-66% height-100%"]] ; ]+Z -> Left 2/3 Column
+                                [:-x ["/opt/homebrew/bin/mwm snap-left"]] ; ]+X -> Bottom Half
+                                ;; [:-c ["/opt/homebrew/bin/mwm right width-66% height-100%"]] ; ]+C -> Right 2/3 Column
+                                [:-v ["/opt/homebrew/bin/mwm snap-right"]] ; ]+C -> Right 2/3 Column
+                                [:spacebar ["/opt/homebrew/bin/mwm display-next"] :condi :!screenflow] ; ]+Space -> Move to Next Display
+                                ;; cmd+tab
+                                [:-c :!Ctab]
+                                [:-g :!Cgrave_accent_and_tilde]
+                                [:-b ["/bin/bash /Users/johnlindquist/.config/scripts/pin_left.sh"]]
+                                ;; control+`
+                                ;; [:left_option :!Ctilde]
+                                ]}
+
+                       {:des   "Close Bracket Mode (Hold ])"
+                        :rules [:close-bracket-mode
+                                ;; Window Management via 'mwm' script while holding ']'
+                                [:2 ["/opt/homebrew/bin/mwm move-left"]] ; ]+2 -> Move Left
+                                [:3 ["/opt/homebrew/bin/mwm center"]] ; ]+3 -> Center
+                                [:4 ["/opt/homebrew/bin/mwm move-right"]] ; ]+4 -> Move Right
+                                [:-q ["/opt/homebrew/bin/mwm maximize-height"]] ; ]+4 -> Maximize Height
+                                [:-a ["/opt/homebrew/bin/mwm maximize"]] ; ]+A -> Maximize
+                                [:-w ["/opt/homebrew/bin/mwm left width-34% height-100%"]] ; ]+W -> Left 1/3 Column
+                                [:-f ["/opt/homebrew/bin/mwm center width-34% height-100%"]] ; ]+F (E Colemak) -> Top Half
+                                [:-p ["/opt/homebrew/bin/mwm right width-34% height-100%"]] ; ]+P (Semicolon Colemak) -> Right 1/3 Column
+                                [:-r ["/opt/homebrew/bin/mwm left width-50% height-100%"]] ; ]+R (S Colemak) -> Left Half
+                                [:-s ["/opt/homebrew/bin/mwm center width-75% height-75%"]] ; ]+S (D Colemak) -> Center 75%
+                                [:-t ["/opt/homebrew/bin/mwm right width-50% height-100%"]] ; ]+T (F Colemak) -> Right Half
+                                [:-z ["/opt/homebrew/bin/mwm left width-66% height-100%"]] ; ]+Z -> Left 2/3 Column
+                                [:-x ["/opt/homebrew/bin/mwm snap-left"]] ; ]+X -> Bottom Half
+                                [:-c ["/opt/homebrew/bin/mwm right width-66% height-100%"]] ; ]+C -> Right 2/3 Column
+                                [:-v ["/opt/homebrew/bin/mwm snap-right"]] ; ]+C -> Right 2/3 Column
+                                [:spacebar ["/opt/homebrew/bin/mwm display-next"]] ; ]+Space -> Move to Next Display
+                                ]}
+
+                       {:des   "F23 Mode (Hold F23)"
+                        :rules [:f23-mode
+                                [:-i :!SOi] ; F23+I (L Colemak) -> Shift+Opt+I ?
+                                ]}
+
+
+                       ;; --- Simlayer Rules (Simultaneous Presses) ---
+                       {:des   "quick Mode (Q + Key)"
+                        :rules [:quick-mode
+                                ;; Utility scripts triggered by Q + Key
+                                [:g ["/opt/homebrew/bin/goku 2>&1 | /opt/homebrew/bin/terminal-notifier -sound default"]] ; Q+G -> Reload Karabiner via Goku
+                                [:d ["date +\"%Y-%m-%d %H:%M:%S\" | tee >(pbcopy) | /opt/homebrew/bin/terminal-notifier -sound default -message"]] ; Q+D -> Copy/Notify current timestamp
+                                ]}
+
+                       {:des   "Zero Mode (0 + Key)"
+                        :rules [:zero-mode
+                                ;; Display Layout Switching via Hyper Key shortcuts
+                                [:1 :display_layout_1] ; 0+1 -> Hyper+1
+                                [:2 :display_layout_2] ; 0+2 -> Hyper+2
+                                [:3 :!CSTO3] ; 0+3 -> Ctrl+Shift+Cmd+Opt+3 ?
+                                [:4 :!CSTO4] ; 0+4 -> Ctrl+Shift+Cmd+Opt+4 ?
+                                ]}
+
+                       {:des   "Close Mode (W + Key)"
+                        :rules [:close-mode
+                                ;; Closing actions in Code triggered by W + Key
+                                [:condi :code :close-mode]
+                                [:-a :close_all]    ; W+A -> Close All (Cmd+R, W sequence?)
+                                [:-o :close_others] ; W+O (Semicolon Colemak) -> Close Others (Cmd+Opt+T)
+                                ;; Add :condi :chrome if needed for browser
+                                ]}
+
+                       {:des   "Finder Mode (E + Key / F Colemak)"
+                        :rules [:finder-mode
+                                ;; Open common folders or run scripts via E + Key
+                                [:-a "open /Applications"] ; E+A -> Open Applications
+                                [:-d "open ~/Downloads"]   ; E+D (S Colemak) -> Open Downloads
+                                [:-h "open ~"]             ; E+H -> Open Home Directory
+                                [:-j ["~/.kit/kar fenced-js"]] ; E+J (Y Colemak) -> Fenced JS script
+                                [:-b [:tilde :tilde :tilde :b :a :s :h :return_or_enter :return_or_enter :tilde :tilde :tilde :up_arrow]] ; E+B -> Fenced Bash snippet
+                                ]}
+
+                       {:des   "Peek Mode (R + Key / P Colemak)"
+                        :rules [:peek-mode
+                                ;; VSCode Peek actions triggered by R + Key
+                                [:-h :peek_definition]     ; R+H -> Peek Definition (Opt+F12)
+                                [:-e :peek_implementations]; R+E (K Colemak) -> Peek Implementations (Cmd+Shift+F12)
+                                [:-n :peek_references]     ; R+N (J Colemak) -> Peek References (Cmd+F19)
+                                [:-i :peek_declaration]    ; R+I (L Colemak) -> Peek Declaration (Ctrl+F19)
+                                [:-o :peek_type]           ; R+O (Semicolon Colemak) -> Peek Type (Shift+F19)
+                                ]}
+
+                       {:des   "Go Mode (T + Key / G Colemak)"
+                        :rules [:go-mode
+                                ;; VSCode Go To actions triggered by T + Key
+                                [:-r :go_to_references]; T+R (S Colemak) -> Go To References (Shift+F12)
+                                [:-w :go_to_symbol_in_workspace]; T+W -> Go To Symbol in Workspace
+                                [:-s :go_to_symbol];     T+S (D Colemak) -> Go To Symbol (Cmd+Shift+O)
+                                [:-h :go_to_hints];      T+H -> Go To Hints (Cmd+Shift+Space)
+                                [:-i :go_to_implementations]; T+I (L Colemak) -> Go To Implementations (Cmd+F12)
+                                [:-n :go_to_symbol];     T+N (J Colemak) -> Go To Symbol (Cmd+Shift+O)
+                                [:-o :go_to_definition]; T+O (Semicolon Colemak) -> Go To Definition (F12)
+                                [:-l :go_to_line];       T+L (U Colemak) -> Go To Line (Ctrl+G)
+                                [:comma :go_to_prev_problem]; T+, -> Prev Problem (Opt+Shift+F8)
+                                [:period :go_to_next_problem]; T+. -> Next Problem (Opt+F8)
+                                ]}
+
+                       {:des   "Opt Mode (A + Key / Option Layer, No Trackpad)"
+                        :rules [:opt-mode
+                                ;; Option-modified keys and AceJump triggers via A + Key
+                                ;; Arrow keys with Option
+                                [:##h :!Oleft_arrow] ; A+H -> Opt+Left
+                                [:##j :!Odown_arrow] ; A+J (Y Colemak) -> Opt+Down
+                                [:##k :!Oup_arrow]   ; A+K (E Colemak) -> Opt+Up
+                                [:##l :!Oright_arrow]; A+L (U Colemak) -> Opt+Right
+                                ;; AceJump Triggers
+                                [:semicolon :acejump] ; A+; -> AceJump (Cmd+Opt+Shift+J)
+                                [:-b [:acejump :open_brace]] ; A+B -> AceJump then '{'
+                                [:spacebar :acejump] ; A+Space -> AceJump
+                                [:escape :acejump_line] ; A+Esc -> AceJump Line (Cmd+Opt+Shift+L)
+                                [:-l :acejump_line] ; A+L (U Colemak) -> AceJump Line
+                                [:tab [:acejump_line :acejump_selection]] ; A+Tab -> AceJump Line then Select
+                                [:-u [:acejump_line :acejump_selection]] ; A+U (I Colemak) -> AceJump Line then Select
+                                [:-s [:acejump_selection]] ; A+S (D Colemak) -> AceJump Select (Cmd+Opt+Shift+S)
+                                [:-m :acejump_multi] ; A+M -> AceJump Multi (Cmd+Opt+Shift+M)
+                                [:left_shift :acejump_selection] ; A+LShift -> AceJump Select
+                                ;; Other
+                                [:-t :superkey] ; A+T (F Colemak) -> Superkey (Hyper+0)
+                                [:left_shift :!CSO0] ; A+LShift -> Cmd+Shift+Opt+0 ?
+                                ]}
+
+                       {:des   "Shift+Opt Mode (S + Key / R Colemak Layer, No Trackpad)"
+                        :rules [:shift-opt-mode
+                                ;; Shift+Option modified arrow keys via S + Key
+                                [:##h :!OSleft_arrow] ; S+H -> Shift+Opt+Left
+                                [:##j :!OSdown_arrow] ; S+J (Y Colemak) -> Shift+Opt+Down
+                                [:##k :!OSup_arrow]   ; S+K (E Colemak) -> Shift+Opt+Up
+                                [:##l :!OSright_arrow]; S+L (U Colemak) -> Shift+Opt+Right
+                                ;; Mouse buttons
+                                [:##spacebar {:pkey :button1 :modi :left_command}] ; S+Space -> Cmd+Click
+                                [:##left_shift :##button2] ; S+LShift -> Right Click
+                                ;; Chrome Navigation (Commented out - handled elsewhere?)
+                                ;; [:condi :chrome]
+                                ;; [:-n :chrome_go_back] ; S+N (J Colemak) -> Chrome Back
+                                ;; [:-e :chrome_go_forward] ; S+E (K Colemak) -> Chrome Forward
+                                ]}
+
+                       {:des   "Shift Mode (D + Key / S Colemak Layer, No Trackpad)"
+                        :rules [:shift-mode
+                                ;; Shift modified keys via D + Key
+                                ;; Arrow keys with Shift
+                                [:##h :!Sleft_arrow] ; D+H -> Shift+Left
+                                [:##j :!Sdown_arrow] ; D+J (Y Colemak) -> Shift+Down
+                                [:##k :!Sup_arrow]   ; D+K (E Colemak) -> Shift+Up
+                                [:##l :!Sright_arrow]; D+L (U Colemak) -> Shift+Right
+                                ;; Selection and Line Insertion
+                                [:left_shift :shrink_selection] ; D+LShift -> Shrink Selection
+                                [:return_or_enter :insert_line_above] ; D+Enter -> Insert Line Above
+                                [:semicolon :expand_selection] ; D+; -> Expand Selection
+                                [:quote :shrink_selection] ; D+' -> Shrink Selection
+                                ;; Page Up/Down with Shift
+                                [:##m :!Spage_down] ; D+M -> Shift+PageDown
+                                [:##comma :!Spage_up] ; D+, -> Shift+PageUp
+                                ;; Home/End Equivalents
+                                [:##y :!Shome :windows] ; D+Y (O Colemak) -> Shift+Home (Windows only)
+                                [:##o :!Send :windows] ; D+O (Semicolon Colemak) -> Shift+End (Windows only)
+                                [:##y :!CSleft_arrow] ; D+Y -> Cmd+Shift+Left (Select to Line Start)
+                                [:##o :!CSright_arrow] ; D+O -> Cmd+Shift+Right (Select to Line End)
+                                ]}
+
+                       {:des   "Movement Mode (F + Key / T Colemak Layer, No Trackpad)"
+                        :rules [:movement-mode
+                                ;; Basic arrow key movement via F + Key
+                                [:##h :left_arrow] ; F+H -> Left
+                                [:##j :down_arrow] ; F+J (Y Colemak) -> Down
+                                [:##k :up_arrow]   ; F+K (E Colemak) -> Up
+                                [:##l :right_arrow]; F+L (U Colemak) -> Right
+                                ;; Autocomplete / Line Insertion
+                                [:semicolon :autocomplete] ; F+; -> Autocomplete (Ctrl+Space)
+                                [:return_or_enter :insert_line_below] ; F+Enter -> Insert Line Below
+                                ;; Home/End Equivalents
+                                [:##y [:!Shome :escape] :windows] ; F+Y (O Colemak) -> Shift+Home, Esc (Windows only)
+                                [:##o :end :windows] ; F+O (Semicolon Colemak) -> End (Windows only)
+                                [:##y :!Cleft_arrow] ; F+Y -> Cmd+Left (Line Start)
+                                [:##o :!Cright_arrow] ; F+O -> Cmd+Right (Line End)
+                                ]}
+
+                       {:des   "Cursor Mode (G + Key / D Colemak Layer, No Trackpad)"
+                        :rules [:cursor-mode
+                                ;; Cursor actions (multi-cursor, AceJump) via G + Key
+                                [:h :cursor_find_match] ; G+H -> Find Match (Cmd+D)
+                                [:j :cursor_below] ; G+J (Y Colemak) -> Cursor Below (Cmd+Opt+Down)
+                                [:k :cursor_above] ; G+K (E Colemak) -> Cursor Above (Cmd+Opt+Up)
+                                [:-j :acejump] ; G+J (N Colemak) -> AceJump
+                                [:-l :acejump_line] ; G+L (I Colemak) -> AceJump Line
+                                [:-m :acejump_multi] ; G+M -> AceJump Multi
+                                [:left_shift :cursor_select_all] ; G+LShift -> Select All Occurrences (Cmd+Shift+L)
+                                [:l :developer_tools] ; G+L (U Colemak) -> Dev Tools (Cmd+Opt+I)
+                                ]}
+
+                       {:des   "Delete Mode (J + Key / N Colemak Layer)"
+                        :rules [:delete-mode
+                                ;; Deletion actions via J + Key
+                                [:escape :delete_line :code] ; J+Esc -> Delete Line (Code only)
+                                [:escape :!Cdelete_or_backspace] ; J+Esc -> Cmd+Backspace (Fallback)
+                                [:hyphen :delete_line :code] ; J+Hyphen -> Delete Line (Code only)
+                                [:caps_lock :delete_line :code] ; J+Caps -> Delete Line (Code only)
+                                [:hyphen :!Cdelete_or_backspace] ; J+Hyphen -> Cmd+Backspace (Fallback)
+                                ;; Word/Line Deletion Variations
+                                [:a :!Odelete_or_backspace nil {:held :delete_line}] ; J+A -> Opt+Backspace (Word), Hold for Delete Line
+                                [:s :delete_or_backspace] ; J+S (R Colemak) -> Backspace
+                                [:d :delete_forward] ; J+D (S Colemak) -> Forward Delete
+                                [:f :!Odelete_forward] ; J+F (T Colemak) -> Opt+FwdDelete (Word Forward)
+                                [:g :!Cdelete_forward] ; J+G (D Colemak) -> Cmd+FwdDelete (Line Forward)
+                                [:e :!COSf] ; J+E (K Colemak) -> Cmd+Opt+Shift+F ?
+                                ]}
+
+                       {:des   "Nav Mode (K + Key / E Colemak Layer)"
+                        :rules [:nav-mode
+                                ;; Editor/Tab navigation via K + Key
+                                ;; Application specific rules in :terminal, :slack blocks
+                                ;; Generic/Code Navigation
+                                [:hyphen :focus_next_editor_group] ; K+Hyphen -> Focus Next Group (Opt+F16)
+                                [:-a :open_prev_editor] ; K+A -> Prev Editor/Tab (Cmd+Opt+Left)
+                                [:-r :go_back] ; K+R (S Colemak) -> Go Back (Ctrl+-)
+                                [:-s :go_forward] ; K+S (D Colemak) -> Go Forward (Ctrl+Shift+-)
+                                [:-t :open_next_editor] ; K+T (F Colemak) -> Next Editor/Tab (Cmd+Opt+Right)
+                                [:-d :focus_prev_editor_group] ; K+D (G Colemak) -> Focus Prev Group (Opt+Shift+F16)
+                                ]}
+
+                       {:des   "Open Mode (Semicolon + Key / O Colemak Layer)"
+                        :rules [:open-mode
+                                ;; Open projects/configs via Semicolon + Key
+                                ;; [:-c [:code-project "~/.config"]] ; Semicolon+C -> Open ~/.config
+                                [:-z ["/usr/local/bin/cursor ~/dev/agent"]] ; Semicolon+K (E Colemak) -> Open ~/.config in Cursor
+                                [:-k ["/usr/local/bin/cursor ~/.config"]] ; Semicolon+K (E Colemak) -> Open ~/.config in Cursor
+                                [:-g ["/opt/homebrew/bin/goku | /opt/homebrew/bin/terminal-notifier -sound default"]] ; Semicolon+G (T Colemak) -> Reload Karabiner
+                                [:-w ["~/.kit/kar ~/.kit/cli/edit.js ~/.kenv/scripts/wiki-ten"]] ; Semicolon+W -> Edit wiki-ten script
+                                ]}
+
+                       {:des   "Snippet Mode (Quote + Key)"
+                        :rules [:snippet-mode
+                                ;; Code snippets via Quote + Key
+                                [:-c [:c :o :n :s :o :l :e :period :l :o :g :open_paren :close_paren :left_arrow]] ; '+C -> console.log()
+                                [:-a [:a :w :a :i :t :spacebar]] ; '+A -> await
+                                [:-s [:a :s :y :n :c :spacebar]] ; '+S (D Colemak) -> async
+                                [:-n [:spacebar :c :l :a :s :s :!Sn :a :m :e :equal_sign :!Squote :!Squote :left_arrow]] ; '+N (J Colemak) -> className=""
+                                [:-e [:type-secret "BUSINESS_EMAIL"]] ; '+E (K Colemak) -> Type Business Email
+                                [:-g [:type-secret "PERSONAL_EMAIL"]] ; '+G (T Colemak) -> Type Personal Email
+                                [:-x [:type-secret "SPAM_EMAIL"]] ; '+X -> Type Spam Email
+                                [:-j [:type-secret "USERNAME"]] ; '+J (N Colemak) -> Type Username
+                                ]}
+
+                       {:des   "Password Mode (Shift + Quote + Key)"
+                        :rules [:password-mode ; Activated by :quote simlayer with :shift-mode condition
+                                ;; Type secrets securely via Shift + Quote + Number
+                                ;; Note: Assumes :shift-mode is active when triggering :password-mode
+                                [:1 [:type-secret "OTHER_PASSWORD"]] ; Shift+'+1
+                                [:2 [:type-secret "MAC_PASSWORD"]] ; Shift+'+2
+                                [:5 [:type-secret "ADDRESS_1"]] ; Shift+'+5
+                                ]}
+
+                       {:des   "Emoji Mode (Z + Key)"
+                        :rules [:emoji-mode
+                                ;; Paste emojis via Z + Key
+                                [:-a [:paste ""]] ; Placeholder
+                                [:-b [:paste "😊"]] ; Z+B -> Blush
+                                [:-c [:paste "👏"]] ; Z+C -> Clap
+                                [:-d [:paste "🧐"]] ; Z+D (G Colemak) -> Monocle
+                                [:-e :emoji_picker] ; Z+E (K Colemak) -> Emoji Picker
+                                [:-f [:paste "🔥"]] ; Z+F (E Colemak) -> Fire
+                                [:-g [:paste "😬"]] ; Z+G (T Colemak) -> Grimace
+                                [:-h [:paste "😍"]] ; Z+H -> Heart Eyes
+                                [:-i [:paste "👀"]] ; Z+I (L Colemak) -> Eyes
+                                [:-j [:paste "😂"]] ; Z+J (N Colemak) -> Laughing Crying
+                                [:-l [:paste "❤️"]] ; Z+L (U Colemak) -> Love
+                                [:-m [:paste "🤯"]] ; Z+M -> Mind Blown
+                                [:-n :emoji_picker] ; Z+N (J Colemak) -> Emoji Picker
+                                [:-o [:paste "💩"]] ; Z+O (Semicolon Colemak) -> Poop
+                                [:-p [:paste "🎉"]] ; Z+P (R Colemak) -> Party Popper
+                                [:-q [:paste "🤫"]] ; Z+Q -> Shushing
+                                [:-r [:paste "🏎"]] ; Z+R (S Colemak) -> Racecar
+                                [:-s [:paste "😢"]] ; Z+S (D Colemak) -> Sad Crying
+                                [:-t [:paste "🤔"]] ; Z+T (F Colemak) -> Thinking
+                                [:-u [:paste "🤷‍♂️"]] ; Z+U (I Colemak) -> Shrug
+                                [:-v [:paste "😎"]] ; Z+V -> Sunglasses Cool
+                                [:-w [:paste "😉"]] ; Z+W -> Wink
+                                [:-x [:paste "😵"]] ; Z+X -> Dizzy
+                                [:-y [:paste "😅"]] ; Z+Y (O Colemak) -> Sweat Smile
+                                [:left_command [:paste "👍"]] ; Z+Cmd -> Thumbs Up
+                                [:left_option [:paste "👎"]] ; Z+Opt -> Thumbs Down
+                                ]}
+
+                       {:des   "Command Mode (C + Key)"
+                        :rules [:command-mode
+                                ;; Command-modified arrow keys and actions via C + Key
+                                ;; Arrow keys with Command
+                                [:##h :!Cleft_arrow] ; C+H -> Cmd+Left
+                                [:##j :!Cdown_arrow] ; C+J (Y Colemak) -> Cmd+Down
+                                [:##k :!Cup_arrow]   ; C+K (E Colemak) -> Cmd+Up
+                                [:##l :!Cright_arrow]; C+L (U Colemak) -> Cmd+Right
+                                ;; Go Home/End
+                                [:-n :go_end] ; C+N (J Colemak) -> Go to End (Cmd+Down)
+                                [:-e :go_home] ; C+E (K Colemak) -> Go to Home (Cmd+Up)
+                                ]}
+
+                       {:des   "Command Shift Mode (V + Key)"
+                        :rules [:command-shift-mode
+                                ;; Command-modified arrow keys and actions via C + Key
+                                ;; Arrow keys with Command
+                                [:##h :!CSleft_arrow] ; C+H -> Cmd+Left
+                                [:##j :!CSdown_arrow] ; C+J (Y Colemak) -> Cmd+Down
+                                [:##k :!CSup_arrow]   ; C+K (E Colemak) -> Cmd+Up
+                                [:##l :!CSright_arrow]; C+L (U Colemak) -> Cmd+Right
+                                
+                                ]}
+
+                       {:des   "Bookmark Mode (B + Key)"
+                        :rules [:bookmark-mode
+                                ;; Browser related actions via B + Key
+                                [:-m :!COk] ; B+M -> Cmd+Opt+K ?
+                                [:-l :!COTb] ; B+L (U Colemak) -> Cmd+Opt+Ctrl+B ?
+                                ]}
+
+                       {:des   "Media Mode (M + Key)"
+                        :rules [:media-mode
+                                ;; Media control keys via M + Key
+                                [:-f :vk_consumer_next] ; M+F (E Colemak) -> Next Track
+                                [:-p :vk_consumer_play] ; M+P (R Colemak) -> Play/Pause
+                                [:-t ["~/.simple/bin/title-case"]] ; M+T (F Colemak) -> Run title-case script
+                                [:-a [:open_bracket :open_bracket]] ; M+A -> '[[' sequence
+                                ]}
+
+                       {:des   "Kit Mode (N + Key / K Colemak Layer)"
+                        :rules [:kit-mode
+                                ;; Script Kit related actions (opening projects/URLs) via N + Key
+                                [:-q ["~/.kit/kar kit-discussions"]] ; N+Q -> Open Kit Discussions
+                                [:-s ["/usr/local/bin/cursor ~/.kit"]] ; N+S (R Colemak) -> Open ~/.kit in Cursor
+                                [:-r ["/usr/local/bin/cursor ~/dev/rubrics"]] ; N+R (P Colemak) -> Open rubrics project
+                                [:-d ["/usr/local/bin/cursor ~/dev/kit-docs"]] ; N+D (G Colemak) -> Open kit-docs project
+                                [:-f ["/usr/local/bin/cursor ~/dev/file-forge"]] ; N+F (E Colemak) -> Open file-forge project
+                                [:-g ["/usr/local/bin/cursor ~/dev/script-generator"]] ; N+G (T Colemak) -> Open script-generator project
+                                [:-v ["/usr/local/bin/cursor ~/.kenv"]] ; N+V -> Open ~/.kenv in Cursor
+                                [:-t ["/usr/local/bin/cursor ~/dev/kit"]] ; N+T (F Colemak) -> Open kit project                                
+                                ;; [:-g ["/usr/local/bin/cursor ~/dev/globals"]] ; Duplicate G mapping?
+                                [:-a ["/usr/local/bin/cursor ~/dev/app"]] ; N+A -> Open app project
+                                ;; [:-s ["/usr/local/bin/cursor ~/dev/scriptkit.com"]] ; Duplicate S mapping?
+                                [:-w ["/usr/local/bin/cursor ~/dev/workshop"]] ; N+W -> Open workshop project
+                                [:-x ["/usr/local/bin/cursor ~/dev/exercises"]] ; N+X -> Open exercises project
+                                ;; GitHub Actions/Releases/Discussions via Number Keys
+                                [:1 ["~/.kenv/bin/focus-tab github.com/johnlindquist/kitapp/actions"]]
+                                [:2 ["~/.kenv/bin/focus-tab github.com/johnlindquist/kitapp/releases"]]
+                                [:3 ["~/.kenv/bin/focus-tab github.com/johnlindquist/kit/discussions"]]
+                                ]}
+
+                       {:des   "Spacebar Mode (Space + Key / Symbol Layer)"
+                        :rules [:spacebar-mode
+                                ;; Symbols and common sequences via Space + Key
+                                ;; Brackets/Parentheses/Braces/Angle Brackets
+                                [:a :open_bracket]  ; Space+A -> [
+                                [:s :close_bracket] ; Space+S (R Colemak) -> ]
+                                [:d :open_paren]    ; Space+D (S Colemak) -> (
+                                [:f :close_paren]   ; Space+F (T Colemak) -> )
+                                [:tab [:open_bracket :open_bracket]] ; Space+Tab -> [[
+                                [:j :open_brace]    ; Space+J (N Colemak) -> {
+                                [:k :close_brace]   ; Space+K (E Colemak) -> }
+                                [:l :less_than]     ; Space+L (U Colemak) -> <
+                                [:semicolon :greater_than] ; Space+; -> >
+                                ;; Symbol Sequences
+                                [:hyphen [:!S4 :!Sopen_bracket :!Sclose_bracket :left_arrow]] ; Space+Hyphen -> ${}
+                                [:caps_lock [:!S4 :!Sopen_bracket :!Sclose_bracket :left_arrow]] ; Space+Caps -> ${}
+                                [:left_shift [:spacebar :equal_sign :spacebar]] ; Space+LShift -> " = "
+                                [:q [:!S9 :!S0 :equal_sign :greater_than :spacebar]] ; Space+Q -> ()=>
+                                [:e [:!S9 :!S9 :!S0 :equal_sign :greater_than :spacebar :open_brace :close_brace :!S0 :left_arrow :left_arrow]] ; Space+E (K Colemak) -> ()=>()=> {} (check intent)
+                                [:g [:spacebar :equal_sign :greater_than :spacebar]] ; Space+G (D Colemak) -> " => "
+                                [:h [:equal_sign :open_brace :close_brace :left_arrow]] ; Space+H -> ={}
+                                [:b [:equal_sign :open_brace :close_brace :left_arrow]] ; Space+B -> ={}
+                                [:quote [:equal_sign :!Squote :!Squote :left_arrow]] ; Space+' -> =""
+                                ]}
+
+                       {:des   "Semicolon Mode (; + Key / O Colemak Layer / Special Chars)"
+                        :rules [:semicolon-mode
+                                ;; Special characters (!@#$ etc.) via Semicolon + Key
+                                ;; Uses Colemak mnemonics for QWERTY keys
+                                [:-e :!S1] ; ;+E (K Colemak) -> !
+                                [:-a :!S2] ; ;+A -> @
+                                [:-h :!S3] ; ;+H -> #
+                                [:-d :!S4] ; ;+D (G Colemak) -> $
+                                [:-p :!S5] ; ;+P (R Colemak) -> %
+                                [:-c :!S6] ; ;+C -> ^
+                                [:-s :!S7] ; ;+S (D Colemak) -> &
+                                [:-b :!S8] ; ;+B -> *
+                                ]}
+
+                ;;        {:des   "Comma Mode (, + Key / Transcription)"
+                ;;         :rules [:comma-mode
+                ;;                 ;; Audio Hijack transcription script triggers via Comma + Key
+                ;;                 [:-c [:copy-transcribe-low]]  ; ,+C -> Copy Transcribe Low
+                ;;                 [:-v [:paste-transcribe-low]] ; ,+V -> Paste Transcribe Low
+                ;;                 [:-s [:copy-transcribe-high]] ; ,+S (D Colemak) -> Copy Transcribe High
+                ;;                 [:-t [:transcribe]]           ; ,+T (F Colemak) -> Transcribe
+                ;;                 ;; [:-t [:paste-transcribe-high]] ; Duplicate T mapping?
+                ;;                 ;; [:-t :!COS0] ; Duplicate T mapping? Cmd+Opt+Shift+0?
+                ;;                 ]}
+
+                       {:des   "Period Mode (. + Key / Open URLs)"
+                        :rules [:period-mode
+                                ;; Open common URLs via Period + Key
+                                [:-c [:focus-or-open-chrome "chatgpt.com"]] ; .+C -> Open ChatGPT
+                                [:-e [:focus-or-open-chrome "egghead.io"]]        ; .+E (K Colemak) -> Open Egghead
+                                [:-g [:focus-or-open-chrome "gemini.google.com"]]   ; .+G (T Colemak) -> Open Gmail
+                                [:-p [:focus-or-open-chrome "perplexity.ai"]]     ; .+P (R Colemak) -> Open Perplexity
+                                [:-j [:focus-or-open-chrome "js.new"]]            ; .+J (N Colemak) -> Open js.new
+                                [:-k [:focus-or-open-chrome "github.com/search?q=extension%3A.edn+filename%3Akarabiner.edn&type=Code&ref=advsearch&l=&l="]] ; .+K (E Colemak) -> Search GitHub for karabiner.edn
+                                [:-l [:focus-or-open-chrome "http://localhost:4200"]]    ; .+L (U Colemak) -> Open localhost:4200
+                                [:-m [:focus-or-open-chrome "www.youtube.com/watch?v=jfKfPfyJRdk&ab_channel=LofiGirl"]] ; .+M -> Open Lofi Girl                                
+                                [:-t [:focus-or-open-chrome "github.com/johnlindquist/kit/actions"]] ; .+T (F Colemak) -> Open Kit Actions
+                                [:-a [:focus-or-open-chrome "aistudio.google.com/prompts/new_chat"]] ; .+A -> Open KitApp Actions
+                                [:-u [:focus-or-open-chrome "builder.egghead.io"]] ; .+U (I Colemak) -> Open Egghead Upload
+                                [:-x [:focus-or-open-chrome "x.com"]]              ; .+X -> Open X.com
+                                [:-w [:focus-or-open-chrome "calendar.google.com/calendar/u/1/r"]] ; .+W -> Open Google Calendar (User 1)
+                                [:-y [:focus-or-open-chrome "youtube.com"]]        ; .+Y (O Colemak) -> Open YouTube
+                                [:1 [:focus-or-open-chrome "mail.google.com/mail/u/0"]]        ; 1 -> Open Gmail (User 0)
+                                [:2 [:focus-or-open-chrome "mail.google.com/mail/u/1"]]        ; 2 -> Open Gmail (User 1)
+                                ]}
+
+                       {:des   "Comma Mode (, + Key / Open URLs)"
+                        :rules [:comma-mode
+                                ;; Open common URLs via Period + Key
+                                [:-c [:open-new-tab "chatgpt.com"]] ; .+C -> Open ChatGPT
+                                [:-e [:open-new-tab "egghead.io"]]        ; .+E (K Colemak) -> Open Egghead
+                                [:-g [:open-new-tab "gemini.google.com"]]   ; .+G (T Colemak) -> Open Gmail
+                                [:-p [:open-new-tab "perplexity.ai"]]     ; .+P (R Colemak) -> Open Perplexity
+                                [:-j [:open-new-tab "js.new"]]            ; .+J (N Colemak) -> Open js.new
+                                [:-k [:open-new-tab "github.com/search?q=extension%3A.edn+filename%3Akarabiner.edn&type=Code&ref=advsearch&l=&l="]] ; .+K (E Colemak) -> Search GitHub for karabiner.edn
+                                [:-l [:open-new-tab "http://localhost:4200"]]    ; .+L (U Colemak) -> Open localhost:4200
+                                [:-m [:open-new-tab "www.youtube.com/watch?v=jfKfPfyJRdk&ab_channel=LofiGirl"]] ; .+M -> Open Lofi Girl                                
+                                [:-t [:open-new-tab "github.com/johnlindquist/kit/actions"]] ; .+T (F Colemak) -> Open Kit Actions
+                                [:-a [:open-new-tab "aistudio.google.com/prompts/new_chat"]] ; .+A -> Open KitApp Actions
+                                [:-u [:open-new-tab "builder.egghead.io"]] ; .+U (I Colemak) -> Open Egghead Upload
+                                [:-x [:open-new-tab "pro.x.com"]]              ; .+X -> Open X.com
+                                [:-w [:open-new-tab "calendar.google.com/calendar/u/1/r"]] ; .+W -> Open Google Calendar (User 1)
+                                [:-y [:open-new-tab "youtube.com"]]        ; .+Y (O Colemak) -> Open YouTube
+                                [:1 [:open-new-tab "mail.google.com/mail/u/0"]]        ; 1 -> Open Gmail (User 0)
+                                [:2 [:open-new-tab "mail.google.com/mail/u/1"]]        ; 2 -> Open Gmail (User 1)
+                                ]}
+
+                       {:des   "Presentation Mode (P + Key / ; Colemak)"
+                        :rules [:presentation-mode
+                                ;; Actions useful during presentations via P + Key
+                                [:-f :toggle_fold] ; P+F (E Colemak) -> Toggle Fold
+                                [:-r :rename]      ; P+R (S Colemak) -> Rename (F2)
+                                ;; Focus specific browser tabs
+                                [:-a ["~/.kenv/bin/focus-tab http://localhost:8080/angular"]]
+                                [:-t ["~/.kenv/bin/focus-tab http://localhost:8080/typescript"]]
+                                [:-w ["~/.kenv/bin/focus-tab http://localhost:8080/."]]
+                                [:-c ["~/.kenv/bin/focus-tab http://localhost:3000/"]]
+                                ]}
+
+                       {:des "Launch Mode (F24 Tap Alfred, Hold Layer / U + Key Layer)"
+                        :rules [:launch-mode ; Activated by holding F24 OR U+Key simlayer
+                                ;; App launching triggers
+                                [:1 :open_1password] ; Launch+1 -> Open 1Password
+                                [:spacebar :!Tdown_arrow] ; Launch+Space -> Ctrl+Down Arrow
+                                [:-a [:launch "Activity Monitor"]] ; Launch+A -> Launch Activity Monitor
+                                [:-v [:launch "Cursor Nightly"]] ; Launch+V -> Launch Cursor Nightly
+                                [:-d [:launch "Discord"]] ; Launch+D (G Colemak) -> Launch Discord
+                                [:-f [:launch "Finder"]] ; Launch+F (E Colemak) -> Launch Finder
+                                [:-g [:launch "Google Chrome"]] ; Launch+G (T Colemak) -> Launch Chrome
+                                [:-t [:launch "iTerm"]] ; Launch+T (F Colemak) -> Launch iTerm
+                                [:-c [:launch "Cursor"]] ; Launch+C -> Launch Cursor
+                                [:-k "launchctl kickstart -k org.pqrs.karabiner.karabiner_console_user_server"] ; Launch+K (E Colemak) -> Restart Karabiner
+                                [:-y [:launch "YouTube Music"]] ; Launch+Y (O Colemak) -> Launch YouTube Music
+                                [:-r [:launch "Restream Chat"]] ; Launch+R (S Colemak) -> Launch Restream Chat
+                                [:-s [:launch "Slack"]] ; Launch+S (D Colemak) -> Launch Slack
+                                [:-w [:launch "Windsurf"]] ; Launch+W -> Launch Windsurf
+                                [:-z [:launch "zoom.us"]] ; Launch+Z -> Launch Zoom
+                                [:-x [:launch "Users/johnlindquist/Applications/Chrome Apps.localized/Messages.app"]] ; Launch+X -> Launch Messages Chrome App
+                                ]}
+
+
+                       ;; --- Global Layout Remapping ---
+                       {:des   "Colemak Remapping (Qwerty Input -> Colemak Output)"
+                        :rules [; This section remaps QWERTY keys to Colemak layout
+                                ;; Top Row
+                                [:##e :f] ; Qwerty E -> Colemak F
+                                [:##r :p] ; Qwerty R -> Colemak P
+                                [:##t :g] ; Qwerty T -> Colemak G
+                                [:##y :j] ; Qwerty Y -> Colemak J
+                                [:##u :l] ; Qwerty U -> Colemak L
+                                [:##i :u] ; Qwerty I -> Colemak U
+                                [:##o :y] ; Qwerty O -> Colemak Y
+                                [:##p :semicolon] ; Qwerty P -> Colemak ;
+                                ;; Home Row
+                                [:##s :r] ; Qwerty S -> Colemak R
+                                [:##d :s] ; Qwerty D -> Colemak S
+                                [:##f :t] ; Qwerty F -> Colemak T
+                                [:##g :d] ; Qwerty G -> Colemak D
+                                [:##j :n] ; Qwerty J -> Colemak N
+                                [:##k :e] ; Qwerty K -> Colemak E
+                                [:##l :i] ; Qwerty L -> Colemak I
+                                [:##semicolon :o] ; Qwerty ; -> Colemak O
+                                ;; Bottom Row
+                                [:##n :k] ; Qwerty N -> Colemak K
+                                ;; Special (Check if needed based on keyboard)
+                                ;; [:close_bracket :a] ; Qwerty ] -> Colemak A ? Usually Caps Lock maps to Backspace
+                                ]}
+
+                       ; End of :main
+                       ]
+
+ ;; End of configuration map
+ }

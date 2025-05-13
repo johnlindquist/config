@@ -183,26 +183,6 @@
           "type" : "basic",
           "to" : [ {
             "set_variable" : {
-              "name" : "home-mode",
-              "value" : 1
-            }
-          } ],
-          "from" : {
-            "key_code" : "home"
-          },
-          "to_after_key_up" : [ {
-            "set_variable" : {
-              "name" : "home-mode",
-              "value" : 0
-            }
-          } ],
-          "to_if_alone" : [ {
-            "key_code" : "home"
-          } ]
-        }, {
-          "type" : "basic",
-          "to" : [ {
-            "set_variable" : {
               "name" : "close-bracket-mode",
               "value" : 1
             }
@@ -282,21 +262,6 @@
           } ]
         } ]
       }, {
-        "description" : "Global Modifier Rules",
-        "manipulators" : [ {
-          "to_if_alone" : [ {
-            "modifiers" : [ "left_command" ],
-            "key_code" : "semicolon"
-          } ],
-          "from" : {
-            "key_code" : "left_option"
-          },
-          "to" : [ {
-            "key_code" : "left_option"
-          } ],
-          "type" : "basic"
-        } ]
-      }, {
         "description" : "Windows RDP/Parallels Remapping",
         "manipulators" : [ {
           "from" : {
@@ -328,6 +293,23 @@
             "bundle_identifiers" : [ "com.microsoft.rdc.macos", "com.parallels.desktop.appstore" ]
           } ],
           "type" : "basic"
+        }, {
+          "from" : {
+            "key_code" : "e"
+          },
+          "to" : [ {
+            "modifiers" : [ "control", "shift" ],
+            "key_code" : "f"
+          } ],
+          "conditions" : [ {
+            "name" : "escape-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          }, {
+            "type" : "frontmost_application_if",
+            "bundle_identifiers" : [ "com.microsoft.rdc.macos", "com.parallels.desktop.appstore" ]
+          } ],
+          "type" : "basic"
         } ]
       }, {
         "description" : "Apple Keyboard Specific Tweaks",
@@ -342,6 +324,26 @@
             "key_code" : "period"
           }, {
             "key_code" : "slash"
+          } ],
+          "type" : "basic"
+        }, {
+          "to_if_alone" : [ {
+            "key_code" : "comma"
+          } ],
+          "to_after_key_up" : [ {
+            "set_variable" : {
+              "name" : "escape-mode",
+              "value" : 0
+            }
+          } ],
+          "from" : {
+            "key_code" : "comma"
+          },
+          "to" : [ {
+            "set_variable" : {
+              "name" : "escape-mode",
+              "value" : 1
+            }
           } ],
           "type" : "basic"
         }, {
@@ -413,8 +415,28 @@
           } ],
           "type" : "basic"
         }, {
+          "from" : {
+            "simultaneous" : [ {
+              "pointing_button" : "button1"
+            }, {
+              "pointing_button" : "button4"
+            } ],
+            "simultaneous_options" : {
+              "detect_key_down_uninterruptedly" : false,
+              "key_down_order" : "insensitive",
+              "key_up_order" : "insensitive",
+              "key_up_when" : "any"
+            }
+          },
+          "to" : [ {
+            "key_code" : "down_arrow",
+            "modifiers" : [ "left_control" ]
+          } ],
+          "type" : "basic"
+        }, {
           "to_if_alone" : [ {
-            "shell_command" : "/Users/johnlindquist/.config/scripts/space_left_by_display.sh"
+            "key_code" : "left_arrow",
+            "modifiers" : [ "left_control" ]
           } ],
           "to_after_key_up" : [ {
             "set_variable" : {
@@ -434,7 +456,8 @@
           "type" : "basic"
         }, {
           "to_if_alone" : [ {
-            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/space_right_by_display.sh"
+            "key_code" : "right_arrow",
+            "modifiers" : [ "left_control" ]
           } ],
           "to_after_key_up" : [ {
             "set_variable" : {
@@ -470,6 +493,123 @@
               "name" : "button2-mode",
               "value" : 1
             }
+          } ],
+          "type" : "basic"
+        } ]
+      }, {
+        "description" : "Button2 Mode (Right Click Hold)",
+        "manipulators" : [ {
+          "from" : {
+            "key_code" : "a"
+          },
+          "to" : [ {
+            "pointing_button" : "button1"
+          }, {
+            "key_code" : "a",
+            "modifiers" : [ "left_command" ]
+          } ],
+          "conditions" : [ {
+            "name" : "button2-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "key_code" : "s"
+          },
+          "to" : [ {
+            "modifiers" : [ "left_shift" ],
+            "pointing_button" : "button1"
+          } ],
+          "conditions" : [ {
+            "name" : "button2-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "key_code" : "d"
+          },
+          "to" : [ {
+            "pointing_button" : "button1"
+          }, {
+            "key_code" : "d",
+            "modifiers" : [ "left_command" ]
+          } ],
+          "conditions" : [ {
+            "name" : "button2-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "key_code" : "c"
+          },
+          "to" : [ {
+            "pointing_button" : "button1"
+          }, {
+            "key_code" : "c",
+            "modifiers" : [ "left_command" ]
+          } ],
+          "conditions" : [ {
+            "name" : "button2-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "key_code" : "x"
+          },
+          "to" : [ {
+            "pointing_button" : "button1"
+          }, {
+            "key_code" : "x",
+            "modifiers" : [ "left_command" ]
+          } ],
+          "conditions" : [ {
+            "name" : "button2-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "key_code" : "v"
+          },
+          "to" : [ {
+            "pointing_button" : "button1"
+          }, {
+            "key_code" : "v",
+            "modifiers" : [ "left_command" ]
+          } ],
+          "conditions" : [ {
+            "name" : "button2-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "pointing_button" : "button1"
+          },
+          "to" : [ {
+            "modifiers" : [ "left_shift" ],
+            "pointing_button" : "button1"
+          }, {
+            "key_code" : "delete_or_backspace",
+            "modifiers" : [ "left_command" ]
+          } ],
+          "conditions" : [ {
+            "name" : "button2-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          }, {
+            "type" : "frontmost_application_if",
+            "bundle_identifiers" : [ "net.telestream.screenflow10" ]
           } ],
           "type" : "basic"
         } ]
@@ -792,20 +932,6 @@
       }, {
         "description" : "Trackpad: 3 Fingers Actions",
         "manipulators" : [ {
-          "from" : {
-            "key_code" : "a"
-          },
-          "to" : [ {
-            "modifiers" : [ "command", "shift" ],
-            "key_code" : "7"
-          } ],
-          "conditions" : [ {
-            "name" : "multitouch_extension_finger_count_total",
-            "value" : 3,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
           "from" : {
             "key_code" : "d"
           },
@@ -2288,22 +2414,7 @@
             "key_code" : "w"
           },
           "to" : [ {
-            "modifiers" : [ "command", "shift", "control", "option" ],
-            "key_code" : "w"
-          } ],
-          "conditions" : [ {
-            "name" : "escape-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
-            "key_code" : "e"
-          },
-          "to" : [ {
-            "modifiers" : [ "command", "shift", "control", "option" ],
-            "key_code" : "f"
+            "shell_command" : "osascript -e 'tell application \"Windsurf\" to activate'"
           } ],
           "conditions" : [ {
             "name" : "escape-mode",
@@ -2442,21 +2553,6 @@
           "to" : [ {
             "key_code" : "0",
             "modifiers" : [ "left_command", "left_option" ]
-          } ],
-          "conditions" : [ {
-            "name" : "escape-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
-            "pointing_button" : "button1"
-          },
-          "to" : [ {
-            "pointing_button" : "button1"
-          }, {
-            "shell_command" : "osascript -e '\n                                        set theFile to POSIX file \"/Users/johnlindquist/.config/snippets/continue.txt\"\n                                          set fileContents to read theFile as «class utf8»\n                                          set the clipboard to fileContents\n                                          tell application \"System Events\"\n                                              keystroke \"v\" using command down\n                                          end tell\n                                          delay 0.1\n                                          tell application \"System Events\"\n                                              keystroke return\n                                          end tell\n                                          '"
           } ],
           "conditions" : [ {
             "name" : "escape-mode",
@@ -3157,10 +3253,11 @@
           "type" : "basic"
         }, {
           "from" : {
-            "key_code" : "m"
+            "pointing_button" : "button6"
           },
           "to" : [ {
-            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/move_window_east.sh"
+            "key_code" : "right_arrow",
+            "modifiers" : [ "left_control" ]
           } ],
           "conditions" : [ {
             "name" : "equal-mode",
@@ -3170,10 +3267,25 @@
           "type" : "basic"
         }, {
           "from" : {
-            "key_code" : "comma"
+            "pointing_button" : "button5"
           },
           "to" : [ {
-            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/move_window_west.sh"
+            "key_code" : "right_arrow",
+            "modifiers" : [ "left_control" ]
+          } ],
+          "conditions" : [ {
+            "name" : "equal-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "pointing_button" : "button4"
+          },
+          "to" : [ {
+            "key_code" : "left_arrow",
+            "modifiers" : [ "left_control" ]
           } ],
           "conditions" : [ {
             "name" : "equal-mode",
@@ -3186,98 +3298,8 @@
             "key_code" : "h"
           },
           "to" : [ {
-            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/space_left.sh"
-          } ],
-          "conditions" : [ {
-            "name" : "equal-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
-            "key_code" : "j"
-          },
-          "to" : [ {
-            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/move_window_to_previous_empty_space.sh"
-          } ],
-          "conditions" : [ {
-            "name" : "equal-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
-            "key_code" : "k"
-          },
-          "to" : [ {
-            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/move_window_to_next_empty_space.sh"
-          } ],
-          "conditions" : [ {
-            "name" : "equal-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
-            "key_code" : "x"
-          },
-          "to" : [ {
-            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/remove_current_space.sh"
-          } ],
-          "conditions" : [ {
-            "name" : "equal-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
-            "key_code" : "o"
-          },
-          "to" : [ {
-            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/remove_empty_spaces_current_display.sh"
-          } ],
-          "conditions" : [ {
-            "name" : "equal-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
-            "key_code" : "e"
-          },
-          "to" : [ {
-            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/fix_floats.sh"
-          } ],
-          "conditions" : [ {
-            "name" : "equal-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
-            "key_code" : "g"
-          },
-          "to" : [ {
-            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/move_to_next_display.sh"
-          } ],
-          "conditions" : [ {
-            "name" : "equal-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
-            "key_code" : "s"
-          },
-          "to" : [ {
-            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/restart_yabai.sh"
+            "key_code" : "left_arrow",
+            "modifiers" : [ "left_control" ]
           } ],
           "conditions" : [ {
             "name" : "equal-mode",
@@ -3290,7 +3312,8 @@
             "key_code" : "l"
           },
           "to" : [ {
-            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/space_right.sh"
+            "key_code" : "right_arrow",
+            "modifiers" : [ "left_control" ]
           } ],
           "conditions" : [ {
             "name" : "equal-mode",
@@ -3330,20 +3353,6 @@
       }, {
         "description" : "Tab Mode (Hold Tab)",
         "manipulators" : [ {
-          "from" : {
-            "key_code" : "a"
-          },
-          "to" : [ {
-            "modifiers" : [ "command", "shift" ],
-            "key_code" : "7"
-          } ],
-          "conditions" : [ {
-            "name" : "tab-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
           "from" : {
             "key_code" : "s"
           },
@@ -3387,685 +3396,8 @@
           "type" : "basic"
         } ]
       }, {
-        "description" : "Home Mode (Hold Home)",
-        "manipulators" : [ {
-          "from" : {
-            "key_code" : "q"
-          },
-          "to" : [ {
-            "modifiers" : [ "command", "shift", "control", "option" ],
-            "key_code" : "f1"
-          } ],
-          "conditions" : [ {
-            "name" : "home-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
-            "key_code" : "w"
-          },
-          "to" : [ {
-            "modifiers" : [ "command", "shift", "control", "option" ],
-            "key_code" : "f2"
-          } ],
-          "conditions" : [ {
-            "name" : "home-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
-            "key_code" : "e"
-          },
-          "to" : [ {
-            "modifiers" : [ "command", "shift", "control", "option" ],
-            "key_code" : "f3"
-          } ],
-          "conditions" : [ {
-            "name" : "home-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
-            "key_code" : "r"
-          },
-          "to" : [ {
-            "modifiers" : [ "command", "shift", "control", "option" ],
-            "key_code" : "f4"
-          } ],
-          "conditions" : [ {
-            "name" : "home-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
-            "key_code" : "t"
-          },
-          "to" : [ {
-            "modifiers" : [ "command", "shift", "control", "option" ],
-            "key_code" : "f5"
-          } ],
-          "conditions" : [ {
-            "name" : "home-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
-            "key_code" : "y"
-          },
-          "to" : [ {
-            "modifiers" : [ "command", "shift", "control", "option" ],
-            "key_code" : "f6"
-          } ],
-          "conditions" : [ {
-            "name" : "home-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
-            "key_code" : "u"
-          },
-          "to" : [ {
-            "modifiers" : [ "command", "shift", "control", "option" ],
-            "key_code" : "f7"
-          } ],
-          "conditions" : [ {
-            "name" : "home-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
-            "key_code" : "i"
-          },
-          "to" : [ {
-            "modifiers" : [ "command", "shift", "control", "option" ],
-            "key_code" : "f8"
-          } ],
-          "conditions" : [ {
-            "name" : "home-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
-            "key_code" : "o"
-          },
-          "to" : [ {
-            "modifiers" : [ "command", "shift", "control", "option" ],
-            "key_code" : "f9"
-          } ],
-          "conditions" : [ {
-            "name" : "home-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
-            "key_code" : "semicolon"
-          },
-          "to" : [ {
-            "modifiers" : [ "command", "shift", "control", "option" ],
-            "key_code" : "f10"
-          } ],
-          "conditions" : [ {
-            "name" : "home-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
-            "key_code" : "a"
-          },
-          "to" : [ {
-            "modifiers" : [ "command", "shift", "control", "option" ],
-            "key_code" : "f11"
-          } ],
-          "conditions" : [ {
-            "name" : "home-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
-            "key_code" : "s"
-          },
-          "to" : [ {
-            "modifiers" : [ "command", "shift", "control", "option" ],
-            "key_code" : "f12"
-          } ],
-          "conditions" : [ {
-            "name" : "home-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
-            "key_code" : "d"
-          },
-          "to" : [ {
-            "modifiers" : [ "command", "shift", "control", "option" ],
-            "key_code" : "f13"
-          } ],
-          "conditions" : [ {
-            "name" : "home-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
-            "key_code" : "f"
-          },
-          "to" : [ {
-            "modifiers" : [ "command", "shift", "control", "option" ],
-            "key_code" : "f14"
-          } ],
-          "conditions" : [ {
-            "name" : "home-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
-            "key_code" : "g"
-          },
-          "to" : [ {
-            "modifiers" : [ "command", "shift", "control", "option" ],
-            "key_code" : "f15"
-          } ],
-          "conditions" : [ {
-            "name" : "home-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
-            "key_code" : "h"
-          },
-          "to" : [ {
-            "modifiers" : [ "command", "shift", "control", "option" ],
-            "key_code" : "f16"
-          } ],
-          "conditions" : [ {
-            "name" : "home-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
-            "key_code" : "j"
-          },
-          "to" : [ {
-            "modifiers" : [ "command", "shift", "control", "option" ],
-            "key_code" : "f17"
-          } ],
-          "conditions" : [ {
-            "name" : "home-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
-            "key_code" : "k"
-          },
-          "to" : [ {
-            "modifiers" : [ "command", "shift", "control", "option" ],
-            "key_code" : "f18"
-          } ],
-          "conditions" : [ {
-            "name" : "home-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
-            "key_code" : "l"
-          },
-          "to" : [ {
-            "modifiers" : [ "command", "shift", "control", "option" ],
-            "key_code" : "f19"
-          } ],
-          "conditions" : [ {
-            "name" : "home-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
-            "key_code" : "semicolon"
-          },
-          "to" : [ {
-            "modifiers" : [ "command", "shift", "control", "option" ],
-            "key_code" : "f20"
-          } ],
-          "conditions" : [ {
-            "name" : "home-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
-            "key_code" : "z"
-          },
-          "to" : [ {
-            "modifiers" : [ "command", "shift", "control", "option", "fn" ],
-            "key_code" : "f1"
-          } ],
-          "conditions" : [ {
-            "name" : "home-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
-            "key_code" : "x"
-          },
-          "to" : [ {
-            "modifiers" : [ "command", "shift", "control", "option", "fn" ],
-            "key_code" : "f2"
-          } ],
-          "conditions" : [ {
-            "name" : "home-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
-            "key_code" : "c"
-          },
-          "to" : [ {
-            "modifiers" : [ "command", "shift", "control", "option", "fn" ],
-            "key_code" : "f3"
-          } ],
-          "conditions" : [ {
-            "name" : "home-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
-            "key_code" : "v"
-          },
-          "to" : [ {
-            "modifiers" : [ "command", "shift", "control", "option", "fn" ],
-            "key_code" : "f4"
-          } ],
-          "conditions" : [ {
-            "name" : "home-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
-            "key_code" : "b"
-          },
-          "to" : [ {
-            "modifiers" : [ "command", "shift", "control", "option", "fn" ],
-            "key_code" : "f5"
-          } ],
-          "conditions" : [ {
-            "name" : "home-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
-            "key_code" : "n"
-          },
-          "to" : [ {
-            "modifiers" : [ "command", "shift", "control", "option", "fn" ],
-            "key_code" : "f6"
-          } ],
-          "conditions" : [ {
-            "name" : "home-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
-            "key_code" : "m"
-          },
-          "to" : [ {
-            "modifiers" : [ "command", "shift", "control", "option", "fn" ],
-            "key_code" : "f7"
-          } ],
-          "conditions" : [ {
-            "name" : "home-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
-            "key_code" : "comma"
-          },
-          "to" : [ {
-            "modifiers" : [ "command", "shift", "control", "option", "fn" ],
-            "key_code" : "f8"
-          } ],
-          "conditions" : [ {
-            "name" : "home-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
-            "key_code" : "period"
-          },
-          "to" : [ {
-            "modifiers" : [ "command", "shift", "control", "option", "fn" ],
-            "key_code" : "f9"
-          } ],
-          "conditions" : [ {
-            "name" : "home-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
-            "key_code" : "slash"
-          },
-          "to" : [ {
-            "modifiers" : [ "command", "shift", "control", "option", "fn" ],
-            "key_code" : "f10"
-          } ],
-          "conditions" : [ {
-            "name" : "home-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
-            "key_code" : "return_or_enter"
-          },
-          "to" : [ {
-            "modifiers" : [ "command", "shift" ],
-            "key_code" : "d"
-          } ],
-          "conditions" : [ {
-            "name" : "home-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        } ]
-      }, {
         "description" : "Close Bracket Mode (Hold ])",
         "manipulators" : [ {
-          "from" : {
-            "key_code" : "2"
-          },
-          "to" : [ {
-            "shell_command" : "/opt/homebrew/bin/mwm move-left"
-          } ],
-          "conditions" : [ {
-            "name" : "button2-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
-            "key_code" : "3"
-          },
-          "to" : [ {
-            "shell_command" : "/opt/homebrew/bin/mwm center"
-          } ],
-          "conditions" : [ {
-            "name" : "button2-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
-            "key_code" : "4"
-          },
-          "to" : [ {
-            "shell_command" : "/opt/homebrew/bin/mwm move-right"
-          } ],
-          "conditions" : [ {
-            "name" : "button2-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
-            "key_code" : "q"
-          },
-          "to" : [ {
-            "shell_command" : "/opt/homebrew/bin/mwm maximize-height"
-          } ],
-          "conditions" : [ {
-            "name" : "button2-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
-            "key_code" : "a"
-          },
-          "to" : [ {
-            "shell_command" : "/opt/homebrew/bin/mwm maximize"
-          } ],
-          "conditions" : [ {
-            "name" : "button2-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
-            "key_code" : "w"
-          },
-          "to" : [ {
-            "shell_command" : "/opt/homebrew/bin/mwm left width-34% height-100%"
-          } ],
-          "conditions" : [ {
-            "name" : "button2-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
-            "key_code" : "e"
-          },
-          "to" : [ {
-            "shell_command" : "/opt/homebrew/bin/mwm center width-34% height-100%"
-          } ],
-          "conditions" : [ {
-            "name" : "button2-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
-            "key_code" : "r"
-          },
-          "to" : [ {
-            "shell_command" : "/opt/homebrew/bin/mwm right width-34% height-100%"
-          } ],
-          "conditions" : [ {
-            "name" : "button2-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
-            "key_code" : "s"
-          },
-          "to" : [ {
-            "shell_command" : "/opt/homebrew/bin/mwm left width-50% height-100%"
-          } ],
-          "conditions" : [ {
-            "name" : "button2-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
-            "key_code" : "d"
-          },
-          "to" : [ {
-            "shell_command" : "/opt/homebrew/bin/mwm center width-75% height-75%"
-          } ],
-          "conditions" : [ {
-            "name" : "button2-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
-            "key_code" : "f"
-          },
-          "to" : [ {
-            "shell_command" : "/opt/homebrew/bin/mwm right width-50% height-100%"
-          } ],
-          "conditions" : [ {
-            "name" : "button2-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
-            "key_code" : "z"
-          },
-          "to" : [ {
-            "shell_command" : "/opt/homebrew/bin/mwm left width-66% height-100%"
-          } ],
-          "conditions" : [ {
-            "name" : "button2-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
-            "key_code" : "x"
-          },
-          "to" : [ {
-            "shell_command" : "/opt/homebrew/bin/mwm snap-left"
-          } ],
-          "conditions" : [ {
-            "name" : "button2-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
-            "key_code" : "v"
-          },
-          "to" : [ {
-            "shell_command" : "/opt/homebrew/bin/mwm snap-right"
-          } ],
-          "conditions" : [ {
-            "name" : "button2-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
-            "key_code" : "spacebar"
-          },
-          "to" : [ {
-            "shell_command" : "/opt/homebrew/bin/mwm display-next"
-          } ],
-          "conditions" : [ {
-            "name" : "button2-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          }, {
-            "name" : "condi",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
-            "key_code" : "c"
-          },
-          "to" : [ {
-            "key_code" : "tab",
-            "modifiers" : [ "left_command" ]
-          } ],
-          "conditions" : [ {
-            "name" : "button2-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
-            "key_code" : "t"
-          },
-          "to" : [ {
-            "key_code" : "grave_accent_and_tilde",
-            "modifiers" : [ "left_command" ]
-          } ],
-          "conditions" : [ {
-            "name" : "button2-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
-            "key_code" : "b"
-          },
-          "to" : [ {
-            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/pin_left.sh"
-          } ],
-          "conditions" : [ {
-            "name" : "button2-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
           "from" : {
             "key_code" : "2"
           },
@@ -9450,51 +8782,6 @@
         "description" : "Open Mode (Semicolon + Key / O Colemak Layer)",
         "manipulators" : [ {
           "from" : {
-            "key_code" : "z"
-          },
-          "to" : [ {
-            "shell_command" : "/usr/local/bin/cursor ~/dev/agent"
-          } ],
-          "conditions" : [ {
-            "name" : "open-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "type" : "basic",
-          "parameters" : {
-            "basic.simultaneous_threshold_milliseconds" : 140
-          },
-          "to" : [ {
-            "set_variable" : {
-              "name" : "open-mode",
-              "value" : 1
-            }
-          }, {
-            "shell_command" : "/usr/local/bin/cursor ~/dev/agent"
-          } ],
-          "from" : {
-            "simultaneous" : [ {
-              "key_code" : "semicolon"
-            }, {
-              "key_code" : "z"
-            } ],
-            "simultaneous_options" : {
-              "detect_key_down_uninterruptedly" : true,
-              "key_down_order" : "strict",
-              "key_up_order" : "strict_inverse",
-              "key_up_when" : "any",
-              "to_after_key_up" : [ {
-                "set_variable" : {
-                  "name" : "open-mode",
-                  "value" : 0
-                }
-              } ]
-            }
-          }
-        }, {
-          "from" : {
             "key_code" : "n"
           },
           "to" : [ {
@@ -11774,209 +11061,6 @@
           }
         } ]
       }, {
-        "description" : "Command Shift Mode (V + Key)",
-        "manipulators" : [ {
-          "from" : {
-            "key_code" : "h",
-            "modifiers" : {
-              "optional" : [ "any" ]
-            }
-          },
-          "to" : [ {
-            "key_code" : "left_arrow",
-            "modifiers" : [ "left_command", "left_shift" ]
-          } ],
-          "conditions" : [ {
-            "name" : "command-shift-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "type" : "basic",
-          "parameters" : {
-            "basic.simultaneous_threshold_milliseconds" : 140
-          },
-          "to" : [ {
-            "set_variable" : {
-              "name" : "command-shift-mode",
-              "value" : 1
-            }
-          }, {
-            "key_code" : "left_arrow",
-            "modifiers" : [ "left_command", "left_shift" ]
-          } ],
-          "from" : {
-            "simultaneous" : [ {
-              "key_code" : "v"
-            }, {
-              "key_code" : "h"
-            } ],
-            "simultaneous_options" : {
-              "detect_key_down_uninterruptedly" : true,
-              "key_down_order" : "strict",
-              "key_up_order" : "strict_inverse",
-              "key_up_when" : "any",
-              "to_after_key_up" : [ {
-                "set_variable" : {
-                  "name" : "command-shift-mode",
-                  "value" : 0
-                }
-              } ]
-            }
-          }
-        }, {
-          "from" : {
-            "key_code" : "j",
-            "modifiers" : {
-              "optional" : [ "any" ]
-            }
-          },
-          "to" : [ {
-            "key_code" : "down_arrow",
-            "modifiers" : [ "left_command", "left_shift" ]
-          } ],
-          "conditions" : [ {
-            "name" : "command-shift-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "type" : "basic",
-          "parameters" : {
-            "basic.simultaneous_threshold_milliseconds" : 140
-          },
-          "to" : [ {
-            "set_variable" : {
-              "name" : "command-shift-mode",
-              "value" : 1
-            }
-          }, {
-            "key_code" : "down_arrow",
-            "modifiers" : [ "left_command", "left_shift" ]
-          } ],
-          "from" : {
-            "simultaneous" : [ {
-              "key_code" : "v"
-            }, {
-              "key_code" : "j"
-            } ],
-            "simultaneous_options" : {
-              "detect_key_down_uninterruptedly" : true,
-              "key_down_order" : "strict",
-              "key_up_order" : "strict_inverse",
-              "key_up_when" : "any",
-              "to_after_key_up" : [ {
-                "set_variable" : {
-                  "name" : "command-shift-mode",
-                  "value" : 0
-                }
-              } ]
-            }
-          }
-        }, {
-          "from" : {
-            "key_code" : "k",
-            "modifiers" : {
-              "optional" : [ "any" ]
-            }
-          },
-          "to" : [ {
-            "key_code" : "up_arrow",
-            "modifiers" : [ "left_command", "left_shift" ]
-          } ],
-          "conditions" : [ {
-            "name" : "command-shift-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "type" : "basic",
-          "parameters" : {
-            "basic.simultaneous_threshold_milliseconds" : 140
-          },
-          "to" : [ {
-            "set_variable" : {
-              "name" : "command-shift-mode",
-              "value" : 1
-            }
-          }, {
-            "key_code" : "up_arrow",
-            "modifiers" : [ "left_command", "left_shift" ]
-          } ],
-          "from" : {
-            "simultaneous" : [ {
-              "key_code" : "v"
-            }, {
-              "key_code" : "k"
-            } ],
-            "simultaneous_options" : {
-              "detect_key_down_uninterruptedly" : true,
-              "key_down_order" : "strict",
-              "key_up_order" : "strict_inverse",
-              "key_up_when" : "any",
-              "to_after_key_up" : [ {
-                "set_variable" : {
-                  "name" : "command-shift-mode",
-                  "value" : 0
-                }
-              } ]
-            }
-          }
-        }, {
-          "from" : {
-            "key_code" : "l",
-            "modifiers" : {
-              "optional" : [ "any" ]
-            }
-          },
-          "to" : [ {
-            "key_code" : "right_arrow",
-            "modifiers" : [ "left_command", "left_shift" ]
-          } ],
-          "conditions" : [ {
-            "name" : "command-shift-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "type" : "basic",
-          "parameters" : {
-            "basic.simultaneous_threshold_milliseconds" : 140
-          },
-          "to" : [ {
-            "set_variable" : {
-              "name" : "command-shift-mode",
-              "value" : 1
-            }
-          }, {
-            "key_code" : "right_arrow",
-            "modifiers" : [ "left_command", "left_shift" ]
-          } ],
-          "from" : {
-            "simultaneous" : [ {
-              "key_code" : "v"
-            }, {
-              "key_code" : "l"
-            } ],
-            "simultaneous_options" : {
-              "detect_key_down_uninterruptedly" : true,
-              "key_down_order" : "strict",
-              "key_up_order" : "strict_inverse",
-              "key_up_when" : "any",
-              "to_after_key_up" : [ {
-                "set_variable" : {
-                  "name" : "command-shift-mode",
-                  "value" : 0
-                }
-              } ]
-            }
-          }
-        } ]
-      }, {
         "description" : "Bookmark Mode (B + Key)",
         "manipulators" : [ {
           "from" : {
@@ -12608,6 +11692,51 @@
               "key_code" : "n"
             }, {
               "key_code" : "f"
+            } ],
+            "simultaneous_options" : {
+              "detect_key_down_uninterruptedly" : true,
+              "key_down_order" : "strict",
+              "key_up_order" : "strict_inverse",
+              "key_up_when" : "any",
+              "to_after_key_up" : [ {
+                "set_variable" : {
+                  "name" : "kit-mode",
+                  "value" : 0
+                }
+              } ]
+            }
+          }
+        }, {
+          "from" : {
+            "key_code" : "c"
+          },
+          "to" : [ {
+            "shell_command" : "/usr/local/bin/cursor ~/dev/clickup_frontend"
+          } ],
+          "conditions" : [ {
+            "name" : "kit-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "type" : "basic",
+          "parameters" : {
+            "basic.simultaneous_threshold_milliseconds" : 140
+          },
+          "to" : [ {
+            "set_variable" : {
+              "name" : "kit-mode",
+              "value" : 1
+            }
+          }, {
+            "shell_command" : "/usr/local/bin/cursor ~/dev/clickup_frontend"
+          } ],
+          "from" : {
+            "simultaneous" : [ {
+              "key_code" : "n"
+            }, {
+              "key_code" : "c"
             } ],
             "simultaneous_options" : {
               "detect_key_down_uninterruptedly" : true,
@@ -14284,6 +13413,189 @@
           }
         } ]
       }, {
+        "description" : "Comma Mode (, + Key / Transcription)",
+        "manipulators" : [ {
+          "from" : {
+            "key_code" : "c"
+          },
+          "to" : [ {
+            "shell_command" : "open -g -a 'Audio Hijack' ~/transcripts/copy-transcribe-low.ahcommand"
+          } ],
+          "conditions" : [ {
+            "name" : "comma-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "type" : "basic",
+          "parameters" : {
+            "basic.simultaneous_threshold_milliseconds" : 140
+          },
+          "to" : [ {
+            "set_variable" : {
+              "name" : "comma-mode",
+              "value" : 1
+            }
+          }, {
+            "shell_command" : "open -g -a 'Audio Hijack' ~/transcripts/copy-transcribe-low.ahcommand"
+          } ],
+          "from" : {
+            "simultaneous" : [ {
+              "key_code" : "comma"
+            }, {
+              "key_code" : "c"
+            } ],
+            "simultaneous_options" : {
+              "detect_key_down_uninterruptedly" : true,
+              "key_down_order" : "strict",
+              "key_up_order" : "strict_inverse",
+              "key_up_when" : "any",
+              "to_after_key_up" : [ {
+                "set_variable" : {
+                  "name" : "comma-mode",
+                  "value" : 0
+                }
+              } ]
+            }
+          }
+        }, {
+          "from" : {
+            "key_code" : "v"
+          },
+          "to" : [ {
+            "shell_command" : "open -g -a 'Audio Hijack' ~/transcripts/paste-transcribe-low.ahcommand"
+          } ],
+          "conditions" : [ {
+            "name" : "comma-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "type" : "basic",
+          "parameters" : {
+            "basic.simultaneous_threshold_milliseconds" : 140
+          },
+          "to" : [ {
+            "set_variable" : {
+              "name" : "comma-mode",
+              "value" : 1
+            }
+          }, {
+            "shell_command" : "open -g -a 'Audio Hijack' ~/transcripts/paste-transcribe-low.ahcommand"
+          } ],
+          "from" : {
+            "simultaneous" : [ {
+              "key_code" : "comma"
+            }, {
+              "key_code" : "v"
+            } ],
+            "simultaneous_options" : {
+              "detect_key_down_uninterruptedly" : true,
+              "key_down_order" : "strict",
+              "key_up_order" : "strict_inverse",
+              "key_up_when" : "any",
+              "to_after_key_up" : [ {
+                "set_variable" : {
+                  "name" : "comma-mode",
+                  "value" : 0
+                }
+              } ]
+            }
+          }
+        }, {
+          "from" : {
+            "key_code" : "d"
+          },
+          "to" : [ {
+            "shell_command" : "open -g -a 'Audio Hijack' ~/transcripts/copy-transcribe-high.ahcommand"
+          } ],
+          "conditions" : [ {
+            "name" : "comma-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "type" : "basic",
+          "parameters" : {
+            "basic.simultaneous_threshold_milliseconds" : 140
+          },
+          "to" : [ {
+            "set_variable" : {
+              "name" : "comma-mode",
+              "value" : 1
+            }
+          }, {
+            "shell_command" : "open -g -a 'Audio Hijack' ~/transcripts/copy-transcribe-high.ahcommand"
+          } ],
+          "from" : {
+            "simultaneous" : [ {
+              "key_code" : "comma"
+            }, {
+              "key_code" : "d"
+            } ],
+            "simultaneous_options" : {
+              "detect_key_down_uninterruptedly" : true,
+              "key_down_order" : "strict",
+              "key_up_order" : "strict_inverse",
+              "key_up_when" : "any",
+              "to_after_key_up" : [ {
+                "set_variable" : {
+                  "name" : "comma-mode",
+                  "value" : 0
+                }
+              } ]
+            }
+          }
+        }, {
+          "from" : {
+            "key_code" : "f"
+          },
+          "to" : [ {
+            "shell_command" : "open -g -a 'Audio Hijack' ~/transcripts/transcribe.ahcommand"
+          } ],
+          "conditions" : [ {
+            "name" : "comma-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "type" : "basic",
+          "parameters" : {
+            "basic.simultaneous_threshold_milliseconds" : 140
+          },
+          "to" : [ {
+            "set_variable" : {
+              "name" : "comma-mode",
+              "value" : 1
+            }
+          }, {
+            "shell_command" : "open -g -a 'Audio Hijack' ~/transcripts/transcribe.ahcommand"
+          } ],
+          "from" : {
+            "simultaneous" : [ {
+              "key_code" : "comma"
+            }, {
+              "key_code" : "f"
+            } ],
+            "simultaneous_options" : {
+              "detect_key_down_uninterruptedly" : true,
+              "key_down_order" : "strict",
+              "key_up_order" : "strict_inverse",
+              "key_up_when" : "any",
+              "to_after_key_up" : [ {
+                "set_variable" : {
+                  "name" : "comma-mode",
+                  "value" : 0
+                }
+              } ]
+            }
+          }
+        } ]
+      }, {
         "description" : "Period Mode (. + Key / Open URLs)",
         "manipulators" : [ {
           "from" : {
@@ -15007,729 +14319,6 @@
           }
         } ]
       }, {
-        "description" : "Comma Mode (, + Key / Open URLs)",
-        "manipulators" : [ {
-          "from" : {
-            "key_code" : "c"
-          },
-          "to" : [ {
-            "shell_command" : "/usr/bin/osascript /Users/johnlindquist/.config/open-tab.scpt \"chatgpt.com\""
-          } ],
-          "conditions" : [ {
-            "name" : "comma-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "type" : "basic",
-          "parameters" : {
-            "basic.simultaneous_threshold_milliseconds" : 140
-          },
-          "to" : [ {
-            "set_variable" : {
-              "name" : "comma-mode",
-              "value" : 1
-            }
-          }, {
-            "shell_command" : "/usr/bin/osascript /Users/johnlindquist/.config/open-tab.scpt \"chatgpt.com\""
-          } ],
-          "from" : {
-            "simultaneous" : [ {
-              "key_code" : "comma"
-            }, {
-              "key_code" : "c"
-            } ],
-            "simultaneous_options" : {
-              "detect_key_down_uninterruptedly" : true,
-              "key_down_order" : "strict",
-              "key_up_order" : "strict_inverse",
-              "key_up_when" : "any",
-              "to_after_key_up" : [ {
-                "set_variable" : {
-                  "name" : "comma-mode",
-                  "value" : 0
-                }
-              } ]
-            }
-          }
-        }, {
-          "from" : {
-            "key_code" : "k"
-          },
-          "to" : [ {
-            "shell_command" : "/usr/bin/osascript /Users/johnlindquist/.config/open-tab.scpt \"egghead.io\""
-          } ],
-          "conditions" : [ {
-            "name" : "comma-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "type" : "basic",
-          "parameters" : {
-            "basic.simultaneous_threshold_milliseconds" : 140
-          },
-          "to" : [ {
-            "set_variable" : {
-              "name" : "comma-mode",
-              "value" : 1
-            }
-          }, {
-            "shell_command" : "/usr/bin/osascript /Users/johnlindquist/.config/open-tab.scpt \"egghead.io\""
-          } ],
-          "from" : {
-            "simultaneous" : [ {
-              "key_code" : "comma"
-            }, {
-              "key_code" : "k"
-            } ],
-            "simultaneous_options" : {
-              "detect_key_down_uninterruptedly" : true,
-              "key_down_order" : "strict",
-              "key_up_order" : "strict_inverse",
-              "key_up_when" : "any",
-              "to_after_key_up" : [ {
-                "set_variable" : {
-                  "name" : "comma-mode",
-                  "value" : 0
-                }
-              } ]
-            }
-          }
-        }, {
-          "from" : {
-            "key_code" : "t"
-          },
-          "to" : [ {
-            "shell_command" : "/usr/bin/osascript /Users/johnlindquist/.config/open-tab.scpt \"gemini.google.com\""
-          } ],
-          "conditions" : [ {
-            "name" : "comma-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "type" : "basic",
-          "parameters" : {
-            "basic.simultaneous_threshold_milliseconds" : 140
-          },
-          "to" : [ {
-            "set_variable" : {
-              "name" : "comma-mode",
-              "value" : 1
-            }
-          }, {
-            "shell_command" : "/usr/bin/osascript /Users/johnlindquist/.config/open-tab.scpt \"gemini.google.com\""
-          } ],
-          "from" : {
-            "simultaneous" : [ {
-              "key_code" : "comma"
-            }, {
-              "key_code" : "t"
-            } ],
-            "simultaneous_options" : {
-              "detect_key_down_uninterruptedly" : true,
-              "key_down_order" : "strict",
-              "key_up_order" : "strict_inverse",
-              "key_up_when" : "any",
-              "to_after_key_up" : [ {
-                "set_variable" : {
-                  "name" : "comma-mode",
-                  "value" : 0
-                }
-              } ]
-            }
-          }
-        }, {
-          "from" : {
-            "key_code" : "r"
-          },
-          "to" : [ {
-            "shell_command" : "/usr/bin/osascript /Users/johnlindquist/.config/open-tab.scpt \"perplexity.ai\""
-          } ],
-          "conditions" : [ {
-            "name" : "comma-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "type" : "basic",
-          "parameters" : {
-            "basic.simultaneous_threshold_milliseconds" : 140
-          },
-          "to" : [ {
-            "set_variable" : {
-              "name" : "comma-mode",
-              "value" : 1
-            }
-          }, {
-            "shell_command" : "/usr/bin/osascript /Users/johnlindquist/.config/open-tab.scpt \"perplexity.ai\""
-          } ],
-          "from" : {
-            "simultaneous" : [ {
-              "key_code" : "comma"
-            }, {
-              "key_code" : "r"
-            } ],
-            "simultaneous_options" : {
-              "detect_key_down_uninterruptedly" : true,
-              "key_down_order" : "strict",
-              "key_up_order" : "strict_inverse",
-              "key_up_when" : "any",
-              "to_after_key_up" : [ {
-                "set_variable" : {
-                  "name" : "comma-mode",
-                  "value" : 0
-                }
-              } ]
-            }
-          }
-        }, {
-          "from" : {
-            "key_code" : "y"
-          },
-          "to" : [ {
-            "shell_command" : "/usr/bin/osascript /Users/johnlindquist/.config/open-tab.scpt \"js.new\""
-          } ],
-          "conditions" : [ {
-            "name" : "comma-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "type" : "basic",
-          "parameters" : {
-            "basic.simultaneous_threshold_milliseconds" : 140
-          },
-          "to" : [ {
-            "set_variable" : {
-              "name" : "comma-mode",
-              "value" : 1
-            }
-          }, {
-            "shell_command" : "/usr/bin/osascript /Users/johnlindquist/.config/open-tab.scpt \"js.new\""
-          } ],
-          "from" : {
-            "simultaneous" : [ {
-              "key_code" : "comma"
-            }, {
-              "key_code" : "y"
-            } ],
-            "simultaneous_options" : {
-              "detect_key_down_uninterruptedly" : true,
-              "key_down_order" : "strict",
-              "key_up_order" : "strict_inverse",
-              "key_up_when" : "any",
-              "to_after_key_up" : [ {
-                "set_variable" : {
-                  "name" : "comma-mode",
-                  "value" : 0
-                }
-              } ]
-            }
-          }
-        }, {
-          "from" : {
-            "key_code" : "n"
-          },
-          "to" : [ {
-            "shell_command" : "/usr/bin/osascript /Users/johnlindquist/.config/open-tab.scpt \"github.com/search?q=extension%3A.edn+filename%3Akarabiner.edn&type=Code&ref=advsearch&l=&l=\""
-          } ],
-          "conditions" : [ {
-            "name" : "comma-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "type" : "basic",
-          "parameters" : {
-            "basic.simultaneous_threshold_milliseconds" : 140
-          },
-          "to" : [ {
-            "set_variable" : {
-              "name" : "comma-mode",
-              "value" : 1
-            }
-          }, {
-            "shell_command" : "/usr/bin/osascript /Users/johnlindquist/.config/open-tab.scpt \"github.com/search?q=extension%3A.edn+filename%3Akarabiner.edn&type=Code&ref=advsearch&l=&l=\""
-          } ],
-          "from" : {
-            "simultaneous" : [ {
-              "key_code" : "comma"
-            }, {
-              "key_code" : "n"
-            } ],
-            "simultaneous_options" : {
-              "detect_key_down_uninterruptedly" : true,
-              "key_down_order" : "strict",
-              "key_up_order" : "strict_inverse",
-              "key_up_when" : "any",
-              "to_after_key_up" : [ {
-                "set_variable" : {
-                  "name" : "comma-mode",
-                  "value" : 0
-                }
-              } ]
-            }
-          }
-        }, {
-          "from" : {
-            "key_code" : "u"
-          },
-          "to" : [ {
-            "shell_command" : "/usr/bin/osascript /Users/johnlindquist/.config/open-tab.scpt \"http://localhost:4200\""
-          } ],
-          "conditions" : [ {
-            "name" : "comma-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "type" : "basic",
-          "parameters" : {
-            "basic.simultaneous_threshold_milliseconds" : 140
-          },
-          "to" : [ {
-            "set_variable" : {
-              "name" : "comma-mode",
-              "value" : 1
-            }
-          }, {
-            "shell_command" : "/usr/bin/osascript /Users/johnlindquist/.config/open-tab.scpt \"http://localhost:4200\""
-          } ],
-          "from" : {
-            "simultaneous" : [ {
-              "key_code" : "comma"
-            }, {
-              "key_code" : "u"
-            } ],
-            "simultaneous_options" : {
-              "detect_key_down_uninterruptedly" : true,
-              "key_down_order" : "strict",
-              "key_up_order" : "strict_inverse",
-              "key_up_when" : "any",
-              "to_after_key_up" : [ {
-                "set_variable" : {
-                  "name" : "comma-mode",
-                  "value" : 0
-                }
-              } ]
-            }
-          }
-        }, {
-          "from" : {
-            "key_code" : "m"
-          },
-          "to" : [ {
-            "shell_command" : "/usr/bin/osascript /Users/johnlindquist/.config/open-tab.scpt \"www.youtube.com/watch?v=jfKfPfyJRdk&ab_channel=LofiGirl\""
-          } ],
-          "conditions" : [ {
-            "name" : "comma-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "type" : "basic",
-          "parameters" : {
-            "basic.simultaneous_threshold_milliseconds" : 140
-          },
-          "to" : [ {
-            "set_variable" : {
-              "name" : "comma-mode",
-              "value" : 1
-            }
-          }, {
-            "shell_command" : "/usr/bin/osascript /Users/johnlindquist/.config/open-tab.scpt \"www.youtube.com/watch?v=jfKfPfyJRdk&ab_channel=LofiGirl\""
-          } ],
-          "from" : {
-            "simultaneous" : [ {
-              "key_code" : "comma"
-            }, {
-              "key_code" : "m"
-            } ],
-            "simultaneous_options" : {
-              "detect_key_down_uninterruptedly" : true,
-              "key_down_order" : "strict",
-              "key_up_order" : "strict_inverse",
-              "key_up_when" : "any",
-              "to_after_key_up" : [ {
-                "set_variable" : {
-                  "name" : "comma-mode",
-                  "value" : 0
-                }
-              } ]
-            }
-          }
-        }, {
-          "from" : {
-            "key_code" : "f"
-          },
-          "to" : [ {
-            "shell_command" : "/usr/bin/osascript /Users/johnlindquist/.config/open-tab.scpt \"github.com/johnlindquist/kit/actions\""
-          } ],
-          "conditions" : [ {
-            "name" : "comma-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "type" : "basic",
-          "parameters" : {
-            "basic.simultaneous_threshold_milliseconds" : 140
-          },
-          "to" : [ {
-            "set_variable" : {
-              "name" : "comma-mode",
-              "value" : 1
-            }
-          }, {
-            "shell_command" : "/usr/bin/osascript /Users/johnlindquist/.config/open-tab.scpt \"github.com/johnlindquist/kit/actions\""
-          } ],
-          "from" : {
-            "simultaneous" : [ {
-              "key_code" : "comma"
-            }, {
-              "key_code" : "f"
-            } ],
-            "simultaneous_options" : {
-              "detect_key_down_uninterruptedly" : true,
-              "key_down_order" : "strict",
-              "key_up_order" : "strict_inverse",
-              "key_up_when" : "any",
-              "to_after_key_up" : [ {
-                "set_variable" : {
-                  "name" : "comma-mode",
-                  "value" : 0
-                }
-              } ]
-            }
-          }
-        }, {
-          "from" : {
-            "key_code" : "a"
-          },
-          "to" : [ {
-            "shell_command" : "/usr/bin/osascript /Users/johnlindquist/.config/open-tab.scpt \"aistudio.google.com/prompts/new_chat\""
-          } ],
-          "conditions" : [ {
-            "name" : "comma-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "type" : "basic",
-          "parameters" : {
-            "basic.simultaneous_threshold_milliseconds" : 140
-          },
-          "to" : [ {
-            "set_variable" : {
-              "name" : "comma-mode",
-              "value" : 1
-            }
-          }, {
-            "shell_command" : "/usr/bin/osascript /Users/johnlindquist/.config/open-tab.scpt \"aistudio.google.com/prompts/new_chat\""
-          } ],
-          "from" : {
-            "simultaneous" : [ {
-              "key_code" : "comma"
-            }, {
-              "key_code" : "a"
-            } ],
-            "simultaneous_options" : {
-              "detect_key_down_uninterruptedly" : true,
-              "key_down_order" : "strict",
-              "key_up_order" : "strict_inverse",
-              "key_up_when" : "any",
-              "to_after_key_up" : [ {
-                "set_variable" : {
-                  "name" : "comma-mode",
-                  "value" : 0
-                }
-              } ]
-            }
-          }
-        }, {
-          "from" : {
-            "key_code" : "i"
-          },
-          "to" : [ {
-            "shell_command" : "/usr/bin/osascript /Users/johnlindquist/.config/open-tab.scpt \"builder.egghead.io\""
-          } ],
-          "conditions" : [ {
-            "name" : "comma-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "type" : "basic",
-          "parameters" : {
-            "basic.simultaneous_threshold_milliseconds" : 140
-          },
-          "to" : [ {
-            "set_variable" : {
-              "name" : "comma-mode",
-              "value" : 1
-            }
-          }, {
-            "shell_command" : "/usr/bin/osascript /Users/johnlindquist/.config/open-tab.scpt \"builder.egghead.io\""
-          } ],
-          "from" : {
-            "simultaneous" : [ {
-              "key_code" : "comma"
-            }, {
-              "key_code" : "i"
-            } ],
-            "simultaneous_options" : {
-              "detect_key_down_uninterruptedly" : true,
-              "key_down_order" : "strict",
-              "key_up_order" : "strict_inverse",
-              "key_up_when" : "any",
-              "to_after_key_up" : [ {
-                "set_variable" : {
-                  "name" : "comma-mode",
-                  "value" : 0
-                }
-              } ]
-            }
-          }
-        }, {
-          "from" : {
-            "key_code" : "x"
-          },
-          "to" : [ {
-            "shell_command" : "/usr/bin/osascript /Users/johnlindquist/.config/open-tab.scpt \"pro.x.com\""
-          } ],
-          "conditions" : [ {
-            "name" : "comma-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "type" : "basic",
-          "parameters" : {
-            "basic.simultaneous_threshold_milliseconds" : 140
-          },
-          "to" : [ {
-            "set_variable" : {
-              "name" : "comma-mode",
-              "value" : 1
-            }
-          }, {
-            "shell_command" : "/usr/bin/osascript /Users/johnlindquist/.config/open-tab.scpt \"pro.x.com\""
-          } ],
-          "from" : {
-            "simultaneous" : [ {
-              "key_code" : "comma"
-            }, {
-              "key_code" : "x"
-            } ],
-            "simultaneous_options" : {
-              "detect_key_down_uninterruptedly" : true,
-              "key_down_order" : "strict",
-              "key_up_order" : "strict_inverse",
-              "key_up_when" : "any",
-              "to_after_key_up" : [ {
-                "set_variable" : {
-                  "name" : "comma-mode",
-                  "value" : 0
-                }
-              } ]
-            }
-          }
-        }, {
-          "from" : {
-            "key_code" : "w"
-          },
-          "to" : [ {
-            "shell_command" : "/usr/bin/osascript /Users/johnlindquist/.config/open-tab.scpt \"calendar.google.com/calendar/u/1/r\""
-          } ],
-          "conditions" : [ {
-            "name" : "comma-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "type" : "basic",
-          "parameters" : {
-            "basic.simultaneous_threshold_milliseconds" : 140
-          },
-          "to" : [ {
-            "set_variable" : {
-              "name" : "comma-mode",
-              "value" : 1
-            }
-          }, {
-            "shell_command" : "/usr/bin/osascript /Users/johnlindquist/.config/open-tab.scpt \"calendar.google.com/calendar/u/1/r\""
-          } ],
-          "from" : {
-            "simultaneous" : [ {
-              "key_code" : "comma"
-            }, {
-              "key_code" : "w"
-            } ],
-            "simultaneous_options" : {
-              "detect_key_down_uninterruptedly" : true,
-              "key_down_order" : "strict",
-              "key_up_order" : "strict_inverse",
-              "key_up_when" : "any",
-              "to_after_key_up" : [ {
-                "set_variable" : {
-                  "name" : "comma-mode",
-                  "value" : 0
-                }
-              } ]
-            }
-          }
-        }, {
-          "from" : {
-            "key_code" : "o"
-          },
-          "to" : [ {
-            "shell_command" : "/usr/bin/osascript /Users/johnlindquist/.config/open-tab.scpt \"youtube.com\""
-          } ],
-          "conditions" : [ {
-            "name" : "comma-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "type" : "basic",
-          "parameters" : {
-            "basic.simultaneous_threshold_milliseconds" : 140
-          },
-          "to" : [ {
-            "set_variable" : {
-              "name" : "comma-mode",
-              "value" : 1
-            }
-          }, {
-            "shell_command" : "/usr/bin/osascript /Users/johnlindquist/.config/open-tab.scpt \"youtube.com\""
-          } ],
-          "from" : {
-            "simultaneous" : [ {
-              "key_code" : "comma"
-            }, {
-              "key_code" : "o"
-            } ],
-            "simultaneous_options" : {
-              "detect_key_down_uninterruptedly" : true,
-              "key_down_order" : "strict",
-              "key_up_order" : "strict_inverse",
-              "key_up_when" : "any",
-              "to_after_key_up" : [ {
-                "set_variable" : {
-                  "name" : "comma-mode",
-                  "value" : 0
-                }
-              } ]
-            }
-          }
-        }, {
-          "from" : {
-            "key_code" : "1"
-          },
-          "to" : [ {
-            "shell_command" : "/usr/bin/osascript /Users/johnlindquist/.config/open-tab.scpt \"mail.google.com/mail/u/0\""
-          } ],
-          "conditions" : [ {
-            "name" : "comma-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "type" : "basic",
-          "parameters" : {
-            "basic.simultaneous_threshold_milliseconds" : 140
-          },
-          "to" : [ {
-            "set_variable" : {
-              "name" : "comma-mode",
-              "value" : 1
-            }
-          }, {
-            "shell_command" : "/usr/bin/osascript /Users/johnlindquist/.config/open-tab.scpt \"mail.google.com/mail/u/0\""
-          } ],
-          "from" : {
-            "simultaneous" : [ {
-              "key_code" : "comma"
-            }, {
-              "key_code" : "1"
-            } ],
-            "simultaneous_options" : {
-              "detect_key_down_uninterruptedly" : true,
-              "key_down_order" : "strict",
-              "key_up_order" : "strict_inverse",
-              "key_up_when" : "any",
-              "to_after_key_up" : [ {
-                "set_variable" : {
-                  "name" : "comma-mode",
-                  "value" : 0
-                }
-              } ]
-            }
-          }
-        }, {
-          "from" : {
-            "key_code" : "2"
-          },
-          "to" : [ {
-            "shell_command" : "/usr/bin/osascript /Users/johnlindquist/.config/open-tab.scpt \"mail.google.com/mail/u/1\""
-          } ],
-          "conditions" : [ {
-            "name" : "comma-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "type" : "basic",
-          "parameters" : {
-            "basic.simultaneous_threshold_milliseconds" : 140
-          },
-          "to" : [ {
-            "set_variable" : {
-              "name" : "comma-mode",
-              "value" : 1
-            }
-          }, {
-            "shell_command" : "/usr/bin/osascript /Users/johnlindquist/.config/open-tab.scpt \"mail.google.com/mail/u/1\""
-          } ],
-          "from" : {
-            "simultaneous" : [ {
-              "key_code" : "comma"
-            }, {
-              "key_code" : "2"
-            } ],
-            "simultaneous_options" : {
-              "detect_key_down_uninterruptedly" : true,
-              "key_down_order" : "strict",
-              "key_up_order" : "strict_inverse",
-              "key_up_when" : "any",
-              "to_after_key_up" : [ {
-                "set_variable" : {
-                  "name" : "comma-mode",
-                  "value" : 0
-                }
-              } ]
-            }
-          }
-        } ]
-      }, {
         "description" : "Presentation Mode (P + Key / ; Colemak)",
         "manipulators" : [ {
           "from" : {
@@ -16111,7 +14700,7 @@
             "key_code" : "a"
           },
           "to" : [ {
-            "shell_command" : "osascript -e 'tell application \"Activity Monitor\" to activate'"
+            "shell_command" : "~/.kit/kar jump-mouse-to-active-app"
           } ],
           "conditions" : [ {
             "name" : "launch-mode",
@@ -16130,7 +14719,7 @@
               "value" : 1
             }
           }, {
-            "shell_command" : "osascript -e 'tell application \"Activity Monitor\" to activate'"
+            "shell_command" : "~/.kit/kar jump-mouse-to-active-app"
           } ],
           "from" : {
             "simultaneous" : [ {

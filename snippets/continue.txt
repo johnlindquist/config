@@ -1,1 +1,3 @@
-Continue, but review what you've tried so far. Analyze why we've got here, especially if it was avoidable so we don't make the same mistake twice.
+Please continue. 
+Your task it to follow these instructions to completion without asking for my input.
+Try, fail, learn, iterate, all without asking for my help (unless it's a destructive action.)

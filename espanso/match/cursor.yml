@@ -1,0 +1,53 @@
+# ~/.config/espanso/cursor.yml
+matches:
+  # ── Meta / Planning ────────────────────────────────────────────────
+  - trigger: ":cclarify"
+    replace: "Do you have any clarifying questions that would help you deploy this request without bugs?"
+
+  - trigger: ":cq2"
+    replace: "Ask me 2–3 initial questions to clarify my needs."
+
+  - trigger: ":cplan"
+    replace: "Tell me what you intend to do, step by step, and wait for my approval before coding."
+
+  - trigger: ":cwhy"
+    replace: "Why do you think this approach will work?"
+
+  - trigger: ":cchat"
+    replace: "⚠️ DO NOT CODE—just chat with me first."
+
+  - trigger: ":cmeta"
+    replace: "Reflect on this failure and update or create a Cursor Rule based on what we learned."
+
+  # ── Debug / Diagnostics ────────────────────────────────────────────
+  - trigger: ":clogs"
+    replace: "Please add logs to the code so we can see what’s really happening."
+
+  - trigger: ":cloganalyze"
+    replace: |
+      Here’s the log output:
+
+      ```txt
+      [PASTE LOGS HERE]
+      ```
+
+      What’s the root cause, and how do we fix it?
+
+  - trigger: ":cerror"
+    replace: |
+      Why might this error occur, and what’s the minimal fix?
+
+  # ── Refactor / Clean‑up ────────────────────────────────────────────
+  - trigger: ":crefactor"
+    replace: "Refactor the selected code for readability: extract helpers, add brief comments, and reduce cognitive complexity."
+
+  - trigger: ":csimplify"
+    replace: "Simplify this logic—use early returns and clearer variable names."
+
+  # ── Docs / Summaries ──────────────────────────────────────────────
+  - trigger: ":csummarize"
+    replace: "Summarize what we’ve done so far in three bullet points."
+
+  - trigger: ":cdocs"
+    replace: "Generate concise docstrings for the public methods we just created."
+

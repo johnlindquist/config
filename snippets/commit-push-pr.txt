@@ -1,0 +1,52 @@
+**Goal:** Commit, Push, Create GitHub PR via CLI.
+**(Reqs: On correct branch, `gh` installed/authed, use semantic commits, no `--no-verify`)**
+
+**1. Commit Changes:** (`run_terminal_cmd`)
+Please assume a fix/feat type unless explicitly requested.
+   ```bash
+   # Stage & Commit (Use semantic type: feat, fix, chore, etc.)
+   git add .
+   git commit -m "type: Your semantic message"
+   ```
+
+**2. Push Branch:** (`run_terminal_cmd`)
+   ```bash
+   git push # Follow Git prompts if needed (e.g., --set-upstream)
+   ```
+
+**3. Prepare PR Body File:** (`edit_file`)
+   *   **File:** `/tmp/pr_project_timestamp.md`
+   *   **Content (Fill placeholders `[...]`):**
+       ```markdown
+       ## Description
+       [Details]
+       Commits:
+       - Commit 1: [Summary]
+       ## Key Changes
+       - [Change 1]
+       ## Testing
+       - [Testing details]
+       ```
+
+**4. Create Pull Request:** (`run_terminal_cmd`)
+   ```bash
+   # Set --title, check --base (e.g., main/master)
+   gh pr create --title "[Your PR Title]" --body-file '/tmp/pr_project_timestamp.md' --base main
+   ```
+
+**5. Verify:** Check URL from `gh pr create` output.
+
+**6. Cleanup (Optional):** (`run_terminal_cmd`)
+   ```bash
+   rm /tmp/pr_project_timestamp.md
+   ```
+
+**7. Open PR in Browser (Optional):** (`run_terminal_cmd`)
+   ```bash
+   # Replace PR_URL with actual URL from step 5
+   open 'PR_URL' # Linux: xdg-open, Windows: start
+   ```
+
+---
+*   **Fallback:** Use GitHub web UI if CLI fails.
+*   **Shell Metacharacters:** Escape (`\\*`) or quote (`'arg_with_*'`) special chars in commands if needed literally.

@@ -1,3 +1,25 @@
+#!/usr/bin/env bash
+# Pin/unpin the currently‑focused window on the left edge.
+
+PIN_W=400                             # sidebar width in px
+win_id=$(yabai -m query --windows --window | jq '.id')
+is_float=$(yabai -m query --windows --window | jq -r '.floating')
+
+if [[ "$is_float" == "off" ]]; then
+  # --- pin it ---
+  yabai -m window $win_id --toggle float                    # unmanaged now
+  yabai -m window $win_id --move   abs:0:0                  # hug left edge
+  yabai -m window $win_id --resize abs:$PIN_W:0             # full height, fixed width
+  yabai -m space  --padding abs:0:0:$PIN_W:0                # shrink BSP grid
+else
+  # --- un‑pin it ---
+  yabai -m window $win_id --toggle float
+  yabai -m space  --padding abs:0:0:0:0                     # restore full width
+fi
+
+
+---
+
 Execute the following Git Commit Steps
 
 1. Check current branch:

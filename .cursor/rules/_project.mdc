@@ -1,0 +1,98 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# User's macOS Configuration & Automation Scripts
+
+## 1. Project Overview
+
+goal: To highly customize and automate a macOS development environment using tools like Karabiner-Elements, Yabai, Script Kit, and various shell/AppleScripts for enhanced productivity.
+type: Configuration Management & System Automation Scripts
+key features:
+- Extensive keyboard customization via Karabiner-Elements (`karabiner.edn`).
+- Tiling window management using Yabai, including focus recency tracking for Script Kit.
+- Automation scripts using Bash, AppleScript, and potentially TypeScript (via Script Kit).
+- Configuration for various development tools (Zed, iTerm2, Fish, Espanso).
+- Integration with Script Kit (`~/.kenv/`) for custom workflows.
+
+## 2. Technology Stack
+
+language(s): EDN (for Karabiner), Bash, AppleScript, TypeScript (for Script Kit utilities).
+framework(s): None directly, but heavily utilizes macOS-specific tools and scripting environments.
+ui library/styling: Not applicable (mostly configuration and backend scripts).
+database(s): None explicitly managed by project, but `.gitignore` mentions `*.sqlite`, `*.db`.
+state management: Not applicable in a traditional sense; state managed by individual tools.
+api layer: Interacts with application-specific APIs/CLIs (Yabai, Script Kit, Alfred triggers).
+key libraries:
+- `jq` (for JSON processing in shell scripts).
+- `@johnlindquist/kit` (for Script Kit scripts).
+
+## 3. Project Structure
+
+main source directory: The entire `.config` directory serves as the source.
+core directories:
+- `scripts/`: Shell scripts (e.g., Yabai helpers).
+- `karabiner/`: Karabiner-Elements assets and backups.
+- `espanso/`: Espanso configuration.
+- `fish/`: Fish shell configuration.
+- `iterm2/`: iTerm2 configuration and scripts.
+- `zed/`: Zed editor configuration.
+- `docs/`: Documentation for specific setups (e.g., Yabai focus tracking).
+- `~/.kenv/lib/` (External but related): Script Kit utility libraries (e.g., `yabai-utils.ts`).
+- `~/.cache/` (External but related): Runtime data like `yabai_focus_history.log`.
+diagram/link: Not available. Structure is a collection of tool configurations and helper scripts.
+
+## 4. Coding Standards & Conventions
+
+language usage:
+- EDN: For `karabiner.edn`.
+- Bash: For utility scripts, often using `yabai` and `jq`.
+- AppleScript: For macOS automation tasks (e.g., `focus-tab.scpt`, `open-tab.scpt`).
+- TypeScript: For Script Kit utilities, using async/await.
+naming conventions:
+- files/folders: Generally `kebab-case` for scripts and config directories.
+- variables/functions: (Inferred from scripts) `snake_case` in Bash, `camelCase` in TypeScript/AppleScript.
+code style/formatting: No explicit project-wide formatter defined. Individual tools may have their own.
+comments: Present in scripts and `karabiner.edn` for explanation.
+imports: TypeScript uses ES module imports.
+
+## 5. Key Principles & Best Practices
+
+- Extensive automation of common tasks and workflows.
+- Deep customization of user interface and interaction (keyboard, window management).
+- Integration between different tools (Yabai, Script Kit, Alfred, Karabiner).
+- Configuration as code, managed within the `.config` directory.
+- Use of specific helper scripts for complex actions.
+
+## 6. Testing
+
+framework: Not explicitly defined. Scripts are tested by direct execution.
+types: Manual testing of configurations and scripts.
+location: Not applicable.
+
+## 7. Tooling & Workflow
+
+package manager: Homebrew for macOS package management (e.g., `yabai`, `jq`). Script Kit may use `npm`/`pnpm` internally for its packages.
+build command(s): Not applicable for most parts; configurations are loaded by their respective tools.
+run command(s):
+- Scripts are run directly (e.g., `~/.config/scripts/move_to_next_display.sh`).
+- Karabiner rules are applied by Karabiner-Elements.
+- Yabai configuration is loaded by the Yabai service.
+- Script Kit scripts are run via Script Kit.
+version control: Git (evidenced by `.gitignore`).
+ci/cd: None apparent.
+
+## 8. (Optional) Database / API Guidelines
+
+- Yabai communication happens via its CLI (`yabai -m query/config/signal`).
+- Script Kit interacts with Yabai and reads log files.
+- Karabiner uses `osascript` to trigger scripts and system events.
+
+## 9. (Optional) Specific Feature Rules
+
+- **Yabai Focus Tracking:** As detailed in `docs/yabai-focus-tracking-setup.md`, involves Yabai signals, a logging script, and Script Kit integration.
+- **Karabiner Customizations:** Defined in `karabiner.edn`, including complex modifier setups, application-specific shortcuts, and script triggers.
+
+## 10. (Optional) Rule Referencing
+- None explicitly defined, but the project heavily relies on the documentation and behavior of external tools like Yabai, Karabiner, and Script Kit.

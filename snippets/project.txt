@@ -1,0 +1,24 @@
+.cursor/rules/project.mdc
+
+An .mdc file is a markdown file with the following frontmatter:
+
+---
+description: Consider these lessons learned first before making changes to avoid mistakes
+globs: 
+alwaysApply: true
+---
+
+Take everything you learned from this conversation, condense it into an extremely terse cheatsheet. Althought this is markdown, avoid indentation. Focus on using headers to avoid nested bullet points with indentation.
+Focus mainly on things I asked you to do in response to either failures or questions and make sure that's included. And then also focus on things you did that were broken that worked the next time. So essentially this post-mortem document we're creating is to help AI agents avoid mistakes in the future.
+
+If .cursor/rules/project.mdc exists:
+Use the `edit_tool` to update it
+
+If .cursor/rules/project.mdc doesn't exist:
+Use the `run_terminal_cmd` tool to create it.
+
+>NOTE: CREATING AN .mdc ALWAYS FAILS WITH THE `edit_tool`, YOU MUST USE THE `run_terminal_cmd` tool
+
+Below is an example of how to create the file:
+
+echo -e 'insert frontmatter and cheatsheet. Use \\n characters for newlines' > .cursor/rules/project.mdc
