@@ -41,7 +41,15 @@ CUR_WIN_ID=$(yabai -m query --windows --window | jq '.id')
 CUR_DISPLAY_ID=$(yabai -m query --windows --window $CUR_WIN_ID | jq '.display')
 CUR_SPACE_ID=$(yabai -m query --windows --window $CUR_WIN_ID | jq '.space')
 
-# ... existing code ...
+# Actual command to move the window east
+if [[ -n "$CUR_WIN_ID" && "$CUR_WIN_ID" != "null" ]]; then
+    yabai -m window --warp east
+    # Optionally, re-focus the window if warp doesn't maintain focus (Yabai usually does)
+    # yabai -m window --focus "$CUR_WIN_ID"
+    "$LOGGER_SCRIPT_PATH" "$SCRIPT_NAME" "ACTION_DETAIL" "Executed: yabai -m window --warp east for window $CUR_WIN_ID"
+else
+    "$LOGGER_SCRIPT_PATH" "$SCRIPT_NAME" "ERROR" "Could not get current window ID to move east. CUR_WIN_ID: '$CUR_WIN_ID'"
+fi
 
 # Log state after action
 log_state "AFTER_STATE"

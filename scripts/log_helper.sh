@@ -17,4 +17,4 @@ TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
 # Format and append log message
 echo "[$TIMESTAMP] [$SCRIPT_NAME] [$LOG_TYPE] $MESSAGE" >> "$LOG_FILE"
 
-exit 0 
+exit 0
