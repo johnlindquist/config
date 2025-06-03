@@ -65,6 +65,14 @@ imports: TypeScript uses ES module imports.
 - Configuration as code, managed within the `.config` directory.
 - Use of specific helper scripts for complex actions.
 
+### 5.1 Karabiner Script Environment: Full Path Requirement
+
+When running scripts from Karabiner-Elements, the environment is minimal and the `$PATH` variable is often limited or missing `/opt/homebrew/bin` (where Homebrew installs most CLI tools on Apple Silicon). As a result, **all scripts triggered by Karabiner must use absolute paths for all executables** (e.g., `/opt/homebrew/bin/yabai`, `/opt/homebrew/bin/jq`).
+
+- Do **not** rely on bare command names (e.g., `yabai`, `jq`) in scripts intended for Karabiner.
+- Always use the full path to each executable to ensure reliability.
+- This is not required when running scripts from a terminal, but is essential for Karabiner compatibility.
+
 ## 6. Testing
 
 framework: Not explicitly defined. Scripts are tested by direct execution.

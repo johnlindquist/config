@@ -13,9 +13,11 @@
                        :co          [:command :option]                     ; Cmd+Opt
                        :cs          [:command :shift]                      ; Cmd+Shift
                        :ct          [:command :control]                    ; Cmd+Ctrl
+                       :cto         [:command :control :option]            ; Cmd+Ctrl+Opt
                        :to          [:control :option]                     ; Ctrl+Opt
                        :ts          [:control :shift]                      ; Ctrl+Shift
-                       :os          [:option :shift]}                      ; Opt+Shift
+                       :os          [:option :shift]
+                       :tos         [:command :shift :option]}                      ; Opt+Shift
 
  ;; --- INPUT KEY ALIASES (:froms) ---
  :froms               {;; Standard Aliases
@@ -70,6 +72,7 @@
                        :alfred       {:key :spacebar :modi :option} ; Opt+Space
                        :emoji_picker {:key :spacebar :modi :ct}     ; Ctrl+Cmd+Space
                        :open_1password {:key :backslash :modi :command} ; Cmd+\
+                       :autofill_1password {:key :backslash :modi :cto} ; Command+Ctrl+Opt+\
 
                        ;; Screenshots & Recording
                        :restore_screenshot {:key :7 :modi :cs} ; Cmd+Shift+4 (macOS default region capture)
@@ -227,6 +230,7 @@
                        :modify "~/.simple/bin/modify --%s"
                        :pad "~/.simple/bin/pad"
                        :test "osascript -e 'say \"poop\"'"
+                       :compress-finder-image "/Users/johnlindquist/scripts/scripts/compress-finder-image.ts"
                        :copy-transcribe-low "open -g -a 'Audio Hijack' ~/transcripts/copy-transcribe-low.ahcommand"
                        :paste-transcribe-low "open -g -a 'Audio Hijack' ~/transcripts/paste-transcribe-low.ahcommand"
                        :copy-transcribe-high "open -g -a 'Audio Hijack' ~/transcripts/copy-transcribe-high.ahcommand"
@@ -285,11 +289,13 @@
                        :move_window_to_next_empty_space "/bin/bash /Users/johnlindquist/.config/scripts/move_window_to_next_empty_space.sh"
                        :move_window_to_previous_empty_space "/bin/bash /Users/johnlindquist/.config/scripts/move_window_to_previous_empty_space.sh"
                        :remove_current_space "/bin/bash /Users/johnlindquist/.config/scripts/remove_current_space.sh"
-                       :remove_empty_spaces_current_display "/bin/bash /Users/johnlindquist/.config/scripts/remove_empty_spaces_current_display.sh"
+                       :remove_empty_spaces "/bin/bash /Users/johnlindquist/.config/scripts/remove_empty_spaces.sh"
                        :move_to_next_display "/bin/bash /Users/johnlindquist/.config/scripts/move_to_next_display.sh"
                        :move_to_previous_display "/bin/bash /Users/johnlindquist/.config/scripts/move_to_previous_display.sh"
                        :move_window_east "/bin/bash /Users/johnlindquist/.config/scripts/move_window_east.sh"
                        :move_window_west "/bin/bash /Users/johnlindquist/.config/scripts/move_window_west.sh"
+                       :window_resize_to_next_tenth_wider "/bin/bash /Users/johnlindquist/.config/scripts/window_resize_to_next_tenth_wider.sh"
+                       :window_resize_to_next_tenth_narrower "/bin/bash /Users/johnlindquist/.config/scripts/window_resize_to_next_tenth_narrower.sh"
                        :restart_yabai "/opt/homebrew/bin/yabai --restart-service"
 
                        :fix_floats "/bin/bash /Users/johnlindquist/.config/scripts/fix_floats.sh"
@@ -414,7 +420,7 @@
 
                        {:des "Global Button2-Mode"
                         :rules [:button2-mode
-                                [:-s [{:pkey :button1 :modi :left_shift}]]
+                                ;; [:-s [{:pkey :button1 :modi :left_shift}]]
                                 [:spacebar :return_or_enter]]}
 
                        ;; --- Device Specific Rules ---
@@ -690,14 +696,24 @@
                                 ;; C -> Cmd+C (Copy) + Click + Cmd+V (Paste)
                                 [:c [:!Cc :button1 :!Cv]]]}
 
+                       {:des "Finder"
+                        :rules [:finder
+                                [:condi :finder :button2-mode]
+                                ;; [:-r [{:pkey :button1} ["/Users/johnlindquist/scripts/scripts/compress-finder-image.ts"]]] ;;cmd+shift+r
+                                [:-r [{:pkey :button1} [:compress-finder-image]]] ;;cmd+shift+r
+                                [:delete_or_backspace [{:pkey :button1} {:key :delete_or_backspace :modi :left_command}]] ;;cmd+shift+r
+                                ]}
+
                        {:des   "Cursor"
                         :rules [:cursor ; Apply only when Cursor is frontmost
                                 ;; Trackpad Interaction (1 finger)
                                 [:condi :cursor :button2-mode]
                                 [{:pkey :button1} [{:pkey :button1} {:key :f3 :modi :hyper}]] ;;ctrl+shift+alt+cmd+f3
+                                [:-a [{:pkey :button1} {:key :f11 :modi :hyper}]] ;;ctrl+shift+alt+cmd+f3
                                 [:-f [{:pkey :button1} {:key :f3 :modi :hyper}]] ;;ctrl+shift+alt+cmd+f3
                                 [:-s [{:pkey :button1} {:key :f8 :modi :hyper}]] ;;ctrl+shift+alt+cmd+f3
                                 [:-r [{:pkey :button1} {:key :f12 :modi :left_shift}]] ;;ctrl+shift+alt+cmd+f3
+                                [:-x [{:pkey :button1} {:key :d :modi :cs}]] ;;cmd+shift+d
                                 [:delete_or_backspace [{:pkey :button1} {:key :delete_or_backspace :modi :left_command}]] ;;ctrl+shift+alt+cmd+f3
                                 ]}
 
@@ -799,20 +815,24 @@
                                 ;; Mouse/Arrow interactions while holding Equal
                                 ;; [{:pkey :button1} [{:pkey :button1} :x :delete_forward]] ; Equal+LClick -> LClick + X + FwdDelete ?
                                 ;; [{:pkey :button2} [{:pkey :button1} :delete_forward :spacebar]] ; Equal+RClick -> LClick + FwdDelete + Space ?
-                                [{:pkey :button1} [{:pkey :button1 :modi :left_shift} :!Cdelete_or_backspace]] ; Equal+LClick -> Shift+Click + Cmd+Delete
+                                [{:pkey :button1} [:move_to_next_display]] ; Equal+LClick -> Move to next display
+                                [{:pkey :button3} [:move_window_to_next_empty_space]] ; Equal+RClick -> Move to previous display
                                 ;; [{:pkey :button6} :!Tright_arrow] ; Equal+Btn5 -> Ctrl+Right COMMENTED OUT
                                 ;; [{:pkey :button6} ["/Users/johnlindquist/.config/scripts/space_right.sh"]] ; Equal+Btn6 -> jump/make space right
 
                                 ;; [{:pkey :button4} :!Tleft_arrow] ; Equal+Btn4 -> Ctrl+Left COMMENTED OUT
                                 ;; [{:pkey :button4} ["/Users/johnlindquist/.config/scripts/space_left.sh"]] ; Equal+Btn4 -> jump/make space left
                                 ;; [:-h :!Tleft_arrow] ; Equal+H -> Ctrl+Left COMMENTED OUT
+                                [:-j [:window_resize_to_next_tenth_wider]]
                                 [:-l [:move_window_west]]
                                 [:-u [:move_window_east]]
+                                [:-y [:window_resize_to_next_tenth_narrower]]
                                 [:-h [:space_left]] ; Equal+H -> jump/make space left
                                 [:-n [:move_window_to_previous_empty_space]] ; Equal+J -> move left
                                 [:-e [:move_window_to_next_empty_space]] ; Equal+K -> move right
                                 [:-x [:remove_current_space]]
-                                [:-y [:remove_empty_spaces_current_display]]
+                                [:-y [:remove_empty_spaces]]
+                                [:-m [:mission_control]]
                                 [:-d [:move_to_next_display]]
                                 [:-r [:restart_yabai]]
 
@@ -825,10 +845,12 @@
                        {:des   "Tab Mode (Hold Tab)"
                         :rules [:tab-mode
                                 ;; Actions while holding Tab
-                                [:-a :restore_screenshot] ; Tab+A (P Colemak) -> Restore Screenshot
+                                [:-z :restore_screenshot] ; Tab+A (P Colemak) -> Restore Screenshot
                                 [:-r :record_screen] ; Tab+R (P Colemak) -> Record Screen
                                 [:-s :capture_screenshot] ; Tab+S (R Colemak) -> Capture Screenshot
                                 [:-i :!SOi] ; Tab+I (L Colemak) -> Shift+Opt+I ?
+                                [:-q :vk_consumer_next] ; M+F (E Colemak) -> Next Track
+                                [:-p :vk_consumer_play] ; M+P (R Colemak) -> Play/Pause
                                 ]}
 
                        {:des   "Home Mode (Hold Home)"
@@ -929,7 +951,7 @@
                        {:des   "quick Mode (Q + Key)"
                         :rules [:quick-mode
                                 ;; Utility scripts triggered by Q + Key
-                                [:g ["/opt/homebrew/bin/goku 2>&1 | /opt/homebrew/bin/terminal-notifier -sound default"]] ; Q+G -> Reload Karabiner via Goku
+                                [:g ["/Users/johnlindquist/scripts/scripts/goku-notify.ts"]] ; Q+G -> Reload Karabiner via Goku
                                 [:d ["date +\"%Y-%m-%d %H:%M:%S\" | tee >(pbcopy) | /opt/homebrew/bin/terminal-notifier -sound default -message"]] ; Q+D -> Copy/Notify current timestamp
                                 ]}
 
@@ -1047,7 +1069,8 @@
                                 [:##o :!Send :windows] ; D+O (Semicolon Colemak) -> Shift+End (Windows only)
                                 [:##y :!CSleft_arrow] ; D+Y -> Cmd+Shift+Left (Select to Line Start)
                                 [:##o :!CSright_arrow] ; D+O -> Cmd+Shift+Right (Select to Line End)
-                                ]}
+
+                                [:escape ["pkill -f 'Script Kit'"]]]}
 
                        {:des   "Movement Mode (F + Key / T Colemak Layer, No Trackpad)"
                         :rules [:movement-mode
@@ -1115,8 +1138,7 @@
                                 ;; [:-c [:code-project "~/.config"]] ; Semicolon+C -> Open ~/.config
                                 [:-z ["/usr/local/bin/cursor ~/dev/agent"]] ; Semicolon+K (E Colemak) -> Open ~/.config in Cursor
                                 [:-k ["/usr/local/bin/cursor ~/.config"]] ; Semicolon+K (E Colemak) -> Open ~/.config in Cursor
-                                [:-g ["/opt/homebrew/bin/goku | /opt/homebrew/bin/terminal-notifier -sound default"]] ; Semicolon+G (T Colemak) -> Reload Karabiner
-                                [:-w ["~/.kit/kar ~/.kit/cli/edit.js ~/.kenv/scripts/wiki-ten"]] ; Semicolon+W -> Edit wiki-ten script
+                                [:-g ["/Users/johnlindquist/scripts/scripts/goku-notify.ts"]] ; Semicolon+G (T Colemak) -> Reload Karabiner
                                 ]}
 
                        {:des   "Snippet Mode (Quote + Key)"
@@ -1225,12 +1247,15 @@
                                 ;; [:-g ["/usr/local/bin/cursor ~/dev/globals"]] ; Duplicate G mapping?
                                 [:-a ["/usr/local/bin/cursor ~/dev/app"]] ; N+A -> Open app project
                                 ;; [:-s ["/usr/local/bin/cursor ~/dev/scriptkit.com"]] ; Duplicate S mapping?
-                                [:-w ["/usr/local/bin/cursor ~/dev/workshop"]] ; N+W -> Open workshop project
+                                [:-w ["/usr/local/bin/cursor ~/dev/kit-workspace.code-workspace"]] ; N+W -> Open workshop project
                                 [:-x ["/usr/local/bin/cursor ~/dev/exercises"]] ; N+X -> Open exercises project
                                 ;; GitHub Actions/Releases/Discussions via Number Keys
                                 [:1 ["~/.kenv/bin/focus-tab github.com/johnlindquist/kitapp/actions"]]
                                 [:2 ["~/.kenv/bin/focus-tab github.com/johnlindquist/kitapp/releases"]]
-                                [:3 ["~/.kenv/bin/focus-tab github.com/johnlindquist/kit/discussions"]]]}
+                                [:3 ["~/.kenv/bin/focus-tab github.com/johnlindquist/kit/discussions"]]
+                                [:escape ["pkill -f 'Electron' && pkill -f 'Electron'"]]
+                                ;;
+                                ]}
 
                        {:des   "Spacebar Mode (Space + Key / Symbol Layer)"
                         :rules [:spacebar-mode
@@ -1262,7 +1287,7 @@
                                 ;; Special characters (!@#$ etc.) via Semicolon + Key
                                 ;; Uses Colemak mnemonics for QWERTY keys
                                 [:-e :!S1] ; ;+E (K Colemak) -> !
-                                [:-a :!S2] ; ;+A -> @
+                                [:-a :!S2] ; ;+A -> @ 
                                 [:-h :!S3] ; ;+H -> #
                                 [:-d :!S4] ; ;+D (G Colemak) -> $
                                 [:-p :!S5] ; ;+P (R Colemak) -> %
@@ -1285,6 +1310,7 @@
                        {:des   "Period Mode (. + Key / Open URLs)"
                         :rules [:period-mode
                                 ;; Open common URLs via Period + Key
+                                [:-s [:focus-or-open-chrome "dashboard.stripe.com/payment-links/plink_1RMGuI2nImeJXwdJfV33uYU5"]]
                                 [:-c [:focus-or-open-chrome "chatgpt.com"]] ; .+C -> Open ChatGPT
                                 [:-e [:focus-or-open-chrome "egghead.io"]]        ; .+E (K Colemak) -> Open Egghead
                                 [:-g [:focus-or-open-chrome "gemini.google.com"]]   ; .+G (T Colemak) -> Open Gmail
@@ -1341,6 +1367,7 @@
                         :rules [:launch-mode ; Activated by holding F24 OR U+Key simlayer
                                 ;; App launching triggers
                                 [:1 :open_1password] ; Launch+1 -> Open 1Password
+                                [:2 :autofill_1password] ; Launch+1 -> Open 1Password
                                 [:spacebar :!Tdown_arrow] ; Launch+Space -> Ctrl+Down Arrow
                                 [:-a [:launch "Activity Monitor"]] ; Launch+A -> Launch Activity Monitor
                                 [:-v [:launch "Cursor Nightly"]] ; Launch+V -> Launch Cursor Nightly
@@ -1353,8 +1380,9 @@
                                 [:-y [:launch "YouTube Music"]] ; Launch+Y (O Colemak) -> Launch YouTube Music
                                 [:-r [:launch "Restream Chat"]] ; Launch+R (S Colemak) -> Launch Restream Chat
                                 [:-s [:launch "Slack"]] ; Launch+S (D Colemak) -> Launch Slack
-                                [:-w [:launch "Windsurf"]] ; Launch+W -> Launch Windsurf
-                                [:-z [:launch "zoom.us"]] ; Launch+Z -> Launch Zoom
+                                ;; [:-w [:launch "Windsurf"]] ; Launch+W -> Launch Windsurf
+                                [:-z [:launch "Zed"]] ; Launch+Z -> Launch Zoom
+                                [:-w [:launch "zoom.us"]] ; Launch+Z -> Launch Zoom
                                 [:-x [:launch "Users/johnlindquist/Applications/Chrome Apps.localized/Messages.app"]] ; Launch+X -> Launch Messages Chrome App
                                 ]}
 

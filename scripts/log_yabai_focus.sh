@@ -1,61 +1,81 @@
 #!/bin/bash
 
-# Add logging helper path
-LOGGER_SCRIPT_PATH="$(dirname "$0")/log_helper.sh"
-SCRIPT_NAME="log_yabai_focus.sh"
+# Script to log the focused yabai window ID for recency tracking.
 
-# Log script start (Note: This runs continuously due to `yabai -m signal`)
-# We log the initial start, but subsequent logs come from the loop
-"$LOGGER_SCRIPT_PATH" "$SCRIPT_NAME" "START" "Daemon script started. Listening for Yabai signals."
+LOG_FILE="$HOME/.cache/yabai_focus_history.log"
+MAX_HISTORY=20 # Keep track of the last 20 focused windows
+TMP_LOG_FILE="${LOG_FILE}.tmp.$$" # Temporary file for atomic write
 
-# --- Dependencies ---
-YABAI_PATH="/opt/homebrew/bin/yabai"
-JQ_PATH="/opt/homebrew/bin/jq"
+# Ensure the cache directory exists
+mkdir -p "$(dirname "$LOG_FILE")"
 
-# Ensure log file directory exists (handled by log_helper.sh, but good practice)
-mkdir -p "$HOME/.cache"
-
-# --- Signal Handling Loop ---
-# Listen for specific yabai signals related to focus changes
-# Add listeners individually
-
-ERRORS=0
-
-"$LOGGER_SCRIPT_PATH" "$SCRIPT_NAME" "INFO" "Adding signal listener for: window_focused"
-$YABAI_PATH -m signal --add event=window_focused action="$LOGGER_SCRIPT_PATH $SCRIPT_NAME YABAI_EVENT WindowFocused ID=\\"$YABAI_WINDOW_ID\\"" label="central_script_logger_wf"
-if [[ $? -ne 0 ]]; then ERRORS=$((ERRORS + 1)); "$LOGGER_SCRIPT_PATH" "$SCRIPT_NAME" "ERROR" "Failed to add window_focused signal."; fi
-
-"$LOGGER_SCRIPT_PATH" "$SCRIPT_NAME" "INFO" "Adding signal listener for: display_changed"
-$YABAI_PATH -m signal --add event=display_changed action="$LOGGER_SCRIPT_PATH $SCRIPT_NAME YABAI_EVENT DisplayChanged ID=\\"$YABAI_DISPLAY_ID\\"" label="central_script_logger_dc"
-if [[ $? -ne 0 ]]; then ERRORS=$((ERRORS + 1)); "$LOGGER_SCRIPT_PATH" "$SCRIPT_NAME" "ERROR" "Failed to add display_changed signal."; fi
-
-"$LOGGER_SCRIPT_PATH" "$SCRIPT_NAME" "INFO" "Adding signal listener for: space_changed"
-$YABAI_PATH -m signal --add event=space_changed action="$LOGGER_SCRIPT_PATH $SCRIPT_NAME YABAI_EVENT SpaceChanged ID=\\"$YABAI_SPACE_ID\\"" label="central_script_logger_sc"
-if [[ $? -ne 0 ]]; then ERRORS=$((ERRORS + 1)); "$LOGGER_SCRIPT_PATH" "$SCRIPT_NAME" "ERROR" "Failed to add space_changed signal."; fi
-
-"$LOGGER_SCRIPT_PATH" "$SCRIPT_NAME" "INFO" "Adding signal listener for: application_activated"
-$YABAI_PATH -m signal --add event=application_activated action="$LOGGER_SCRIPT_PATH $SCRIPT_NAME YABAI_EVENT AppActivated App=\\"$YABAI_PROCESS_NAME\\" PID=\\"$YABAI_PROCESS_ID\\"" label="central_script_logger_aa"
-if [[ $? -ne 0 ]]; then ERRORS=$((ERRORS + 1)); "$LOGGER_SCRIPT_PATH" "$SCRIPT_NAME" "ERROR" "Failed to add application_activated signal."; fi
-
-"$LOGGER_SCRIPT_PATH" "$SCRIPT_NAME" "INFO" "Adding signal listener for: window_title_changed"
-$YABAI_PATH -m signal --add event=window_title_changed action="$LOGGER_SCRIPT_PATH $SCRIPT_NAME YABAI_EVENT WindowTitleChanged ID=\\"$YABAI_WINDOW_ID\\"" label="central_script_logger_wtc"
-if [[ $? -ne 0 ]]; then ERRORS=$((ERRORS + 1)); "$LOGGER_SCRIPT_PATH" "$SCRIPT_NAME" "ERROR" "Failed to add window_title_changed signal."; fi
-
-EXIT_CODE=$ERRORS
-
-if [[ $EXIT_CODE -ne 0 ]]; then
-    "$LOGGER_SCRIPT_PATH" "$SCRIPT_NAME" "ERROR" "Failed to add one or more Yabai signals ($ERRORS errors)."
-    exit $EXIT_CODE
+# Check if the YABAI_WINDOW_ID environment variable is set (provided by the signal)
+if [[ -z "$YABAI_WINDOW_ID" ]]; then
+  # For testing or manual execution, get the current focused window ID
+  CURRENT_FOCUSED_ID=$(/opt/homebrew/bin/yabai -m query --windows --window | /opt/homebrew/bin/jq -r '.id')
+  # Validate the manually fetched ID
+  if [[ -z "$CURRENT_FOCUSED_ID" || "$CURRENT_FOCUSED_ID" == "null" ]]; then
+    rm -f "$TMP_LOG_FILE" # Clean up temp file on error
+    exit 1 # Exit if no valid ID found
+  fi
+  WINDOW_ID="$CURRENT_FOCUSED_ID"
 else
-    "$LOGGER_SCRIPT_PATH" "$SCRIPT_NAME" "INFO" "Successfully added all Yabai signal listeners."
-    # Add a message indicating it will keep running
-    "$LOGGER_SCRIPT_PATH" "$SCRIPT_NAME" "INFO" "Script is now running in the background (implicitly via signal handling) to log Yabai events."
-    # Typically, a script listening for signals doesn't exit here,
-    # but relies on the yabai process managing the signals.
-    # For clarity in logging, we log completion of setup.
-    "$LOGGER_SCRIPT_PATH" "$SCRIPT_NAME" "END" "Signal setup finished. Logging will occur on Yabai events."
-    exit 0 # Exit setup script successfully
+  WINDOW_ID="$YABAI_WINDOW_ID"
 fi
 
-# Note: The actual logging now happens directly via the `action` in `yabai -m signal` calls.
-# This script primarily sets up those listeners. 
+# Ensure WINDOW_ID is not empty or null before proceeding
+if [[ -z "$WINDOW_ID" || "$WINDOW_ID" == "null" ]]; then
+  rm -f "$TMP_LOG_FILE" # Clean up temp file on error
+  exit 1 # Exit if ID is invalid
+fi
+
+history=()
+if [[ -f "$LOG_FILE" ]]; then
+  # Read line by line using while read
+  while IFS= read -r line || [[ -n "$line" ]]; do
+      # Trim whitespace (optional, but good practice)
+      line_trimmed=$(echo "$line" | xargs)
+      if [[ -n "$line_trimmed" ]]; then # Add only non-empty lines
+          history+=("$line_trimmed")
+      fi
+  done < "$LOG_FILE"
+else
+  # history array is already initialized empty
+  : # No action needed if file doesn't exist
+fi
+
+# Remove the current window ID if it already exists in the history
+new_history=()
+for id in "${history[@]}"; do
+  # Trim whitespace just in case and compare
+  id_trimmed=$(echo "$id" | xargs) # Trim whitespace
+  if [[ -n "$id_trimmed" && "$id_trimmed" != "$WINDOW_ID" ]]; then # Ensure ID is not empty after trimming
+    new_history+=("$id_trimmed")
+  fi
+done
+
+# Prepend the new window ID
+updated_history=("$WINDOW_ID" "${new_history[@]}")
+
+# Trim the history to MAX_HISTORY entries
+if [[ ${#updated_history[@]} -gt $MAX_HISTORY ]]; then
+  trimmed_history=("${updated_history[@]:0:$MAX_HISTORY}")
+else
+  trimmed_history=("${updated_history[@]}")
+fi
+
+# Write the updated history to the TEMPORARY file
+printf "%s\n" "${trimmed_history[@]}" > "$TMP_LOG_FILE"
+if [[ $? -ne 0 ]]; then
+    rm -f "$TMP_LOG_FILE" # Clean up temp file on error
+    exit 1
+fi
+
+# Atomically rename the temporary file to the target log file
+mv "$TMP_LOG_FILE" "$LOG_FILE"
+if [[ $? -ne 0 ]]; then
+    rm -f "$TMP_LOG_FILE" # Clean up temp file on error
+    exit 1
+fi
+
+exit 0 

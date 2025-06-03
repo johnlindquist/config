@@ -1,21 +1,25 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Add logging helper path
 LOGGER_SCRIPT_PATH="$(dirname "$0")/log_helper.sh"
 SCRIPT_NAME="move_window_east.sh"
 
 # Log script start
-"$LOGGER_SCRIPT_PATH" "$SCRIPT_NAME" "START" "Script execution started."
+"$LOGGER_SCRIPT_PATH" "$SCRIPT_NAME" "START" "Script execution started. PATH: $PATH"
+
+# Use absolute paths for yabai and jq
+YABAI="/opt/homebrew/bin/yabai"
+JQ="/opt/homebrew/bin/jq"
 
 # Function to log current state (assuming similar needs to west)
 log_state() {
     local type="$1" # BEFORE_STATE or AFTER_STATE
-    local window_id=$(yabai -m query --windows --window | jq -r '.id' 2>/dev/null || echo "unknown")
-    local space_id=$(yabai -m query --spaces --space | jq -r '.index' 2>/dev/null || echo "unknown")
-    local display_id=$(yabai -m query --displays --display | jq -r '.index' 2>/dev/null || echo "unknown")
+    local window_id=$($YABAI -m query --windows --window | $JQ -r '.id' 2>/dev/null || echo "unknown")
+    local space_id=$($YABAI -m query --spaces --space | $JQ -r '.index' 2>/dev/null || echo "unknown")
+    local display_id=$($YABAI -m query --displays --display | $JQ -r '.index' 2>/dev/null || echo "unknown")
     local window_info="unknown"
     if [[ "$window_id" != "unknown" ]]; then
-        window_info=$(yabai -m query --windows --window $window_id | jq -c '.' 2>/dev/null || echo "failed to query window")
+        window_info=$($YABAI -m query --windows --window $window_id | $JQ -c '.' 2>/dev/null || echo "failed to query window")
     fi
     "$LOGGER_SCRIPT_PATH" "$SCRIPT_NAME" "$type" "WindowID: $window_id, Space: $space_id, Display: $display_id, Details: $window_info"
 }
@@ -37,13 +41,13 @@ log_state "BEFORE_STATE"
 "$LOGGER_SCRIPT_PATH" "$SCRIPT_NAME" "ACTION" "Attempting to move window east (or equivalent for vertical)."
 
 # Main logic starts
-CUR_WIN_ID=$(yabai -m query --windows --window | jq '.id')
-CUR_DISPLAY_ID=$(yabai -m query --windows --window $CUR_WIN_ID | jq '.display')
-CUR_SPACE_ID=$(yabai -m query --windows --window $CUR_WIN_ID | jq '.space')
+CUR_WIN_ID=$($YABAI -m query --windows --window | $JQ '.id')
+CUR_DISPLAY_ID=$($YABAI -m query --windows --window $CUR_WIN_ID | $JQ '.display')
+CUR_SPACE_ID=$($YABAI -m query --windows --window $CUR_WIN_ID | $JQ '.space')
 
 # Actual command to move the window east
 if [[ -n "$CUR_WIN_ID" && "$CUR_WIN_ID" != "null" ]]; then
-    yabai -m window --warp east
+    $YABAI -m window --warp east
     # Optionally, re-focus the window if warp doesn't maintain focus (Yabai usually does)
     # yabai -m window --focus "$CUR_WIN_ID"
     "$LOGGER_SCRIPT_PATH" "$SCRIPT_NAME" "ACTION_DETAIL" "Executed: yabai -m window --warp east for window $CUR_WIN_ID"

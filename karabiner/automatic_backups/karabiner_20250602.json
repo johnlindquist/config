@@ -23,6 +23,26 @@
           "type" : "basic",
           "to" : [ {
             "set_variable" : {
+              "name" : "equal-mode",
+              "value" : 1
+            }
+          } ],
+          "from" : {
+            "key_code" : "equal_sign"
+          },
+          "to_after_key_up" : [ {
+            "set_variable" : {
+              "name" : "equal-mode",
+              "value" : 0
+            }
+          } ],
+          "to_if_alone" : [ {
+            "key_code" : "equal_sign"
+          } ]
+        }, {
+          "type" : "basic",
+          "to" : [ {
+            "set_variable" : {
               "name" : "escape-mode",
               "value" : 1
             }
@@ -138,26 +158,6 @@
           } ],
           "to_if_alone" : [ {
             "key_code" : "home"
-          } ]
-        }, {
-          "type" : "basic",
-          "to" : [ {
-            "set_variable" : {
-              "name" : "equal-mode",
-              "value" : 1
-            }
-          } ],
-          "from" : {
-            "key_code" : "equal_sign"
-          },
-          "to_after_key_up" : [ {
-            "set_variable" : {
-              "name" : "equal-mode",
-              "value" : 0
-            }
-          } ],
-          "to_if_alone" : [ {
-            "key_code" : "equal_sign"
           } ]
         }, {
           "type" : "basic",
@@ -306,9 +306,9 @@
             "key_code" : "return_or_enter"
           } ],
           "conditions" : [ {
-            "name" : "button2-mode",
+            "name" : "equal-mode",
             "value" : 1,
-            "type" : "variable_if"
+            "type" : "variable_unless"
           } ],
           "type" : "basic"
         } ]
@@ -16235,53 +16235,6 @@
               "key_code" : "u"
             }, {
               "key_code" : "1"
-            } ],
-            "simultaneous_options" : {
-              "detect_key_down_uninterruptedly" : true,
-              "key_down_order" : "strict",
-              "key_up_order" : "strict_inverse",
-              "key_up_when" : "any",
-              "to_after_key_up" : [ {
-                "set_variable" : {
-                  "name" : "launch-mode",
-                  "value" : 0
-                }
-              } ]
-            }
-          }
-        }, {
-          "from" : {
-            "key_code" : "2"
-          },
-          "to" : [ {
-            "modifiers" : [ "command", "control", "option" ],
-            "key_code" : "backslash"
-          } ],
-          "conditions" : [ {
-            "name" : "launch-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "type" : "basic",
-          "parameters" : {
-            "basic.simultaneous_threshold_milliseconds" : 140
-          },
-          "to" : [ {
-            "set_variable" : {
-              "name" : "launch-mode",
-              "value" : 1
-            }
-          }, {
-            "modifiers" : [ "command", "control", "option" ],
-            "key_code" : "backslash"
-          } ],
-          "from" : {
-            "simultaneous" : [ {
-              "key_code" : "u"
-            }, {
-              "key_code" : "2"
             } ],
             "simultaneous_options" : {
               "detect_key_down_uninterruptedly" : true,
