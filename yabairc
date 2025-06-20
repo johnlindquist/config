@@ -1,0 +1,52 @@
+yabai -m signal --add event=dock_did_restart action="sudo yabai --load-sa"
+sudo yabai --load-sa
+
+# Enable debug logging
+yabai -m config debug_output on
+
+# Set default layout to BSP
+yabai -m config layout bsp
+
+# Always start with vertical splits = columns
+yabai -m config split_type   vertical # columns forever
+yabai -m config auto_balance off      # let us decide widths
+yabai -m config window_placement second_child  # new window on the right
+
+# Guard rails for main apps
+yabai -m rule --add app="^Google Chrome$" manage=on sub-layer=normal
+yabai -m rule --add app="^Code$"          manage=on sub-layer=normal
+yabai -m rule --add app="^Cursor$"        manage=on sub-layer=normal
+
+# Exclude specific apps from window management (no layout reflow)
+yabai -m rule --add app="^Script Kit$"    manage=off
+yabai -m rule --add app="^Electron$"    manage=off
+yabai -m rule --add app="^Finder$"        manage=off
+yabai -m rule --add app="^ScreenFlow$"    manage=off
+yabai -m rule --add app="^System Preferences$"    manage=off
+yabai -m rule --add app="^System Settings$"    manage=off
+yabai -m rule --add app="^Displays$"    manage=off
+yabai -m rule --add app="^ChatGPT$"    manage=off
+
+# Ignore all file dialogs and popups
+yabai -m rule --add title="(Copy|Bin|About This Mac|Info|Finder Preferences|Preferences|General)" manage=off
+yabai -m rule --add title="^Opening.*" manage=off
+yabai -m rule --add title="^Copy$" manage=off
+yabai -m rule --add title="^Save" manage=off
+yabai -m rule --add title="^Open" manage=off
+yabai -m rule --add title="^Choose" manage=off
+yabai -m rule --add title="^Select" manage=off
+yabai -m rule --add subrole="^AXDialog$" manage=off
+yabai -m rule --add subrole="^AXSystemDialog$" manage=off mouse_follows_focus=off
+yabai -m rule --add role="^AXSheet$" manage=off
+yabai -m rule --add subrole="^AXStandardWindow$" manage=off
+
+# Auto-heal signals
+yabai -m signal --add event=window_created     action="/Users/johnlindquist/.config/scripts/fix_floats.sh"
+yabai -m signal --add event=window_deminimized action="/Users/johnlindquist/.config/scripts/fix_floats.sh"
+# yabai -m signal --add event=window_moved       action="/Users/johnlindquist/.config/scripts/fix_floats.sh"
+
+# Execute the script to set up all logging signals correctly (now renamed)
+/Users/johnlindquist/.config/scripts/yabai_event_logger.sh
+
+# Add signal for specific window focus history logging (as per documentation)
+yabai -m signal --add event=window_focused action="/Users/johnlindquist/.config/scripts/log_yabai_focus.sh"

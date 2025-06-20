@@ -288,6 +288,10 @@
                        :move_window_left_half "/bin/bash /Users/johnlindquist/.config/scripts/move_window_left_half.sh"
                        :move_window_to_next_empty_space "/bin/bash /Users/johnlindquist/.config/scripts/move_window_to_next_empty_space.sh"
                        :move_window_to_previous_empty_space "/bin/bash /Users/johnlindquist/.config/scripts/move_window_to_previous_empty_space.sh"
+                       :move_window_to_display_1 "/bin/bash /Users/johnlindquist/.config/scripts/move_window_to_display_1.sh"
+                       :move_window_to_display_2 "/bin/bash /Users/johnlindquist/.config/scripts/move_window_to_display_2.sh"
+                       :move_window_to_display_3 "/bin/bash /Users/johnlindquist/.config/scripts/move_window_to_display_3.sh"
+                       :move_window_to_display_4 "/bin/bash /Users/johnlindquist/.config/scripts/move_window_to_display_4.sh"
                        :remove_current_space "/bin/bash /Users/johnlindquist/.config/scripts/remove_current_space.sh"
                        :remove_empty_spaces "/bin/bash /Users/johnlindquist/.config/scripts/remove_empty_spaces.sh"
                        :move_to_next_display "/bin/bash /Users/johnlindquist/.config/scripts/move_to_next_display.sh"
@@ -296,7 +300,8 @@
                        :move_window_west "/bin/bash /Users/johnlindquist/.config/scripts/move_window_west.sh"
                        :window_resize_to_next_tenth_wider "/bin/bash /Users/johnlindquist/.config/scripts/window_resize_to_next_tenth_wider.sh"
                        :window_resize_to_next_tenth_narrower "/bin/bash /Users/johnlindquist/.config/scripts/window_resize_to_next_tenth_narrower.sh"
-                       :restart_yabai "/opt/homebrew/bin/yabai --restart-service"
+                       :restart_yabai "/opt/homebrew/bin/yabai --restart-service || /opt/homebrew/bin/yabai --start-service"
+                       :stop_yabai "/opt/homebrew/bin/yabai --stop-service"
 
                        :fix_floats "/bin/bash /Users/johnlindquist/.config/scripts/fix_floats.sh"
 
@@ -342,7 +347,8 @@
                                                 {:set ["kit-mode" 0]}
                                                 {:set ["button2-mode" 0]} ; Added missing modes? Check if needed
                                                 {:set ["button4-mode" 0]}
-                                                {:set ["button5-mode" 0]}]}
+                                                {:set ["button5-mode" 0]}
+                                                {:set ["escape-mode" 0]}]}
 
                        :f23-mode       {:key :f23 :alone {:key :vk_none}} ; Use F23 as a layer trigger
                        :launch-mode    {:key :f24 :alone {:key :spacebar :modi :left_option}} ; Hold F24 for layer, Tap for Alfred
@@ -416,7 +422,10 @@
  ;; --- MAIN RULE DEFINITIONS ---
  :main                [{:des   "Global Modifier Rules"
                         :rules [;; Global modifier rules
-                                [:left_option :left_option nil {:alone {:key :semicolon :modi :left_command}}]]}
+                                [:left_option :left_option nil {:alone {:key :semicolon :modi :left_command}}]
+                                [{:key :left_control :modi :left_command} {:key :9 :modi :hyper}]
+                                ;;
+                                ]}
 
                        {:des "Global Button2-Mode"
                         :rules [:button2-mode
@@ -835,6 +844,11 @@
                                 [:-m [:mission_control]]
                                 [:-d [:move_to_next_display]]
                                 [:-r [:restart_yabai]]
+                                [:-s [:stop_yabai]]
+                                [:1 [:move_window_to_display_1]]
+                                [:2 [:move_window_to_display_2]]
+                                [:3 [:move_window_to_display_3]]
+                                [:4 [:move_window_to_display_4]]
 
                                 ;; [:-i :!Tright_arrow] ; Equal+I (L Colemak) -> Ctrl+Right COMMENTED OUT
                                 [:-i [:space_right]] ; Equal+I -> jump/make space right
