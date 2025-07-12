@@ -3990,7 +3990,7 @@
             "key_code" : "f"
           },
           "to" : [ {
-            "shell_command" : "osascript -e '\n                                    tell application \"Google Chrome \"\n\tif (count of windows) > 0 then\n\t\t-- Get the URL of the active tab in the front window\n\t\tset tabURL to URL of active tab of front window\n\t\t\n\t\t-- Close the active tab\n\t\tclose active tab of front window\n\t\t\n\t\t-- Create a new window and set its tab to the saved URL\n\t\tmake new window\n\t\tset URL of active tab of front window to tabURL\n\tend if\nend tell\n                                    '"
+            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/detach_chrome_tab.sh"
           } ],
           "conditions" : [ {
             "name" : "home-mode",
@@ -4030,7 +4030,7 @@
             "key_code" : "j"
           },
           "to" : [ {
-            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/focus_direction.sh north"
+            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/focus_direction.sh south"
           } ],
           "conditions" : [ {
             "name" : "home-mode",
@@ -4043,7 +4043,7 @@
             "key_code" : "k"
           },
           "to" : [ {
-            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/focus_direction.sh south"
+            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/focus_direction.sh north"
           } ],
           "conditions" : [ {
             "name" : "home-mode",

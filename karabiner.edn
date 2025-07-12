@@ -276,21 +276,7 @@
                                  tell application id \"com.runningwithcrayons.Alfred\" to run trigger \"datamuse\" in workflow \"com.johnlindquist.datamuse\" with argument \"%s\"
                                  '"
 
-                       :detach_tab "osascript -e '
-                                    tell application \"Google Chrome \"
-	if (count of windows) > 0 then
-		-- Get the URL of the active tab in the front window
-		set tabURL to URL of active tab of front window
-		
-		-- Close the active tab
-		close active tab of front window
-		
-		-- Create a new window and set its tab to the saved URL
-		make new window
-		set URL of active tab of front window to tabURL
-	end if
-end tell
-                                    '"
+                       :detach_tab "/bin/bash /Users/johnlindquist/.config/scripts/detach_chrome_tab.sh"
 
                        :open_new_space_and_focus "/bin/bash /Users/johnlindquist/.config/scripts/open_new_space_and_focus.sh"
                        :space_right "/bin/bash /Users/johnlindquist/.config/scripts/space_right.sh"
@@ -926,8 +912,8 @@ end tell
                                 [:-t [:detach_tab]]
                                 [:-d {:key :f15 :modi :hyper}]
                                 [:-h [:focus_west]]
-                                [:-n [:focus_north]]
-                                [:-e [:focus_south]]
+                                [:-n [:focus_south]]
+                                [:-e [:focus_north]]
                                 [:-i [:focus_east]]
                                 [:-n {:key :f17 :modi :hyper}]
                                 [:-e {:key :f18 :modi :hyper}]
