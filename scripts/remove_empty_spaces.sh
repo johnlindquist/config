@@ -27,26 +27,26 @@ log_state "BEFORE_STATE"
 
 # Get all spaces and windows
 all_spaces_json=$($YABAI_PATH -m query --spaces)
-all_windows_json=$($YABAI_PATH -m query --windows)
 focused_space_index=$($YABAI_PATH -m query --spaces --space | $JQ_PATH '.index')
 
-# Find spaces with no windows
-empty_space_indices=$($JQ_PATH -n --argjson spaces "$all_spaces_json" --argjson windows "$all_windows_json" --argjson focused_idx "$focused_space_index" '
-  [$spaces[] | select(.index != ($focused_idx | tonumber)) | .index] as $all_other_space_indices |
-  [$windows[] | .space] as $window_space_indices |
-  ($all_other_space_indices - $window_space_indices) | .[]
+# Find spaces whose first-window == 0 (no real windows) excluding focused space
+empty_space_indices=$($JQ_PATH -n --argjson spaces "$all_spaces_json" --argjson focused_idx "$focused_space_index" '
+  [$spaces[] | select(.index != ($focused_idx | tonumber) and ."first-window" == 0) | .index] | .[]
 ')
 
+# Sort indices in descending order to prevent Mission Control index shifts during deletion
+empty_space_indices_sorted=$(echo "$empty_space_indices" | sort -nr)
+
 # Check if we found any empty spaces
-if [[ -z "$empty_space_indices" ]]; then
+if [[ -z "$empty_space_indices_sorted" ]]; then
     "$LOGGER_SCRIPT_PATH" "$SCRIPT_NAME" "INFO" "No empty spaces found (excluding the focused one). Nothing to do."
 else
-    "$LOGGER_SCRIPT_PATH" "$SCRIPT_NAME" "ACTION" "Found empty spaces to destroy (indices): $empty_space_indices"
+    "$LOGGER_SCRIPT_PATH" "$SCRIPT_NAME" "ACTION" "Found empty spaces to destroy (indices, descending): $empty_space_indices_sorted"
     total_destroyed=0
     total_errors=0
 
     # Loop through empty space indices and destroy them
-    echo "$empty_space_indices" | while IFS= read -r space_index; do
+    echo "$empty_space_indices_sorted" | while IFS= read -r space_index; do
         # Basic check if space_index is a number
         if ! [[ "$space_index" =~ ^[0-9]+$ ]]; then
             "$LOGGER_SCRIPT_PATH" "$SCRIPT_NAME" "WARN" "Skipping invalid space index found: '$space_index'."

@@ -78,3 +78,11 @@ Scripts use a centralized logging system via `log_helper.sh`. Logs are written t
 - `scripts/log_yabai_focus.sh` - Window focus tracking
 - `docs/yabai-focus-tracking-setup.md` - Comprehensive Yabai setup guide
 - `.cursor/rules/_global.mdc` - Global development preferences
+
+## Yabai Nuances
+- Ensure window focus tracking scripts are always running
+- Be mindful of floating window behavior
+- Check signal configurations before making changes
+- Monitor Yabai logs for unexpected window management issues
+- Validate window ID consistency across scripts
+- Test scripts in different display and space configurations

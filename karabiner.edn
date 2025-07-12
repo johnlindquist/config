@@ -69,6 +69,7 @@
 
                        ;; macOS & App Launchers
                        :spotlight    {:key :f13} ; Often used as a custom spotlight trigger
+                       :chatgpt      {:key :0 :modi :hyper} ; Open chatgpt overlay
                        :alfred       {:key :spacebar :modi :option} ; Opt+Space
                        :emoji_picker {:key :spacebar :modi :ct}     ; Ctrl+Cmd+Space
                        :open_1password {:key :backslash :modi :command} ; Cmd+\
@@ -198,7 +199,7 @@
  ;; Templates for generating shell commands using osascript, security, kenv, etc.
  :templates           {:beep "osascript -e 'beep'"
                        :beep2 "osascript -e 'beep 2'"
-                       :new-note "osascript -e 'tell application id \"com.runningwithcrayons.Alfred\" to run trigger \"new-note\" in workflow \"com.johnlindquist.new-note\" with argument \"\"'"
+                       :new-note "osascript -e 'tell application id \"m.runningwithcrayons.Alfred\" to run trigger \"new-note\" in workflow \"com.johnlindquist.new-note\" with argument \"\"'"
                        :new-blog "osascript -e 'tell application id \"com.runningwithcrayons.Alfred\" to run trigger \"new-blog\" in workflow \"com.johnlindquist.new-blog\" with argument \"\"'"
                        :alfred "osascript -e 'tell application \"Alfred 4\" to run trigger \"%s\" in workflow \"%s\" with argument \"%s\"'"
                        :code-project "~/.kenv/bin/code-project \"%s\""
@@ -211,7 +212,7 @@
                                      '"
                        :kit "~/.kit/kar \"%s\""
                        :focus "~/.kit/kar focus \"%s\""
-                       :launch "osascript -e 'tell application \"%s\" to activate'"
+                       :launch "/bin/bash /Users/johnlindquist/.config/scripts/launch_focus_app.sh \"%s\""
                        :open-chrome "osascript -e 'tell application \"Google Chrome\"\nactivate\nopen location \"%s\"\nend tell'"
                        ;; Inside your :templates map in karabiner.edn
 
@@ -275,6 +276,22 @@
                                  tell application id \"com.runningwithcrayons.Alfred\" to run trigger \"datamuse\" in workflow \"com.johnlindquist.datamuse\" with argument \"%s\"
                                  '"
 
+                       :detach_tab "osascript -e '
+                                    tell application \"Google Chrome \"
+	if (count of windows) > 0 then
+		-- Get the URL of the active tab in the front window
+		set tabURL to URL of active tab of front window
+		
+		-- Close the active tab
+		close active tab of front window
+		
+		-- Create a new window and set its tab to the saved URL
+		make new window
+		set URL of active tab of front window to tabURL
+	end if
+end tell
+                                    '"
+
                        :open_new_space_and_focus "/bin/bash /Users/johnlindquist/.config/scripts/open_new_space_and_focus.sh"
                        :space_right "/bin/bash /Users/johnlindquist/.config/scripts/space_right.sh"
                        :space_right_by_display "/bin/bash /Users/johnlindquist/.config/scripts/space_right_by_display.sh"
@@ -302,7 +319,12 @@
                        :window_resize_to_next_tenth_narrower "/bin/bash /Users/johnlindquist/.config/scripts/window_resize_to_next_tenth_narrower.sh"
                        :restart_yabai "/opt/homebrew/bin/yabai --restart-service || /opt/homebrew/bin/yabai --start-service"
                        :stop_yabai "/opt/homebrew/bin/yabai --stop-service"
-
+                       :focus_next_window_same_app "/bin/bash /Users/johnlindquist/.config/scripts/focus_next_window_same_app.sh"
+                       :focus_previous_window_same_app "/bin/bash /Users/johnlindquist/.config/scripts/focus_previous_window_same_app.sh"
+                       :focus_west "/bin/bash /Users/johnlindquist/.config/scripts/focus_direction.sh west"
+                       :focus_east "/bin/bash /Users/johnlindquist/.config/scripts/focus_direction.sh east"
+                       :focus_north "/bin/bash /Users/johnlindquist/.config/scripts/focus_direction.sh north"
+                       :focus_south "/bin/bash /Users/johnlindquist/.config/scripts/focus_direction.sh south"
                        :fix_floats "/bin/bash /Users/johnlindquist/.config/scripts/fix_floats.sh"
 
                        :wait "osascript -e 'delay %s'"}
@@ -422,7 +444,19 @@
  ;; --- MAIN RULE DEFINITIONS ---
  :main                [{:des   "Global Modifier Rules"
                         :rules [;; Global modifier rules
-                                [:left_option :left_option nil {:alone {:key :semicolon :modi :left_command}}]
+                                [:left_option :left_option nil {:alone {:key :semicolon :modi :left_command
+                                                                        {:set ["fn-mode" 0]}
+                                                                        {:set ["opt-mode" 0]}
+                                                                        {:set ["shift-opt-mode" 0]}
+                                                                        {:set ["movement-mode" 0]}
+                                                                        {:set ["cursor-mode" 0]}
+                                                                        {:set ["delete-mode" 0]}
+                                                                        {:set ["nav-mode" 0]}
+                                                                        {:set ["snippet-mode" 0]}
+                                                                        {:set ["kit-mode" 0]}
+                                                                        {:set ["button2-mode" 0]} ; Added missing modes? Check if needed
+                                                                        {:set ["button4-mode" 0]}
+                                                                        {:set ["escape-mode" 0]}}}]
                                 [{:key :left_control :modi :left_command} {:key :9 :modi :hyper}]
                                 ;;
                                 ]}
@@ -771,6 +805,7 @@
                                 [:-w {:key :w :modi :hyper}] ; Esc+W -> window
                                 [:-f {:key :f :modi :hyper}] ; Esc+F -> Focus
                                 [:-s :spotlight]         ; Esc+S (D Colemak) -> Spotlight
+                                [:-c :chatgpt]
                                 [:-t :mission_control]   ; Esc+T (F Colemak) -> Mission Control
                                 ;; Number row -> Cmd+Opt+Number (Switch Spaces/Desktops?)
                                 [:1 :!CO1]
@@ -845,6 +880,8 @@
                                 [:-d [:move_to_next_display]]
                                 [:-r [:restart_yabai]]
                                 [:-s [:stop_yabai]]
+                                [:-t [:focus_next_window_same_app]]
+                                [{:key :f :modi :left_shift} [:focus_previous_window_same_app]]
                                 [:1 [:move_window_to_display_1]]
                                 [:2 [:move_window_to_display_2]]
                                 [:3 [:move_window_to_display_3]]
@@ -886,9 +923,12 @@
                                 [:-a {:key :f11 :modi :hyper}]
                                 [:-r {:key :f12 :modi :hyper}]
                                 [:-s {:key :f13 :modi :hyper}]
-                                [:-t {:key :f14 :modi :hyper}]
+                                [:-t [:detach_tab]]
                                 [:-d {:key :f15 :modi :hyper}]
-                                [:-h {:key :f16 :modi :hyper}]
+                                [:-h [:focus_west]]
+                                [:-n [:focus_north]]
+                                [:-e [:focus_south]]
+                                [:-i [:focus_east]]
                                 [:-n {:key :f17 :modi :hyper}]
                                 [:-e {:key :f18 :modi :hyper}]
                                 [:-i {:key :f19 :modi :hyper}]
@@ -1250,7 +1290,7 @@
                        {:des   "Kit Mode (N + Key / K Colemak Layer)"
                         :rules [:kit-mode
                                 ;; Script Kit related actions (opening projects/URLs) via N + Key
-                                [:-q ["~/.kit/kar kit-discussions"]] ; N+Q -> Open Kit Discussions
+                                [:-q ["/usr/local/bin/cursor ~/dev/cdp-cli-container/cdp-cli"]] ; N+Q -> Open Kit Discussions
                                 [:-s ["/usr/local/bin/cursor ~/.kit"]] ; N+S (R Colemak) -> Open ~/.kit in Cursor
                                 [:-r ["/usr/local/bin/cursor ~/dev/rubrics"]] ; N+R (P Colemak) -> Open rubrics project
                                 [:-d ["/usr/local/bin/cursor ~/dev/kit-docs"]] ; N+D (G Colemak) -> Open kit-docs project
@@ -1258,10 +1298,11 @@
                                 [:-g ["/usr/local/bin/cursor ~/dev/script-generator"]] ; N+G (T Colemak) -> Open script-generator project
                                 [:-v ["/usr/local/bin/cursor ~/.kenv"]] ; N+V -> Open ~/.kenv in Cursor
                                 [:-t ["/usr/local/bin/cursor ~/dev/kit"]] ; N+T (F Colemak) -> Open kit project                                
+                                [:-c ["/usr/local/bin/cursor ~/dev/kit-container"]]
                                 ;; [:-g ["/usr/local/bin/cursor ~/dev/globals"]] ; Duplicate G mapping?
-                                [:-a ["/usr/local/bin/cursor ~/dev/app"]] ; N+A -> Open app project
+                                [:-a ["/usr/local/bin/cursor ~/dev/agentconfig"]] ; N+A -> Open app project
                                 ;; [:-s ["/usr/local/bin/cursor ~/dev/scriptkit.com"]] ; Duplicate S mapping?
-                                [:-w ["/usr/local/bin/cursor ~/dev/kit-workspace.code-workspace"]] ; N+W -> Open workshop project
+                                [:-w ["/usr/local/bin/cursor ~/dev/cursor-workshop-marp"]] ; N+W -> Open workshop project
                                 [:-x ["/usr/local/bin/cursor ~/dev/exercises"]] ; N+X -> Open exercises project
                                 ;; GitHub Actions/Releases/Discussions via Number Keys
                                 [:1 ["~/.kenv/bin/focus-tab github.com/johnlindquist/kitapp/actions"]]
@@ -1337,6 +1378,7 @@
                                 [:-a [:focus-or-open-chrome "aistudio.google.com/prompts/new_chat"]] ; .+A -> Open KitApp Actions
                                 [:-u [:focus-or-open-chrome "builder.egghead.io"]] ; .+U (I Colemak) -> Open Egghead Upload
                                 [:-x [:focus-or-open-chrome "x.com"]]              ; .+X -> Open X.com
+                                [:-q [:focus-or-open-chrome "chatgpt.com/codex"]]              ; .+Q -> Open ChatGPT Codex
                                 [:-w [:focus-or-open-chrome "calendar.google.com/calendar/u/1/r"]] ; .+W -> Open Google Calendar (User 1)
                                 [:-y [:focus-or-open-chrome "youtube.com"]]        ; .+Y (O Colemak) -> Open YouTube
                                 [:1 [:focus-or-open-chrome "mail.google.com/mail/u/0"]]        ; 1 -> Open Gmail (User 0)
@@ -1387,8 +1429,9 @@
                                 [:-v [:launch "Cursor Nightly"]] ; Launch+V -> Launch Cursor Nightly
                                 [:-d [:launch "Discord"]] ; Launch+D (G Colemak) -> Launch Discord
                                 [:-f [:launch "Finder"]] ; Launch+F (E Colemak) -> Launch Finder
+                                [:-p [:launch "Pieces"]] ; Launch+P (E Colemak) -> Launch Pieces
                                 [:-g [:launch "Google Chrome"]] ; Launch+G (T Colemak) -> Launch Chrome
-                                [:-t [:launch "iTerm"]] ; Launch+T (F Colemak) -> Launch iTerm
+                                [:-t [:launch "Warp"]] ; Launch+T (F Colemak) -> Launch iTerm
                                 [:-c [:launch "Cursor"]] ; Launch+C -> Launch Cursor
                                 [:-k "launchctl kickstart -k org.pqrs.karabiner.karabiner_console_user_server"] ; Launch+K (E Colemak) -> Restart Karabiner
                                 [:-y [:launch "YouTube Music"]] ; Launch+Y (O Colemak) -> Launch YouTube Music

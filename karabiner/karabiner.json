@@ -98,6 +98,11 @@
               "name" : "button5-mode",
               "value" : 0
             }
+          }, {
+            "set_variable" : {
+              "name" : "escape-mode",
+              "value" : 0
+            }
           } ]
         }, {
           "type" : "basic",
@@ -293,6 +298,18 @@
           },
           "to" : [ {
             "key_code" : "left_option"
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "modifiers" : {
+              "mandatory" : [ "left_command" ]
+            },
+            "key_code" : "left_control"
+          },
+          "to" : [ {
+            "modifiers" : [ "command", "shift", "control", "option" ],
+            "key_code" : "9"
           } ],
           "type" : "basic"
         } ]
@@ -2555,6 +2572,20 @@
           "type" : "basic"
         }, {
           "from" : {
+            "key_code" : "c"
+          },
+          "to" : [ {
+            "modifiers" : [ "command", "shift", "control", "option" ],
+            "key_code" : "0"
+          } ],
+          "conditions" : [ {
+            "name" : "escape-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
             "key_code" : "f"
           },
           "to" : [ {
@@ -3541,7 +3572,101 @@
             "key_code" : "s"
           },
           "to" : [ {
-            "shell_command" : "/opt/homebrew/bin/yabai --restart-service"
+            "shell_command" : "/opt/homebrew/bin/yabai --restart-service || /opt/homebrew/bin/yabai --start-service"
+          } ],
+          "conditions" : [ {
+            "name" : "equal-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "key_code" : "d"
+          },
+          "to" : [ {
+            "shell_command" : "/opt/homebrew/bin/yabai --stop-service"
+          } ],
+          "conditions" : [ {
+            "name" : "equal-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "key_code" : "f"
+          },
+          "to" : [ {
+            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/focus_next_window_same_app.sh"
+          } ],
+          "conditions" : [ {
+            "name" : "equal-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "modifiers" : {
+              "mandatory" : [ "left_shift" ]
+            },
+            "key_code" : "f"
+          },
+          "to" : [ {
+            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/focus_previous_window_same_app.sh"
+          } ],
+          "conditions" : [ {
+            "name" : "equal-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "key_code" : "1"
+          },
+          "to" : [ {
+            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/move_window_to_display_1.sh"
+          } ],
+          "conditions" : [ {
+            "name" : "equal-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "key_code" : "2"
+          },
+          "to" : [ {
+            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/move_window_to_display_2.sh"
+          } ],
+          "conditions" : [ {
+            "name" : "equal-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "key_code" : "3"
+          },
+          "to" : [ {
+            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/move_window_to_display_3.sh"
+          } ],
+          "conditions" : [ {
+            "name" : "equal-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "key_code" : "4"
+          },
+          "to" : [ {
+            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/move_window_to_display_4.sh"
           } ],
           "conditions" : [ {
             "name" : "equal-mode",
@@ -3865,8 +3990,7 @@
             "key_code" : "f"
           },
           "to" : [ {
-            "modifiers" : [ "command", "shift", "control", "option" ],
-            "key_code" : "f14"
+            "shell_command" : "osascript -e '\n                                    tell application \"Google Chrome \"\n\tif (count of windows) > 0 then\n\t\t-- Get the URL of the active tab in the front window\n\t\tset tabURL to URL of active tab of front window\n\t\t\n\t\t-- Close the active tab\n\t\tclose active tab of front window\n\t\t\n\t\t-- Create a new window and set its tab to the saved URL\n\t\tmake new window\n\t\tset URL of active tab of front window to tabURL\n\tend if\nend tell\n                                    '"
           } ],
           "conditions" : [ {
             "name" : "home-mode",
@@ -3893,8 +4017,46 @@
             "key_code" : "h"
           },
           "to" : [ {
-            "modifiers" : [ "command", "shift", "control", "option" ],
-            "key_code" : "f16"
+            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/focus_direction.sh west"
+          } ],
+          "conditions" : [ {
+            "name" : "home-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "key_code" : "j"
+          },
+          "to" : [ {
+            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/focus_direction.sh north"
+          } ],
+          "conditions" : [ {
+            "name" : "home-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "key_code" : "k"
+          },
+          "to" : [ {
+            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/focus_direction.sh south"
+          } ],
+          "conditions" : [ {
+            "name" : "home-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "key_code" : "l"
+          },
+          "to" : [ {
+            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/focus_direction.sh east"
           } ],
           "conditions" : [ {
             "name" : "home-mode",
@@ -12322,7 +12484,7 @@
             "key_code" : "q"
           },
           "to" : [ {
-            "shell_command" : "~/.kit/kar kit-discussions"
+            "shell_command" : "/usr/local/bin/cursor ~/dev/cdp-cli-container/cdp-cli"
           } ],
           "conditions" : [ {
             "name" : "kit-mode",
@@ -12341,7 +12503,7 @@
               "value" : 1
             }
           }, {
-            "shell_command" : "~/.kit/kar kit-discussions"
+            "shell_command" : "/usr/local/bin/cursor ~/dev/cdp-cli-container/cdp-cli"
           } ],
           "from" : {
             "simultaneous" : [ {
@@ -12679,10 +12841,10 @@
           }
         }, {
           "from" : {
-            "key_code" : "a"
+            "key_code" : "c"
           },
           "to" : [ {
-            "shell_command" : "/usr/local/bin/cursor ~/dev/app"
+            "shell_command" : "/usr/local/bin/cursor ~/dev/kit-container"
           } ],
           "conditions" : [ {
             "name" : "kit-mode",
@@ -12701,7 +12863,52 @@
               "value" : 1
             }
           }, {
-            "shell_command" : "/usr/local/bin/cursor ~/dev/app"
+            "shell_command" : "/usr/local/bin/cursor ~/dev/kit-container"
+          } ],
+          "from" : {
+            "simultaneous" : [ {
+              "key_code" : "n"
+            }, {
+              "key_code" : "c"
+            } ],
+            "simultaneous_options" : {
+              "detect_key_down_uninterruptedly" : true,
+              "key_down_order" : "strict",
+              "key_up_order" : "strict_inverse",
+              "key_up_when" : "any",
+              "to_after_key_up" : [ {
+                "set_variable" : {
+                  "name" : "kit-mode",
+                  "value" : 0
+                }
+              } ]
+            }
+          }
+        }, {
+          "from" : {
+            "key_code" : "a"
+          },
+          "to" : [ {
+            "shell_command" : "/usr/local/bin/cursor ~/dev/agentconfig"
+          } ],
+          "conditions" : [ {
+            "name" : "kit-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "type" : "basic",
+          "parameters" : {
+            "basic.simultaneous_threshold_milliseconds" : 140
+          },
+          "to" : [ {
+            "set_variable" : {
+              "name" : "kit-mode",
+              "value" : 1
+            }
+          }, {
+            "shell_command" : "/usr/local/bin/cursor ~/dev/agentconfig"
           } ],
           "from" : {
             "simultaneous" : [ {
@@ -12727,7 +12934,7 @@
             "key_code" : "w"
           },
           "to" : [ {
-            "shell_command" : "/usr/local/bin/cursor ~/dev/kit-workspace.code-workspace"
+            "shell_command" : "/usr/local/bin/cursor ~/dev/cursor-workshop-marp"
           } ],
           "conditions" : [ {
             "name" : "kit-mode",
@@ -12746,7 +12953,7 @@
               "value" : 1
             }
           }, {
-            "shell_command" : "/usr/local/bin/cursor ~/dev/kit-workspace.code-workspace"
+            "shell_command" : "/usr/local/bin/cursor ~/dev/cursor-workshop-marp"
           } ],
           "from" : {
             "simultaneous" : [ {
@@ -14927,6 +15134,51 @@
           }
         }, {
           "from" : {
+            "key_code" : "q"
+          },
+          "to" : [ {
+            "shell_command" : "/usr/bin/osascript /Users/johnlindquist/.config/focus-tab.scpt \"chatgpt.com/codex\""
+          } ],
+          "conditions" : [ {
+            "name" : "period-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "type" : "basic",
+          "parameters" : {
+            "basic.simultaneous_threshold_milliseconds" : 140
+          },
+          "to" : [ {
+            "set_variable" : {
+              "name" : "period-mode",
+              "value" : 1
+            }
+          }, {
+            "shell_command" : "/usr/bin/osascript /Users/johnlindquist/.config/focus-tab.scpt \"chatgpt.com/codex\""
+          } ],
+          "from" : {
+            "simultaneous" : [ {
+              "key_code" : "period"
+            }, {
+              "key_code" : "q"
+            } ],
+            "simultaneous_options" : {
+              "detect_key_down_uninterruptedly" : true,
+              "key_down_order" : "strict",
+              "key_up_order" : "strict_inverse",
+              "key_up_when" : "any",
+              "to_after_key_up" : [ {
+                "set_variable" : {
+                  "name" : "period-mode",
+                  "value" : 0
+                }
+              } ]
+            }
+          }
+        }, {
+          "from" : {
             "key_code" : "w"
           },
           "to" : [ {
@@ -16348,7 +16600,7 @@
             "key_code" : "a"
           },
           "to" : [ {
-            "shell_command" : "osascript -e 'tell application \"Activity Monitor\" to activate'"
+            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/launch_focus_app.sh \"Activity Monitor\""
           } ],
           "conditions" : [ {
             "name" : "launch-mode",
@@ -16367,7 +16619,7 @@
               "value" : 1
             }
           }, {
-            "shell_command" : "osascript -e 'tell application \"Activity Monitor\" to activate'"
+            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/launch_focus_app.sh \"Activity Monitor\""
           } ],
           "from" : {
             "simultaneous" : [ {
@@ -16393,7 +16645,7 @@
             "key_code" : "v"
           },
           "to" : [ {
-            "shell_command" : "osascript -e 'tell application \"Cursor Nightly\" to activate'"
+            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/launch_focus_app.sh \"Cursor Nightly\""
           } ],
           "conditions" : [ {
             "name" : "launch-mode",
@@ -16412,7 +16664,7 @@
               "value" : 1
             }
           }, {
-            "shell_command" : "osascript -e 'tell application \"Cursor Nightly\" to activate'"
+            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/launch_focus_app.sh \"Cursor Nightly\""
           } ],
           "from" : {
             "simultaneous" : [ {
@@ -16438,7 +16690,7 @@
             "key_code" : "g"
           },
           "to" : [ {
-            "shell_command" : "osascript -e 'tell application \"Discord\" to activate'"
+            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/launch_focus_app.sh \"Discord\""
           } ],
           "conditions" : [ {
             "name" : "launch-mode",
@@ -16457,7 +16709,7 @@
               "value" : 1
             }
           }, {
-            "shell_command" : "osascript -e 'tell application \"Discord\" to activate'"
+            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/launch_focus_app.sh \"Discord\""
           } ],
           "from" : {
             "simultaneous" : [ {
@@ -16483,7 +16735,7 @@
             "key_code" : "e"
           },
           "to" : [ {
-            "shell_command" : "osascript -e 'tell application \"Finder\" to activate'"
+            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/launch_focus_app.sh \"Finder\""
           } ],
           "conditions" : [ {
             "name" : "launch-mode",
@@ -16502,7 +16754,7 @@
               "value" : 1
             }
           }, {
-            "shell_command" : "osascript -e 'tell application \"Finder\" to activate'"
+            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/launch_focus_app.sh \"Finder\""
           } ],
           "from" : {
             "simultaneous" : [ {
@@ -16525,10 +16777,10 @@
           }
         }, {
           "from" : {
-            "key_code" : "t"
+            "key_code" : "r"
           },
           "to" : [ {
-            "shell_command" : "osascript -e 'tell application \"Google Chrome\" to activate'"
+            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/launch_focus_app.sh \"Pieces\""
           } ],
           "conditions" : [ {
             "name" : "launch-mode",
@@ -16547,7 +16799,52 @@
               "value" : 1
             }
           }, {
-            "shell_command" : "osascript -e 'tell application \"Google Chrome\" to activate'"
+            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/launch_focus_app.sh \"Pieces\""
+          } ],
+          "from" : {
+            "simultaneous" : [ {
+              "key_code" : "u"
+            }, {
+              "key_code" : "r"
+            } ],
+            "simultaneous_options" : {
+              "detect_key_down_uninterruptedly" : true,
+              "key_down_order" : "strict",
+              "key_up_order" : "strict_inverse",
+              "key_up_when" : "any",
+              "to_after_key_up" : [ {
+                "set_variable" : {
+                  "name" : "launch-mode",
+                  "value" : 0
+                }
+              } ]
+            }
+          }
+        }, {
+          "from" : {
+            "key_code" : "t"
+          },
+          "to" : [ {
+            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/launch_focus_app.sh \"Google Chrome\""
+          } ],
+          "conditions" : [ {
+            "name" : "launch-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "type" : "basic",
+          "parameters" : {
+            "basic.simultaneous_threshold_milliseconds" : 140
+          },
+          "to" : [ {
+            "set_variable" : {
+              "name" : "launch-mode",
+              "value" : 1
+            }
+          }, {
+            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/launch_focus_app.sh \"Google Chrome\""
           } ],
           "from" : {
             "simultaneous" : [ {
@@ -16573,7 +16870,7 @@
             "key_code" : "f"
           },
           "to" : [ {
-            "shell_command" : "osascript -e 'tell application \"iTerm\" to activate'"
+            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/launch_focus_app.sh \"Warp\""
           } ],
           "conditions" : [ {
             "name" : "launch-mode",
@@ -16592,7 +16889,7 @@
               "value" : 1
             }
           }, {
-            "shell_command" : "osascript -e 'tell application \"iTerm\" to activate'"
+            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/launch_focus_app.sh \"Warp\""
           } ],
           "from" : {
             "simultaneous" : [ {
@@ -16618,7 +16915,7 @@
             "key_code" : "c"
           },
           "to" : [ {
-            "shell_command" : "osascript -e 'tell application \"Cursor\" to activate'"
+            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/launch_focus_app.sh \"Cursor\""
           } ],
           "conditions" : [ {
             "name" : "launch-mode",
@@ -16637,7 +16934,7 @@
               "value" : 1
             }
           }, {
-            "shell_command" : "osascript -e 'tell application \"Cursor\" to activate'"
+            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/launch_focus_app.sh \"Cursor\""
           } ],
           "from" : {
             "simultaneous" : [ {
@@ -16708,7 +17005,7 @@
             "key_code" : "o"
           },
           "to" : [ {
-            "shell_command" : "osascript -e 'tell application \"YouTube Music\" to activate'"
+            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/launch_focus_app.sh \"YouTube Music\""
           } ],
           "conditions" : [ {
             "name" : "launch-mode",
@@ -16727,7 +17024,7 @@
               "value" : 1
             }
           }, {
-            "shell_command" : "osascript -e 'tell application \"YouTube Music\" to activate'"
+            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/launch_focus_app.sh \"YouTube Music\""
           } ],
           "from" : {
             "simultaneous" : [ {
@@ -16753,7 +17050,7 @@
             "key_code" : "s"
           },
           "to" : [ {
-            "shell_command" : "osascript -e 'tell application \"Restream Chat\" to activate'"
+            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/launch_focus_app.sh \"Restream Chat\""
           } ],
           "conditions" : [ {
             "name" : "launch-mode",
@@ -16772,7 +17069,7 @@
               "value" : 1
             }
           }, {
-            "shell_command" : "osascript -e 'tell application \"Restream Chat\" to activate'"
+            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/launch_focus_app.sh \"Restream Chat\""
           } ],
           "from" : {
             "simultaneous" : [ {
@@ -16798,7 +17095,7 @@
             "key_code" : "d"
           },
           "to" : [ {
-            "shell_command" : "osascript -e 'tell application \"Slack\" to activate'"
+            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/launch_focus_app.sh \"Slack\""
           } ],
           "conditions" : [ {
             "name" : "launch-mode",
@@ -16817,7 +17114,7 @@
               "value" : 1
             }
           }, {
-            "shell_command" : "osascript -e 'tell application \"Slack\" to activate'"
+            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/launch_focus_app.sh \"Slack\""
           } ],
           "from" : {
             "simultaneous" : [ {
@@ -16843,7 +17140,7 @@
             "key_code" : "z"
           },
           "to" : [ {
-            "shell_command" : "osascript -e 'tell application \"Zed\" to activate'"
+            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/launch_focus_app.sh \"Zed\""
           } ],
           "conditions" : [ {
             "name" : "launch-mode",
@@ -16862,7 +17159,7 @@
               "value" : 1
             }
           }, {
-            "shell_command" : "osascript -e 'tell application \"Zed\" to activate'"
+            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/launch_focus_app.sh \"Zed\""
           } ],
           "from" : {
             "simultaneous" : [ {
@@ -16888,7 +17185,7 @@
             "key_code" : "w"
           },
           "to" : [ {
-            "shell_command" : "osascript -e 'tell application \"zoom.us\" to activate'"
+            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/launch_focus_app.sh \"zoom.us\""
           } ],
           "conditions" : [ {
             "name" : "launch-mode",
@@ -16907,7 +17204,7 @@
               "value" : 1
             }
           }, {
-            "shell_command" : "osascript -e 'tell application \"zoom.us\" to activate'"
+            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/launch_focus_app.sh \"zoom.us\""
           } ],
           "from" : {
             "simultaneous" : [ {
@@ -16933,7 +17230,7 @@
             "key_code" : "x"
           },
           "to" : [ {
-            "shell_command" : "osascript -e 'tell application \"Users/johnlindquist/Applications/Chrome Apps.localized/Messages.app\" to activate'"
+            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/launch_focus_app.sh \"Users/johnlindquist/Applications/Chrome Apps.localized/Messages.app\""
           } ],
           "conditions" : [ {
             "name" : "launch-mode",
@@ -16952,7 +17249,7 @@
               "value" : 1
             }
           }, {
-            "shell_command" : "osascript -e 'tell application \"Users/johnlindquist/Applications/Chrome Apps.localized/Messages.app\" to activate'"
+            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/launch_focus_app.sh \"Users/johnlindquist/Applications/Chrome Apps.localized/Messages.app\""
           } ],
           "from" : {
             "simultaneous" : [ {
