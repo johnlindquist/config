@@ -1,0 +1,25 @@
+#!/bin/bash
+
+# JankyBorders configuration file
+# https://github.com/FelixKratz/JankyBorders
+
+# Set active window border color (bright blue)
+active_color=0xff0080ff
+
+# Set inactive window border color (dim gray)
+inactive_color=0x00000000
+
+# Set border width
+width=5.0
+
+# Style can be "round" or "square"
+style="square"
+
+# Blur radius for background blur
+blur_radius=5.0
+
+# Hide border for inactive windows
+hidpi=on
+
+# Apply to all windows
+blacklist="regex:^$"

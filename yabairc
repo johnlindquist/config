@@ -50,3 +50,12 @@ yabai -m signal --add event=window_deminimized action="/Users/johnlindquist/.con
 
 # Add signal for specific window focus history logging (as per documentation)
 yabai -m signal --add event=window_focused action="/Users/johnlindquist/.config/scripts/log_yabai_focus.sh"
+
+# App-specific window placement rules
+# Display 4, Space 12: Pieces (left) and Zed (right)
+yabai -m rule --add app="^Pieces$" display=4 space=12 manage=on grid=1:2:0:0:1:1
+yabai -m rule --add app="^Zed$" display=4 space=12 manage=on grid=1:2:1:0:1:1
+
+# Display 4, Space 11: Slack (left) and Messages (right)
+yabai -m rule --add app="^Slack$" display=4 space=11 manage=on grid=1:2:0:0:1:1
+yabai -m rule --add app="^Messages$" display=4 space=11 manage=on grid=1:2:1:0:1:1

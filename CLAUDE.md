@@ -86,3 +86,49 @@ Scripts use a centralized logging system via `log_helper.sh`. Logs are written t
 - Monitor Yabai logs for unexpected window management issues
 - Validate window ID consistency across scripts
 - Test scripts in different display and space configurations
+
+## Lessons Learned
+
+### Bash Arithmetic with Floating Point Numbers (FAILED)
+**What failed:** Using bash arithmetic operations `$(( ))` with yabai's floating-point coordinates
+```bash
+# This fails because bash doesn't support floats
+CURRENT_RIGHT_EDGE=$((CURRENT_X + CURRENT_WIDTH))
+```
+**What worked:** Do all arithmetic in jq instead
+```bash
+CURRENT_RIGHT_EDGE=$(echo "$CURRENT_DISPLAY_INFO" | $JQ -r '.frame.x + .frame.w')
+```
+
+### Window Borders with JankyBorders
+**Package name:** The tool is installed as `borders` not `jankyborders`
+```bash
+brew install felixkratz/formulae/borders  # Correct
+brew install jankyborders                 # Wrong
+```
+
+**Border clipping on maximized windows:**
+- Issue: Borders get clipped at screen edges when windows are maximized
+- Partial solution: Use undocumented `order=above` option
+- Note: JankyBorders only supports full borders (all 4 sides), not partial borders
+
+**What doesn't work:**
+- Adding padding only to focused window (yabai padding is global)
+- Creating bottom-only borders (JankyBorders limitation)
+- Perfect border rendering with `order=above` (minor 1px corner issues)
+
+### Cross-Display Window Focus
+**What worked:** Successfully implemented cross-display focus for all directions (north/south/east/west)
+- East/West: Focus the edge window closest to current position
+- North/South: Focus the largest window or edge window on target display
+- Use display frame coordinates to determine spatial relationships
+
+### Script Consolidation Pattern
+**What worked:** Creating a single parametric script instead of multiple similar scripts
+- `focus_direction.sh [east|west|north|south]` replaces 4 separate scripts
+- Original scripts can delegate to the consolidated script for backward compatibility
+
+### Chrome Tab Detachment
+**What worked:** Using AppleScript to get tab URL, close tab, and create new window
+- Check for single tab to avoid closing window
+- Return meaningful status messages for logging
