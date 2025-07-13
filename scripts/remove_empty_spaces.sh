@@ -30,6 +30,8 @@ all_spaces_json=$($YABAI_PATH -m query --spaces)
 focused_space_index=$($YABAI_PATH -m query --spaces --space | $JQ_PATH '.index')
 
 # Find spaces whose first-window == 0 (no real windows) excluding focused space
+# NOTE: This may miss spaces with hidden system windows (e.g., Granola, Music app)
+# Use remove_empty_spaces_improved.sh for better detection of truly empty spaces
 empty_space_indices=$($JQ_PATH -n --argjson spaces "$all_spaces_json" --argjson focused_idx "$focused_space_index" '
   [$spaces[] | select(.index != ($focused_idx | tonumber) and ."first-window" == 0) | .index] | .[]
 ')
@@ -42,11 +44,13 @@ if [[ -z "$empty_space_indices_sorted" ]]; then
     "$LOGGER_SCRIPT_PATH" "$SCRIPT_NAME" "INFO" "No empty spaces found (excluding the focused one). Nothing to do."
 else
     "$LOGGER_SCRIPT_PATH" "$SCRIPT_NAME" "ACTION" "Found empty spaces to destroy (indices, descending): $empty_space_indices_sorted"
-    total_destroyed=0
-    total_errors=0
-
+    
+    # Use arrays to track results (fixes counter issue)
+    destroyed_spaces=()
+    failed_spaces=()
+    
     # Loop through empty space indices and destroy them
-    echo "$empty_space_indices_sorted" | while IFS= read -r space_index; do
+    for space_index in $empty_space_indices_sorted; do
         # Basic check if space_index is a number
         if ! [[ "$space_index" =~ ^[0-9]+$ ]]; then
             "$LOGGER_SCRIPT_PATH" "$SCRIPT_NAME" "WARN" "Skipping invalid space index found: '$space_index'."
@@ -54,7 +58,12 @@ else
         fi
 
         # Check if it's the last space on its display - Yabai prevents this
-        space_display=$($YABAI_PATH -m query --spaces --space "$space_index" | $JQ_PATH '.display')
+        space_display=$($YABAI_PATH -m query --spaces --space "$space_index" | $JQ_PATH '.display' 2>/dev/null)
+        if [[ -z "$space_display" ]]; then
+            "$LOGGER_SCRIPT_PATH" "$SCRIPT_NAME" "WARN" "Space $space_index no longer exists, skipping."
+            continue
+        fi
+        
         spaces_on_display_count=$($YABAI_PATH -m query --spaces --display "$space_display" | $JQ_PATH 'length')
 
         if [[ "$spaces_on_display_count" -le 1 ]]; then
@@ -65,13 +74,16 @@ else
             exit_code=$?
             if [[ $exit_code -ne 0 ]]; then
                 "$LOGGER_SCRIPT_PATH" "$SCRIPT_NAME" "ERROR" "Failed to destroy space $space_index (Exit code: $exit_code)."
-                ((total_errors++))
+                failed_spaces+=("$space_index")
             else
                 "$LOGGER_SCRIPT_PATH" "$SCRIPT_NAME" "INFO" "Successfully destroyed space $space_index."
-                ((total_destroyed++))
+                destroyed_spaces+=("$space_index")
             fi
         fi
     done
+    
+    total_destroyed=${#destroyed_spaces[@]}
+    total_errors=${#failed_spaces[@]}
     "$LOGGER_SCRIPT_PATH" "$SCRIPT_NAME" "RESULT" "Finished processing empty spaces. Destroyed: $total_destroyed, Errors: $total_errors."
 fi
 

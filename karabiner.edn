@@ -860,8 +860,8 @@
                                 [:-h [:space_left]] ; Equal+H -> jump/make space left
                                 [:-n [:move_window_to_previous_empty_space]] ; Equal+J -> move left
                                 [:-e [:move_window_to_next_empty_space]] ; Equal+K -> move right
-                                [:-x [:remove_current_space]]
-                                [:-y [:remove_empty_spaces]]
+                                ;; [:-x [:remove_current_space]]
+                                [:-x [:remove_empty_spaces]]
                                 [:-m [:mission_control]]
                                 [:-d [:move_to_next_display]]
                                 [:-r [:restart_yabai]]

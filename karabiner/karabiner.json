@@ -3520,19 +3520,6 @@
             "key_code" : "x"
           },
           "to" : [ {
-            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/remove_current_space.sh"
-          } ],
-          "conditions" : [ {
-            "name" : "equal-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
-            "key_code" : "o"
-          },
-          "to" : [ {
             "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/remove_empty_spaces.sh"
           } ],
           "conditions" : [ {
