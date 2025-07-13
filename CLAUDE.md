@@ -132,3 +132,62 @@ brew install jankyborders                 # Wrong
 **What worked:** Using AppleScript to get tab URL, close tab, and create new window
 - Check for single tab to avoid closing window
 - Return meaningful status messages for logging
+
+### Yabai Window Rules for App Placement
+**What worked:** Using yabai rules to automatically place apps on specific displays/spaces
+```bash
+yabai -m rule --add app="^AppName$" display=4 space=12 manage=on grid=1:2:0:0:1:1
+```
+- Grid syntax: `rows:cols:start-x:start-y:width:height` (e.g., `1:2:0:0:1:1` = left half)
+- Rules apply to NEW windows only (not existing ones)
+- Must use exact app name with `^` and `$` anchors
+
+### Empty Space Detection Issues
+**Original script limitation:** `first-window == 0` check misses spaces with hidden system windows
+
+**Hidden system windows that cause false positives:**
+- Granola app (no role, can't move)
+- Music app (no role, can't move)
+- UAD Meter (hidden but has window ID)
+
+**What worked:** Check for truly visible windows instead:
+- Verify window has a valid `role` (not null/empty)
+- Check `can-move` property
+- Ignore system windows without proper roles
+
+**Bash counter bug in pipes:** Variables incremented in piped while loops are in subshells
+```bash
+# FAILED: Counter always shows 0
+echo "$items" | while read item; do ((count++)); done
+
+# WORKED: Use arrays or for loops
+for item in $items; do ((count++)); done
+# OR use arrays: destroyed_spaces+=("$space_index")
+```
+
+### Mission Control Sync Issues
+**Problem:** After programmatically creating/destroying spaces, Mission Control can show incorrect space contents
+
+**Symptoms:**
+- "Desktop 1" appears empty in Mission Control but has windows
+- Space indices don't match between yabai and Mission Control
+
+**Partial fixes:**
+1. Restart Dock: `killall Dock`
+2. Force Mission Control refresh via AppleScript
+3. Add/remove space labels to trigger update
+4. Nuclear option: `rm ~/Library/Preferences/com.apple.spaces.plist && killall Dock`
+
+**Root cause:** yabai uses undocumented APIs, causing occasional desync with macOS
+
+### Yabai Service Management
+**What failed:** `brew services restart yabai` (yabai doesn't use brew services)
+
+**What worked:** 
+- `yabai --restart-service` (built-in command)
+- Check logs: `~/.cache/yabai_script_log.log`
+
+### Script Naming Patterns
+- Use underscores for consistency: `remove_empty_spaces.sh`
+- Create "improved" versions when fixing complex issues: `remove_empty_spaces_improved.sh`
+- Consolidate similar scripts: `focus_direction.sh` with parameters

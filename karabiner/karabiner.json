@@ -3520,7 +3520,7 @@
             "key_code" : "x"
           },
           "to" : [ {
-            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/remove_empty_spaces.sh"
+            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/remove_empty_spaces_improved.sh"
           } ],
           "conditions" : [ {
             "name" : "equal-mode",

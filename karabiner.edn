@@ -296,7 +296,7 @@
                        :move_window_to_display_3 "/bin/bash /Users/johnlindquist/.config/scripts/move_window_to_display_3.sh"
                        :move_window_to_display_4 "/bin/bash /Users/johnlindquist/.config/scripts/move_window_to_display_4.sh"
                        :remove_current_space "/bin/bash /Users/johnlindquist/.config/scripts/remove_current_space.sh"
-                       :remove_empty_spaces "/bin/bash /Users/johnlindquist/.config/scripts/remove_empty_spaces.sh"
+                       :remove_empty_spaces "/bin/bash /Users/johnlindquist/.config/scripts/remove_empty_spaces_improved.sh"
                        :move_to_next_display "/bin/bash /Users/johnlindquist/.config/scripts/move_to_next_display.sh"
                        :move_to_previous_display "/bin/bash /Users/johnlindquist/.config/scripts/move_to_previous_display.sh"
                        :move_window_east "/bin/bash /Users/johnlindquist/.config/scripts/move_window_east.sh"

@@ -52,10 +52,17 @@ yabai -m signal --add event=window_deminimized action="/Users/johnlindquist/.con
 yabai -m signal --add event=window_focused action="/Users/johnlindquist/.config/scripts/log_yabai_focus.sh"
 
 # App-specific window placement rules
-# Display 4, Space 12: Pieces (left) and Zed (right)
-yabai -m rule --add app="^Pieces$" display=4 space=12 manage=on grid=1:2:0:0:1:1
-yabai -m rule --add app="^Zed$" display=4 space=12 manage=on grid=1:2:1:0:1:1
+# Display 4, Space 9: Pieces (left) and Zed (right)
+yabai -m rule --add app="^Pieces$" display=4 space=9 manage=on grid=1:2:0:0:1:1
+yabai -m rule --add app="^Zed$" display=4 space=9 manage=on grid=1:2:1:0:1:1
 
-# Display 4, Space 11: Slack (left) and Messages (right)
-yabai -m rule --add app="^Slack$" display=4 space=11 manage=on grid=1:2:0:0:1:1
-yabai -m rule --add app="^Messages$" display=4 space=11 manage=on grid=1:2:1:0:1:1
+# Display 4, Space 10: Slack (left) and Messages (right)
+yabai -m rule --add app="^Slack$" display=4 space=10 manage=on grid=1:2:0:0:1:1
+yabai -m rule --add app="^Messages$" display=4 space=10 manage=on grid=1:2:1:0:1:1
+
+# Auto-arrange existing windows on startup
+/Users/johnlindquist/.config/scripts/auto_arrange_startup_apps.sh
+
+# Add signal to auto-arrange when these specific apps create windows
+yabai -m signal --add event=window_created app="^(Pieces|Zed|Slack|Messages)$" \
+    action="/Users/johnlindquist/.config/scripts/auto_arrange_startup_apps.sh"
