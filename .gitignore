@@ -41,6 +41,10 @@ node_modules/
 .node_repl_history
 .python_history
 
+# Zsh local config (machine-specific, not shared)
+zsh/local.zsh
+zsh/.zcompdump*
+
 # Local environment files
 .env
 .env.local

@@ -1,0 +1,552 @@
+# ==============================================================================
+# Zsh Gist Functions with AI-powered safety checks
+# ==============================================================================
+# Requires: gh (GitHub CLI), claude (Claude CLI)
+# Usage: Source this file in your .zshrc
+# ==============================================================================
+
+# --- Global knobs (override in your env before loading this file) ---
+: "${GIST_MAX_FILES:=10}"        # hard cap on files per gist
+: "${GIST_MAX_BYTES:=1048576}"   # ~1 MiB cap on total content
+: "${GIST_MAX_CANDIDATES:=40}"   # max changed files AI will consider
+: "${GIST_AI:=1}"                # set to 0 to disable AI layer
+: "${GIST_AI_MODEL:=}"           # e.g. "sonnet" if you want a specific model
+
+# If set to 1, pass --public to gh (otherwise secret gists)
+: "${GIST_PUBLIC:=0}"
+
+_gist_check_deps() {
+  command -v gh >/dev/null 2>&1 || {
+    echo "gh CLI not found. Install GitHub CLI and run 'gh auth login' first." >&2
+    return 1
+  }
+  command -v claude >/dev/null 2>&1 || {
+    echo "claude CLI not found. Install it before using the AI features." >&2
+    return 1
+  }
+}
+
+_gist_file_size() {
+  local f=$1
+  [[ -f "$f" ]] || { echo 0; return 0; }
+  if stat -c '%s' "$f" >/dev/null 2>&1; then
+    stat -c '%s' "$f" 2>/dev/null
+  else
+    stat -f '%z' "$f" 2>/dev/null
+  fi
+}
+
+_gist_scan_for_secrets() {
+  # crude, defensive heuristics. This will flag some false positives; that's fine.
+  local f
+  for f in "$@"; do
+    [[ -f "$f" ]] || continue
+    if grep -Eqi '(AWS_SECRET_ACCESS_KEY|AWS_ACCESS_KEY_ID|BEGIN [A-Z ]*PRIVATE KEY|xox[baprs]-|ghp_[0-9A-Za-z]{20,}|github_pat_[0-9A-Za-z]{20,}|sk_(test|live)_[0-9A-Za-z]{10,}|password\s*=?\s*[^[:space:]]+|secret\s*=?\s*[^[:space:]]+)' "$f"; then
+      echo "Possible secrets detected in $f" >&2
+      return 1
+    fi
+  done
+  return 0
+}
+
+_gist_scan_text_for_secrets() {
+  # same heuristic, but for text coming from diff/clipboard
+  if printf '%s\n' "$1" | grep -Eqi '(AWS_SECRET_ACCESS_KEY|AWS_ACCESS_KEY_ID|BEGIN [A-Z ]*PRIVATE KEY|xox[baprs]-|ghp_[0-9A-Za-z]{20,}|github_pat_[0-9A-Za-z]{20,}|sk_(test|live)_[0-9A-Za-z]{10,}|password\s*=?\s*[^[:space:]]+|secret\s*=?\s*[^[:space:]]+)' ; then
+    echo "Possible secrets detected in supplied text" >&2
+    return 1
+  fi
+  return 0
+}
+
+_gist_total_bytes() {
+  local total=0 f size
+  for f in "$@"; do
+    size=$(_gist_file_size "$f")
+    total=$(( total + size ))
+  done
+  echo "$total"
+}
+
+_gist_ai_call() {
+  # $1 = prompt string
+  local prompt=$1
+  local -a args
+  args=(-p --print --output-format text)
+  [[ -n "$GIST_AI_MODEL" ]] && args+=(--model "$GIST_AI_MODEL")
+  claude "${args[@]}" "$prompt"
+}
+
+_gist_public_flag() {
+  [[ "$GIST_PUBLIC" = "1" ]] && echo "--public"
+}
+
+# ==============================================================================
+# 1) gist_safe – AI-reviewed, size-limited files
+# ==============================================================================
+gist_safe() {
+  _gist_check_deps || return 1
+
+  if (( $# == 0 )); then
+    echo "Usage: gist_safe <file ...>" >&2
+    return 1
+  fi
+
+  local -a files=()
+  local f
+  for f in "$@"; do
+    if [[ -f "$f" ]]; then
+      files+="$f"
+    else
+      echo "Skipping non-regular file: $f" >&2
+    fi
+  done
+
+  (( ${#files[@]} )) || { echo "No valid files to gist." >&2; return 1; }
+
+  if (( ${#files[@]} > GIST_MAX_FILES )); then
+    echo "Refusing to gist ${#files[@]} files (limit: $GIST_MAX_FILES). Set GIST_MAX_FILES to override." >&2
+    return 1
+  fi
+
+  local total_bytes
+  total_bytes=$(_gist_total_bytes "${files[@]}")
+  if (( total_bytes > GIST_MAX_BYTES )); then
+    echo "Refusing to gist $total_bytes bytes (limit: $GIST_MAX_BYTES). Set GIST_MAX_BYTES to override." >&2
+    return 1
+  fi
+
+  if ! _gist_scan_for_secrets "${files[@]}"; then
+    if [[ "$GIST_FORCE" = "1" ]]; then
+      echo "GIST_FORCE=1 set; continuing despite secret heuristic warning." >&2
+    else
+      echo "Aborting due to suspected secrets. Set GIST_FORCE=1 if you really know what you're doing." >&2
+      return 1
+    fi
+  fi
+
+  local desc="Gist from gist_safe"
+  if (( GIST_AI )); then
+    local sample
+    sample=$(
+      for f in "${files[@]}"; do
+        echo "=== $f (first 100 lines) ==="
+        sed -n '1,100p' -- "$f" 2>/dev/null
+        echo
+      done
+    )
+
+    local prompt
+    prompt=$(cat <<EOF
+You are reviewing code that a developer wants to share as a secret GitHub gist.
+
+Files:
+${files[*]}
+
+Sample content (truncated):
+$sample
+
+Tasks:
+1) Decide if this looks safe to share externally (no secrets, credentials, private keys, tokens, or obvious sensitive data).
+2) Reply with exactly two lines:
+   SAFE: yes|no
+   DESC: one short, human-friendly description of what this gist contains.
+
+No extra commentary.
+EOF
+)
+    local ai_output safe desc_line
+    ai_output=$(_gist_ai_call "$prompt")
+
+    safe=$(printf '%s\n' "$ai_output" | sed -n 's/^SAFE:[[:space:]]*//Ip' | head -n1 | tr '[:upper:]' '[:lower:]')
+    desc_line=$(printf '%s\n' "$ai_output" | sed -n 's/^DESC:[[:space:]]*//Ip' | head -n1)
+
+    [[ -n "$desc_line" ]] && desc="$desc_line"
+
+    if [[ "$safe" != "yes" ]]; then
+      echo "AI flagged this as potentially unsafe to share (SAFE=$safe)." >&2
+      if [[ "$GIST_FORCE" = "1" ]]; then
+        echo "GIST_FORCE=1 set; overriding AI warning." >&2
+      else
+        return 1
+      fi
+    fi
+  fi
+
+  local public_flag
+  public_flag=$(_gist_public_flag)
+
+  echo "Creating gist (${#files[@]} files, ${total_bytes} bytes) – \"$desc\"" >&2
+  gh gist create ${public_flag:+$public_flag} -d "$desc" "${files[@]}"
+}
+
+# ==============================================================================
+# 2) gist_ai_changed – AI picks a safe subset of changed files in a git repo
+# ==============================================================================
+gist_ai_changed() {
+  _gist_check_deps || return 1
+
+  local max_files=$GIST_MAX_FILES
+  local public_flag=""
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      -n|--max-files)
+        max_files=$2
+        shift 2
+        ;;
+      --public)
+        public_flag="--public"
+        shift
+        ;;
+      *)
+        echo "Unknown option: $1" >&2
+        echo "Usage: gist_ai_changed [-n max_files] [--public]" >&2
+        return 1
+        ;;
+    esac
+  done
+
+  git rev-parse --is-inside-work-tree >/dev/null 2>&1 || {
+    echo "Not inside a git repository." >&2
+    return 1
+  }
+
+  local -a files
+  # crude but works for normal names (no newlines). If you have truly cursed filenames, you deal with it.
+  files=("${(@f)$(git status --porcelain | sed 's/^...//')}")
+
+  (( ${#files[@]} )) || { echo "No changed files to gist." >&2; return 1; }
+
+  # Limit candidates to keep prompts and runtime sane
+  if (( ${#files[@]} > GIST_MAX_CANDIDATES )); then
+    echo "There are ${#files[@]} changed files; only considering first $GIST_MAX_CANDIDATES for AI selection." >&2
+    files=("${files[@]:0:GIST_MAX_CANDIDATES}")
+  fi
+
+  local meta=""
+  local f size
+  for f in "${files[@]}"; do
+    size=$(_gist_file_size "$f")
+    meta+="$f ($size bytes)\n"
+  done
+
+  local desc="Gist of selected changed files"
+  local -a chosen_files=()
+
+  if (( GIST_AI )); then
+    local prompt
+    prompt=$(cat <<EOF
+You are helping a developer share a small, safe subset of files from a git repository as a secret GitHub gist.
+
+Here are changed files (at most $GIST_MAX_CANDIDATES considered):
+$meta
+
+Goals:
+- Pick at most $max_files files that are:
+  * small enough and likely useful as a snippet (examples, scripts, docs, small source files).
+  * unlikely to contain secrets (.env, private keys, config with passwords/tokens, etc.) – avoid those completely.
+- Prefer files under $GIST_MAX_BYTES bytes.
+- Avoid dependency locks, node_modules, build artifacts, and junk.
+
+Reply in this exact format:
+
+FILES:
+relative/path/one.ext
+relative/path/two.ext
+DESC: a short human description of what this gist is (one line)
+
+Do not add extra commentary.
+EOF
+)
+    local ai_output
+    ai_output=$(_gist_ai_call "$prompt")
+
+    local line in_files=0
+    while IFS= read -r line; do
+      if [[ "$line" == FILES:* ]]; then
+        in_files=1
+        continue
+      fi
+      if [[ "$line" == DESC:* ]]; then
+        desc=${line#DESC:}
+        desc=${desc##[[:space:]]}
+        break
+      fi
+      if (( in_files )); then
+        [[ -z "$line" ]] && continue
+        chosen_files+=("$line")
+      fi
+    done <<< "$ai_output"
+
+    # sanity clamp
+    if (( ${#chosen_files[@]} > max_files )); then
+      chosen_files=("${chosen_files[@]:0:max_files}")
+    fi
+  else
+    # fallback: just take up to max_files smallest files
+    local -a tmp_pairs
+    for f in "${files[@]}"; do
+      size=$(_gist_file_size "$f")
+      tmp_pairs+=("$size:$f")
+    done
+    tmp_pairs=("${(on)tmp_pairs}")  # sort numerically by size
+    for f in "${tmp_pairs[@]:0:max_files}"; do
+      chosen_files+=("${f#*:}")
+    done
+  fi
+
+  (( ${#chosen_files[@]} )) || {
+    echo "AI did not select any files. Nothing to gist." >&2
+    return 1
+  }
+
+  local total_bytes
+  total_bytes=$(_gist_total_bytes "${chosen_files[@]}")
+  if (( total_bytes > GIST_MAX_BYTES )); then
+    echo "Refusing to gist ${#chosen_files[@]} files ($total_bytes bytes > $GIST_MAX_BYTES limit)." >&2
+    return 1
+  fi
+
+  if ! _gist_scan_for_secrets "${chosen_files[@]}"; then
+    if [[ "$GIST_FORCE" = "1" ]]; then
+      echo "GIST_FORCE=1 set; overriding secret heuristic warning." >&2
+    else
+      echo "Aborting due to suspected secrets in selected files." >&2
+      return 1
+    fi
+  fi
+
+  echo "Creating gist with ${#chosen_files[@]} changed files ($total_bytes bytes) – \"$desc\"" >&2
+  gh gist create ${public_flag:+$public_flag} -d "$desc" "${chosen_files[@]}"
+}
+
+# ==============================================================================
+# 3) gist_ai_clipboard – AI-sanitized clipboard (or piped) text
+# ==============================================================================
+gist_ai_clipboard() {
+  _gist_check_deps || return 1
+
+  local public_flag=""
+  if [[ "$1" == "--public" ]]; then
+    public_flag="--public"
+    shift
+  fi
+
+  local content=""
+  if [ -t 0 ]; then
+    # No stdin, so try clipboard
+    if command -v pbpaste >/dev/null 2>&1; then
+      content=$(pbpaste)
+    elif command -v xclip >/dev/null 2>&1; then
+      content=$(xclip -o -selection clipboard)
+    elif command -v wl-paste >/dev/null 2>&1; then
+      content=$(wl-paste)
+    else
+      echo "No clipboard tool found (pbpaste/xclip/wl-paste). Pipe content into gist_ai_clipboard instead." >&2
+      return 1
+    fi
+  else
+    content=$(cat)
+  fi
+
+  [[ -n "$content" ]] || { echo "No content to gist." >&2; return 1; }
+
+  if (( ${#content} > GIST_MAX_BYTES )); then
+    echo "Refusing to gist clipboard/stdin: ${#content} bytes > $GIST_MAX_BYTES limit." >&2
+    return 1
+  fi
+
+  if ! _gist_scan_text_for_secrets "$content"; then
+    if [[ "$GIST_FORCE" = "1" ]]; then
+      echo "GIST_FORCE=1 set; overriding secret heuristic warning." >&2
+    else
+      echo "Aborting; suspected secrets detected in text." >&2
+      return 1
+    fi
+  fi
+
+  local sanitized="$content"
+  local desc="Clipboard gist"
+
+  if (( GIST_AI )); then
+    local prompt
+    prompt=$(cat <<EOF
+You are preparing text to be shared as a secret GitHub gist.
+
+Original text between <<< and >>>:
+<<<
+$content
+>>>
+
+Tasks:
+1) Remove or mask any secrets, credentials, private keys, tokens, or obviously sensitive values by replacing them with "***redacted***".
+2) Otherwise keep the text as-is.
+3) Output the sanitized text.
+4) On the very last line, output: DESC: <short one-line description of this gist>.
+
+Do not add any extra commentary.
+EOF
+)
+    local ai_output
+    ai_output=$(_gist_ai_call "$prompt")
+
+    desc=$(printf '%s\n' "$ai_output" | sed -n 's/^DESC:[[:space:]]*//Ip' | tail -n1)
+    [[ -z "$desc" ]] && desc="Clipboard gist"
+
+    sanitized=$(printf '%s\n' "$ai_output" | sed '/^DESC:/Id')
+  fi
+
+  echo "Creating text gist – \"$desc\"" >&2
+  printf '%s\n' "$sanitized" | gh gist create ${public_flag:+$public_flag} -d "$desc" -
+}
+
+# ==============================================================================
+# 4) gist_ai_snippet – file + line range, minimal exposed code
+# ==============================================================================
+gist_ai_snippet() {
+  _gist_check_deps || return 1
+
+  if (( $# < 1 )); then
+    echo "Usage: gist_ai_snippet <file> [start_line] [end_line]" >&2
+    return 1
+  fi
+
+  local file=$1
+  local start=${2:-1}
+  local end=${3:-}
+
+  [[ -f "$file" ]] || { echo "No such file: $file" >&2; return 1; }
+
+  local snippet
+  if [[ -n "$end" ]]; then
+    snippet=$(sed -n "${start},${end}p" -- "$file")
+  else
+    snippet=$(sed -n "${start},\$p" -- "$file")
+  fi
+
+  [[ -n "$snippet" ]] || { echo "Selected range is empty." >&2; return 1; }
+
+  if (( ${#snippet} > GIST_MAX_BYTES )); then
+    echo "Refusing to gist snippet: ${#snippet} bytes > $GIST_MAX_BYTES limit." >&2
+    return 1
+  fi
+
+  if ! _gist_scan_text_for_secrets "$snippet"; then
+    if [[ "$GIST_FORCE" = "1" ]]; then
+      echo "GIST_FORCE=1 set; overriding secret heuristic warning." >&2
+    else
+      echo "Aborting; suspected secrets detected in snippet." >&2
+      return 1
+    fi
+  fi
+
+  local sanitized="$snippet"
+  local desc="Snippet from $file lines $start-${end:-EOF}"
+
+  if (( GIST_AI )); then
+    local prompt
+    prompt=$(cat <<EOF
+You are preparing a code snippet from file "$file" to be shared as a secret GitHub gist.
+
+Snippet (lines $start to ${end:-EOF}) between <<< and >>>:
+<<<
+$snippet
+>>>
+
+Tasks:
+1) Mask any secrets/credentials if present by replacing them with "***redacted***".
+2) Otherwise leave the code as-is.
+3) Output the sanitized snippet.
+4) On the last line, output: DESC: <short one-line description>.
+
+No extra commentary.
+EOF
+)
+    local ai_output
+    ai_output=$(_gist_ai_call "$prompt")
+
+    desc=$(printf '%s\n' "$ai_output" | sed -n 's/^DESC:[[:space:]]*//Ip' | tail -n1)
+    [[ -z "$desc" ]] && desc="Snippet from $file lines $start-${end:-EOF}"
+
+    sanitized=$(printf '%s\n' "$ai_output" | sed '/^DESC:/Id')
+  fi
+
+  local public_flag
+  public_flag=$(_gist_public_flag)
+
+  echo "Creating snippet gist from $file [$start-${end:-EOF}] – \"$desc\"" >&2
+  printf '%s\n' "$sanitized" | gh gist create ${public_flag:+$public_flag} -d "$desc" -
+}
+
+# ==============================================================================
+# 5) gist_ai_diff – AI-sanitized git diff instead of full files
+# ==============================================================================
+gist_ai_diff() {
+  _gist_check_deps || return 1
+
+  git rev-parse --is-inside-work-tree >/dev/null 2>&1 || {
+    echo "Not inside a git repository." >&2
+    return 1
+  }
+
+  local base=${1:-HEAD}
+  local diff_text
+
+  if [[ "$base" == "HEAD" ]]; then
+    diff_text=$(git diff)
+  else
+    diff_text=$(git diff "$base"..HEAD)
+  fi
+
+  [[ -n "$diff_text" ]] || { echo "No diff to gist." >&2; return 1; }
+
+  if (( ${#diff_text} > GIST_MAX_BYTES )); then
+    echo "Refusing to gist diff: ${#diff_text} bytes > $GIST_MAX_BYTES limit." >&2
+    return 1
+  fi
+
+  if ! _gist_scan_text_for_secrets "$diff_text"; then
+    if [[ "$GIST_FORCE" = "1" ]]; then
+      echo "GIST_FORCE=1 set; overriding secret heuristic warning." >&2
+    else
+      echo "Aborting; suspected secrets detected in diff." >&2
+      return 1
+    fi
+  fi
+
+  local sanitized="$diff_text"
+  local desc="Git diff gist"
+
+  if (( GIST_AI )); then
+    local prompt
+    prompt=$(cat <<EOF
+You are preparing a git diff to be shared as a secret GitHub gist.
+
+Diff between ${base} and current working tree (or HEAD) is between <<< and >>>:
+<<<
+$diff_text
+>>>
+
+Tasks:
+1) Mask any secrets, credentials, access tokens, private keys, or obviously sensitive values by replacing them with "***redacted***".
+2) Otherwise, keep the diff structure intact.
+3) Output the sanitized diff.
+4) On the last line, output: DESC: <short one-line description of the change>.
+
+No extra commentary.
+EOF
+)
+    local ai_output
+    ai_output=$(_gist_ai_call "$prompt")
+
+    desc=$(printf '%s\n' "$ai_output" | sed -n 's/^DESC:[[:space:]]*//Ip' | tail -n1)
+    [[ -z "$desc" ]] && desc="Git diff gist from $base"
+
+    sanitized=$(printf '%s\n' "$ai_output" | sed '/^DESC:/Id')
+  fi
+
+  local public_flag
+  public_flag=$(_gist_public_flag)
+
+  echo "Creating diff gist – \"$desc\"" >&2
+  printf '%s\n' "$sanitized" | gh gist create ${public_flag:+$public_flag} -d "$desc" -
+}

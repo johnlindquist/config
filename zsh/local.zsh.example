@@ -1,0 +1,79 @@
+# =============================================================================
+# Local Machine Configuration (not version controlled)
+# =============================================================================
+# Copy this file to local.zsh and customize for your machine.
+# This file is sourced AFTER all conf.d/ modules.
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# PATH additions (machine-specific tools)
+# -----------------------------------------------------------------------------
+# path=(
+#   "$HOME/dev/my-project/bin"
+#   "$HOME/.codeium/windsurf/bin"
+#   $path
+# )
+# export PATH="${(j/:/)path}"
+
+# -----------------------------------------------------------------------------
+# Node version (if different from default)
+# -----------------------------------------------------------------------------
+# export NODE_VERSION="22.0.0"
+
+# -----------------------------------------------------------------------------
+# 1Password item name overrides
+# -----------------------------------------------------------------------------
+# If your 1Password items have different names, override them here:
+# export OP_GEMINI_ITEM="My Gemini API Key"
+# export OP_OPENAI_ITEM="My OpenAI Key"
+# export OP_GITHUB_ITEM="GitHub Personal Token"
+# export OP_ANTHROPIC_ITEM="Claude API Key"
+
+# -----------------------------------------------------------------------------
+# Editor preferences
+# -----------------------------------------------------------------------------
+# export EDITOR_CMD="code"  # or "cursor", "zed", "nvim"
+
+# Aliases for your editor
+# alias zz="$EDITOR_CMD ~/.config/zsh/.zshrc"
+# alias zk="$EDITOR_CMD ~/.config/karabiner.edn"
+
+# -----------------------------------------------------------------------------
+# Project-specific shortcuts
+# -----------------------------------------------------------------------------
+# alias myproj="cd ~/dev/my-project && $EDITOR_CMD ."
+# kdev() { cd ~/dev/kit && pnpm build && cd - && pnpm dev; }
+
+# -----------------------------------------------------------------------------
+# Tool-specific configs
+# -----------------------------------------------------------------------------
+# Karabiner profile switching (macOS)
+# alias kar1="'/Library/Application Support/org.pqrs/Karabiner-Elements/bin/karabiner_cli' --select-profile 'Default'"
+
+# ScriptKit logs
+# tk() { tail -f ~/Library/Logs/ScriptKit/"$1".log; }
+
+# Cursor agent (if installed)
+# ca() { env -u CURSOR_CLI -u CURSOR_AGENT $HOME/.local/bin/cursor-agent "$@"; }
+
+# Windsurf
+# alias w="$HOME/.codeium/windsurf/bin/windsurf"
+
+# -----------------------------------------------------------------------------
+# ZAI / Alternative Claude backends
+# -----------------------------------------------------------------------------
+# with_zai() {
+#   local k=$(opkey "${OP_ZAI_ITEM:-ZAI_API_KEY}") || return 1
+#   ANTHROPIC_AUTH_TOKEN="$k" \
+#   ANTHROPIC_BASE_URL="https://api.z.ai/api/anthropic" \
+#   "$@"
+# }
+# zai() { with_zai claude "$@"; }
+
+# -----------------------------------------------------------------------------
+# Kimi / Groq / Other providers
+# -----------------------------------------------------------------------------
+# kimi() {
+#   local k=$(opkey "${OP_KIMI_ITEM:-OPENROUTER_KIMI_API_KEY}") || return 1
+#   OPENROUTER_KIMI_API_KEY="$k" ccr code "$@"
+# }
