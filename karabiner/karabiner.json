@@ -40,6 +40,11 @@
             "key_code" : "escape"
           }, {
             "set_variable" : {
+              "name" : "caps-lock-mode",
+              "value" : 0
+            }
+          }, {
+            "set_variable" : {
               "name" : "fn-mode",
               "value" : 0
             }
@@ -103,46 +108,11 @@
               "name" : "escape-mode",
               "value" : 0
             }
-          } ]
-        }, {
-          "type" : "basic",
-          "to" : [ {
+          }, {
             "set_variable" : {
-              "name" : "caps_lock-mode",
-              "value" : 1
-            }
-          } ],
-          "from" : {
-            "key_code" : "caps_lock"
-          },
-          "to_after_key_up" : [ {
-            "set_variable" : {
-              "name" : "caps_lock-mode",
+              "name" : "home-mode",
               "value" : 0
             }
-          } ],
-          "to_if_alone" : [ {
-            "key_code" : "escape"
-          } ]
-        }, {
-          "type" : "basic",
-          "to" : [ {
-            "set_variable" : {
-              "name" : "fn-mode",
-              "value" : 1
-            }
-          } ],
-          "from" : {
-            "key_code" : "fn"
-          },
-          "to_after_key_up" : [ {
-            "set_variable" : {
-              "name" : "fn-mode",
-              "value" : 0
-            }
-          } ],
-          "to_if_alone" : [ {
-            "key_code" : "home"
           } ]
         }, {
           "type" : "basic",
@@ -290,32 +260,143 @@
         "description" : "Global Modifier Rules",
         "manipulators" : [ {
           "to_if_alone" : [ {
-            "modifiers" : [ "left_command" ],
-            "key_code" : "semicolon"
+            "key_code" : "home"
+          } ],
+          "to_after_key_up" : [ {
+            "set_variable" : {
+              "name" : "equal-mode",
+              "value" : 0
+            }
           } ],
           "from" : {
-            "key_code" : "left_option"
+            "key_code" : "fn"
           },
           "to" : [ {
-            "key_code" : "left_option"
+            "set_variable" : {
+              "name" : "equal-mode",
+              "value" : 1
+            }
           } ],
           "type" : "basic"
         }, {
+          "to_if_alone" : [ {
+            "key_code" : "escape"
+          } ],
+          "to_after_key_up" : [ {
+            "set_variable" : {
+              "name" : "escape-mode",
+              "value" : 0
+            }
+          } ],
           "from" : {
-            "modifiers" : {
-              "mandatory" : [ "left_command" ]
-            },
-            "key_code" : "left_control"
+            "key_code" : "caps_lock"
           },
           "to" : [ {
-            "modifiers" : [ "command", "shift", "control", "option" ],
-            "key_code" : "9"
+            "set_variable" : {
+              "name" : "escape-mode",
+              "value" : 1
+            }
+          } ],
+          "type" : "basic"
+        }, {
+          "to_if_alone" : [ {
+            "modifiers" : [ "left_command" ],
+            "key_code" : "semicolon"
+          } ],
+          "to_after_key_up" : [ {
+            "set_variable" : {
+              "name" : "home-mode",
+              "value" : 0
+            }
+          }, {
+            "set_variable" : {
+              "name" : "fn-mode",
+              "value" : 0
+            }
+          }, {
+            "set_variable" : {
+              "name" : "opt-mode",
+              "value" : 0
+            }
+          }, {
+            "set_variable" : {
+              "name" : "shift-opt-mode",
+              "value" : 0
+            }
+          }, {
+            "set_variable" : {
+              "name" : "movement-mode",
+              "value" : 0
+            }
+          }, {
+            "set_variable" : {
+              "name" : "cursor-mode",
+              "value" : 0
+            }
+          }, {
+            "set_variable" : {
+              "name" : "delete-mode",
+              "value" : 0
+            }
+          }, {
+            "set_variable" : {
+              "name" : "nav-mode",
+              "value" : 0
+            }
+          }, {
+            "set_variable" : {
+              "name" : "snippet-mode",
+              "value" : 0
+            }
+          }, {
+            "set_variable" : {
+              "name" : "kit-mode",
+              "value" : 0
+            }
+          }, {
+            "set_variable" : {
+              "name" : "button2-mode",
+              "value" : 0
+            }
+          }, {
+            "set_variable" : {
+              "name" : "button4-mode",
+              "value" : 0
+            }
+          }, {
+            "set_variable" : {
+              "name" : "escape-mode",
+              "value" : 0
+            }
+          } ],
+          "from" : {
+            "key_code" : "left_option"
+          },
+          "to" : [ {
+            "key_code" : "left_option"
           } ],
           "type" : "basic"
         } ]
       }, {
         "description" : "Global Button2-Mode",
         "manipulators" : [ {
+          "from" : {
+            "pointing_button" : "button1"
+          },
+          "to" : [ {
+            "modifiers" : [ "left_shift" ],
+            "pointing_button" : "button1"
+          } ],
+          "conditions" : [ {
+            "name" : "button2-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          }, {
+            "type" : "frontmost_application_unless",
+            "bundle_identifiers" : [ "net.telestream.screenflow10" ]
+          } ],
+          "type" : "basic"
+        }, {
           "from" : {
             "key_code" : "spacebar"
           },
@@ -375,34 +456,6 @@
             "key_code" : "period"
           }, {
             "key_code" : "slash"
-          } ],
-          "type" : "basic"
-        }, {
-          "to_if_alone" : [ {
-            "key_code" : "delete_or_backspace"
-          } ],
-          "from" : {
-            "key_code" : "left_shift",
-            "modifiers" : {
-              "optional" : [ "any" ]
-            }
-          },
-          "to" : [ {
-            "key_code" : "left_shift"
-          } ],
-          "type" : "basic"
-        }, {
-          "to_if_alone" : [ {
-            "key_code" : "delete_forward"
-          } ],
-          "from" : {
-            "key_code" : "right_shift",
-            "modifiers" : {
-              "optional" : [ "any" ]
-            }
-          },
-          "to" : [ {
-            "key_code" : "right_shift"
           } ],
           "type" : "basic"
         } ]
@@ -1325,7 +1378,7 @@
           } ],
           "conditions" : [ {
             "type" : "frontmost_application_if",
-            "bundle_identifiers" : [ "com.google.Chrome" ]
+            "bundle_identifiers" : [ "com.google.Chrome", "company.thebrowser.dia" ]
           } ],
           "type" : "basic"
         }, {
@@ -1342,7 +1395,7 @@
             "type" : "variable_if"
           }, {
             "type" : "frontmost_application_if",
-            "bundle_identifiers" : [ "com.google.Chrome" ]
+            "bundle_identifiers" : [ "com.google.Chrome", "company.thebrowser.dia" ]
           } ],
           "type" : "basic"
         }, {
@@ -1359,7 +1412,7 @@
             "type" : "variable_if"
           }, {
             "type" : "frontmost_application_if",
-            "bundle_identifiers" : [ "com.google.Chrome" ]
+            "bundle_identifiers" : [ "com.google.Chrome", "company.thebrowser.dia" ]
           } ],
           "type" : "basic"
         }, {
@@ -1376,7 +1429,7 @@
             "type" : "variable_if"
           }, {
             "type" : "frontmost_application_if",
-            "bundle_identifiers" : [ "com.google.Chrome" ]
+            "bundle_identifiers" : [ "com.google.Chrome", "company.thebrowser.dia" ]
           } ],
           "type" : "basic"
         }, {
@@ -1393,7 +1446,7 @@
             "type" : "variable_if"
           }, {
             "type" : "frontmost_application_if",
-            "bundle_identifiers" : [ "com.google.Chrome" ]
+            "bundle_identifiers" : [ "com.google.Chrome", "company.thebrowser.dia" ]
           } ],
           "type" : "basic"
         }, {
@@ -1410,7 +1463,7 @@
             "type" : "variable_if"
           }, {
             "type" : "frontmost_application_if",
-            "bundle_identifiers" : [ "com.google.Chrome" ]
+            "bundle_identifiers" : [ "com.google.Chrome", "company.thebrowser.dia" ]
           } ],
           "type" : "basic"
         }, {
@@ -1448,7 +1501,7 @@
           },
           "conditions" : [ {
             "type" : "frontmost_application_if",
-            "bundle_identifiers" : [ "com.google.Chrome" ]
+            "bundle_identifiers" : [ "com.google.Chrome", "company.thebrowser.dia" ]
           }, {
             "name" : "multitouch_extension_finger_count_total",
             "value" : 0,
@@ -1470,7 +1523,7 @@
             "type" : "variable_if"
           }, {
             "type" : "frontmost_application_if",
-            "bundle_identifiers" : [ "com.google.Chrome" ]
+            "bundle_identifiers" : [ "com.google.Chrome", "company.thebrowser.dia" ]
           } ],
           "type" : "basic"
         }, {
@@ -1488,7 +1541,7 @@
             "type" : "variable_if"
           }, {
             "type" : "frontmost_application_if",
-            "bundle_identifiers" : [ "com.google.Chrome" ]
+            "bundle_identifiers" : [ "com.google.Chrome", "company.thebrowser.dia" ]
           } ],
           "type" : "basic"
         } ]
@@ -1507,7 +1560,7 @@
           } ],
           "conditions" : [ {
             "type" : "frontmost_application_if",
-            "bundle_identifiers" : [ "com.microsoft.VSCode", "com.todesktop.230313mzl4w4u92", "com.todesktop.23052492jqa5xjo", "com.exafunction.windsurf", "com.visualstudio.code.insiders", "dev.warp.Warp-Stable" ]
+            "bundle_identifiers" : [ "com.microsoft.VSCode", "com.todesktop.230313mzl4w4u92", "com.todesktop.23052492jqa5xjo", "com.exafunction.windsurf", "com.visualstudio.code.insiders", "dev.warp.Warp-Stable", "dev.zed.Zed" ]
           } ],
           "type" : "basic"
         }, {
@@ -1523,7 +1576,7 @@
           } ],
           "conditions" : [ {
             "type" : "frontmost_application_if",
-            "bundle_identifiers" : [ "com.microsoft.VSCode", "com.todesktop.230313mzl4w4u92", "com.todesktop.23052492jqa5xjo", "com.exafunction.windsurf", "com.visualstudio.code.insiders", "dev.warp.Warp-Stable" ]
+            "bundle_identifiers" : [ "com.microsoft.VSCode", "com.todesktop.230313mzl4w4u92", "com.todesktop.23052492jqa5xjo", "com.exafunction.windsurf", "com.visualstudio.code.insiders", "dev.warp.Warp-Stable", "dev.zed.Zed" ]
           } ],
           "type" : "basic"
         }, {
@@ -1539,7 +1592,7 @@
           } ],
           "conditions" : [ {
             "type" : "frontmost_application_if",
-            "bundle_identifiers" : [ "com.microsoft.VSCode", "com.todesktop.230313mzl4w4u92", "com.todesktop.23052492jqa5xjo", "com.exafunction.windsurf", "com.visualstudio.code.insiders", "dev.warp.Warp-Stable" ]
+            "bundle_identifiers" : [ "com.microsoft.VSCode", "com.todesktop.230313mzl4w4u92", "com.todesktop.23052492jqa5xjo", "com.exafunction.windsurf", "com.visualstudio.code.insiders", "dev.warp.Warp-Stable", "dev.zed.Zed" ]
           } ],
           "type" : "basic"
         }, {
@@ -1556,7 +1609,7 @@
             "type" : "variable_if"
           }, {
             "type" : "frontmost_application_if",
-            "bundle_identifiers" : [ "com.microsoft.VSCode", "com.todesktop.230313mzl4w4u92", "com.todesktop.23052492jqa5xjo", "com.exafunction.windsurf", "com.visualstudio.code.insiders", "dev.warp.Warp-Stable" ]
+            "bundle_identifiers" : [ "com.microsoft.VSCode", "com.todesktop.230313mzl4w4u92", "com.todesktop.23052492jqa5xjo", "com.exafunction.windsurf", "com.visualstudio.code.insiders", "dev.warp.Warp-Stable", "dev.zed.Zed" ]
           } ],
           "type" : "basic"
         }, {
@@ -1573,7 +1626,7 @@
             "type" : "variable_if"
           }, {
             "type" : "frontmost_application_if",
-            "bundle_identifiers" : [ "com.microsoft.VSCode", "com.todesktop.230313mzl4w4u92", "com.todesktop.23052492jqa5xjo", "com.exafunction.windsurf", "com.visualstudio.code.insiders", "dev.warp.Warp-Stable" ]
+            "bundle_identifiers" : [ "com.microsoft.VSCode", "com.todesktop.230313mzl4w4u92", "com.todesktop.23052492jqa5xjo", "com.exafunction.windsurf", "com.visualstudio.code.insiders", "dev.warp.Warp-Stable", "dev.zed.Zed" ]
           } ],
           "type" : "basic"
         }, {
@@ -1590,16 +1643,16 @@
             "type" : "variable_if"
           }, {
             "type" : "frontmost_application_if",
-            "bundle_identifiers" : [ "com.microsoft.VSCode", "com.todesktop.230313mzl4w4u92", "com.todesktop.23052492jqa5xjo", "com.exafunction.windsurf", "com.visualstudio.code.insiders", "dev.warp.Warp-Stable" ]
+            "bundle_identifiers" : [ "com.microsoft.VSCode", "com.todesktop.230313mzl4w4u92", "com.todesktop.23052492jqa5xjo", "com.exafunction.windsurf", "com.visualstudio.code.insiders", "dev.warp.Warp-Stable", "dev.zed.Zed" ]
           } ],
           "type" : "basic"
         }, {
           "from" : {
-            "key_code" : "h"
+            "key_code" : "f"
           },
           "to" : [ {
-            "modifiers" : [ "command", "shift", "control", "option" ],
-            "key_code" : "i"
+            "modifiers" : [ "control" ],
+            "key_code" : "grave_accent_and_tilde"
           } ],
           "conditions" : [ {
             "name" : "escape-mode",
@@ -1607,7 +1660,7 @@
             "type" : "variable_if"
           }, {
             "type" : "frontmost_application_if",
-            "bundle_identifiers" : [ "com.microsoft.VSCode", "com.todesktop.230313mzl4w4u92", "com.todesktop.23052492jqa5xjo", "com.exafunction.windsurf", "com.visualstudio.code.insiders", "dev.warp.Warp-Stable" ]
+            "bundle_identifiers" : [ "com.microsoft.VSCode", "com.todesktop.230313mzl4w4u92", "com.todesktop.23052492jqa5xjo", "com.exafunction.windsurf", "com.visualstudio.code.insiders", "dev.warp.Warp-Stable", "dev.zed.Zed" ]
           } ],
           "type" : "basic"
         }, {
@@ -1624,7 +1677,7 @@
             "type" : "variable_if"
           }, {
             "type" : "frontmost_application_if",
-            "bundle_identifiers" : [ "com.microsoft.VSCode", "com.todesktop.230313mzl4w4u92", "com.todesktop.23052492jqa5xjo", "com.exafunction.windsurf", "com.visualstudio.code.insiders", "dev.warp.Warp-Stable" ]
+            "bundle_identifiers" : [ "com.microsoft.VSCode", "com.todesktop.230313mzl4w4u92", "com.todesktop.23052492jqa5xjo", "com.exafunction.windsurf", "com.visualstudio.code.insiders", "dev.warp.Warp-Stable", "dev.zed.Zed" ]
           } ],
           "type" : "basic"
         }, {
@@ -1641,7 +1694,7 @@
             "type" : "variable_if"
           }, {
             "type" : "frontmost_application_if",
-            "bundle_identifiers" : [ "com.microsoft.VSCode", "com.todesktop.230313mzl4w4u92", "com.todesktop.23052492jqa5xjo", "com.exafunction.windsurf", "com.visualstudio.code.insiders", "dev.warp.Warp-Stable" ]
+            "bundle_identifiers" : [ "com.microsoft.VSCode", "com.todesktop.230313mzl4w4u92", "com.todesktop.23052492jqa5xjo", "com.exafunction.windsurf", "com.visualstudio.code.insiders", "dev.warp.Warp-Stable", "dev.zed.Zed" ]
           } ],
           "type" : "basic"
         }, {
@@ -1658,7 +1711,7 @@
             "type" : "variable_if"
           }, {
             "type" : "frontmost_application_if",
-            "bundle_identifiers" : [ "com.microsoft.VSCode", "com.todesktop.230313mzl4w4u92", "com.todesktop.23052492jqa5xjo", "com.exafunction.windsurf", "com.visualstudio.code.insiders", "dev.warp.Warp-Stable" ]
+            "bundle_identifiers" : [ "com.microsoft.VSCode", "com.todesktop.230313mzl4w4u92", "com.todesktop.23052492jqa5xjo", "com.exafunction.windsurf", "com.visualstudio.code.insiders", "dev.warp.Warp-Stable", "dev.zed.Zed" ]
           } ],
           "type" : "basic"
         }, {
@@ -1675,7 +1728,7 @@
             "type" : "variable_if"
           }, {
             "type" : "frontmost_application_if",
-            "bundle_identifiers" : [ "com.microsoft.VSCode", "com.todesktop.230313mzl4w4u92", "com.todesktop.23052492jqa5xjo", "com.exafunction.windsurf", "com.visualstudio.code.insiders", "dev.warp.Warp-Stable" ]
+            "bundle_identifiers" : [ "com.microsoft.VSCode", "com.todesktop.230313mzl4w4u92", "com.todesktop.23052492jqa5xjo", "com.exafunction.windsurf", "com.visualstudio.code.insiders", "dev.warp.Warp-Stable", "dev.zed.Zed" ]
           } ],
           "type" : "basic"
         }, {
@@ -1694,7 +1747,7 @@
             "type" : "variable_if"
           }, {
             "type" : "frontmost_application_if",
-            "bundle_identifiers" : [ "com.microsoft.VSCode", "com.todesktop.230313mzl4w4u92", "com.todesktop.23052492jqa5xjo", "com.exafunction.windsurf", "com.visualstudio.code.insiders", "dev.warp.Warp-Stable" ]
+            "bundle_identifiers" : [ "com.microsoft.VSCode", "com.todesktop.230313mzl4w4u92", "com.todesktop.23052492jqa5xjo", "com.exafunction.windsurf", "com.visualstudio.code.insiders", "dev.warp.Warp-Stable", "dev.zed.Zed" ]
           } ],
           "type" : "basic"
         }, {
@@ -1711,7 +1764,7 @@
             "type" : "variable_if"
           }, {
             "type" : "frontmost_application_if",
-            "bundle_identifiers" : [ "com.microsoft.VSCode", "com.todesktop.230313mzl4w4u92", "com.todesktop.23052492jqa5xjo", "com.exafunction.windsurf", "com.visualstudio.code.insiders", "dev.warp.Warp-Stable" ]
+            "bundle_identifiers" : [ "com.microsoft.VSCode", "com.todesktop.230313mzl4w4u92", "com.todesktop.23052492jqa5xjo", "com.exafunction.windsurf", "com.visualstudio.code.insiders", "dev.warp.Warp-Stable", "dev.zed.Zed" ]
           } ],
           "type" : "basic"
         }, {
@@ -1730,7 +1783,7 @@
             "type" : "variable_if"
           }, {
             "type" : "frontmost_application_if",
-            "bundle_identifiers" : [ "com.microsoft.VSCode", "com.todesktop.230313mzl4w4u92", "com.todesktop.23052492jqa5xjo", "com.exafunction.windsurf", "com.visualstudio.code.insiders", "dev.warp.Warp-Stable" ]
+            "bundle_identifiers" : [ "com.microsoft.VSCode", "com.todesktop.230313mzl4w4u92", "com.todesktop.23052492jqa5xjo", "com.exafunction.windsurf", "com.visualstudio.code.insiders", "dev.warp.Warp-Stable", "dev.zed.Zed" ]
           } ],
           "type" : "basic"
         }, {
@@ -1748,7 +1801,7 @@
             "type" : "variable_if"
           }, {
             "type" : "frontmost_application_if",
-            "bundle_identifiers" : [ "com.microsoft.VSCode", "com.todesktop.230313mzl4w4u92", "com.todesktop.23052492jqa5xjo", "com.exafunction.windsurf", "com.visualstudio.code.insiders", "dev.warp.Warp-Stable" ]
+            "bundle_identifiers" : [ "com.microsoft.VSCode", "com.todesktop.230313mzl4w4u92", "com.todesktop.23052492jqa5xjo", "com.exafunction.windsurf", "com.visualstudio.code.insiders", "dev.warp.Warp-Stable", "dev.zed.Zed" ]
           } ],
           "type" : "basic"
         } ]
@@ -1770,7 +1823,7 @@
           } ],
           "conditions" : [ {
             "type" : "frontmost_application_if",
-            "bundle_identifiers" : [ "com.apple.Terminal", "com.googlecode.iterm2" ]
+            "bundle_identifiers" : [ "com.apple.Terminal", "com.googlecode.WezTerm" ]
           } ],
           "type" : "basic"
         }, {
@@ -1787,7 +1840,7 @@
             "type" : "variable_if"
           }, {
             "type" : "frontmost_application_if",
-            "bundle_identifiers" : [ "com.apple.Terminal", "com.googlecode.iterm2" ]
+            "bundle_identifiers" : [ "com.apple.Terminal", "com.googlecode.WezTerm" ]
           } ],
           "type" : "basic"
         }, {
@@ -1825,7 +1878,7 @@
           },
           "conditions" : [ {
             "type" : "frontmost_application_if",
-            "bundle_identifiers" : [ "com.apple.Terminal", "com.googlecode.iterm2" ]
+            "bundle_identifiers" : [ "com.apple.Terminal", "com.googlecode.WezTerm" ]
           } ]
         }, {
           "from" : {
@@ -1841,7 +1894,7 @@
             "type" : "variable_if"
           }, {
             "type" : "frontmost_application_if",
-            "bundle_identifiers" : [ "com.apple.Terminal", "com.googlecode.iterm2" ]
+            "bundle_identifiers" : [ "com.apple.Terminal", "com.googlecode.WezTerm" ]
           } ],
           "type" : "basic"
         }, {
@@ -1879,7 +1932,7 @@
           },
           "conditions" : [ {
             "type" : "frontmost_application_if",
-            "bundle_identifiers" : [ "com.apple.Terminal", "com.googlecode.iterm2" ]
+            "bundle_identifiers" : [ "com.apple.Terminal", "com.googlecode.WezTerm" ]
           } ]
         } ]
       }, {
@@ -2176,25 +2229,6 @@
         "description" : "Cursor",
         "manipulators" : [ {
           "from" : {
-            "pointing_button" : "button1"
-          },
-          "to" : [ {
-            "pointing_button" : "button1"
-          }, {
-            "modifiers" : [ "command", "shift", "control", "option" ],
-            "key_code" : "f3"
-          } ],
-          "conditions" : [ {
-            "name" : "button2-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          }, {
-            "type" : "frontmost_application_if",
-            "bundle_identifiers" : [ "com.todesktop.230313mzl4w4u92" ]
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
             "key_code" : "a"
           },
           "to" : [ {
@@ -2209,7 +2243,7 @@
             "type" : "variable_if"
           }, {
             "type" : "frontmost_application_if",
-            "bundle_identifiers" : [ "com.todesktop.230313mzl4w4u92" ]
+            "bundle_identifiers" : [ "com.todesktop.230313mzl4w4u92", "dev.zed.Zed" ]
           } ],
           "type" : "basic"
         }, {
@@ -2228,7 +2262,7 @@
             "type" : "variable_if"
           }, {
             "type" : "frontmost_application_if",
-            "bundle_identifiers" : [ "com.todesktop.230313mzl4w4u92" ]
+            "bundle_identifiers" : [ "com.todesktop.230313mzl4w4u92", "dev.zed.Zed" ]
           } ],
           "type" : "basic"
         }, {
@@ -2247,7 +2281,7 @@
             "type" : "variable_if"
           }, {
             "type" : "frontmost_application_if",
-            "bundle_identifiers" : [ "com.todesktop.230313mzl4w4u92" ]
+            "bundle_identifiers" : [ "com.todesktop.230313mzl4w4u92", "dev.zed.Zed" ]
           } ],
           "type" : "basic"
         }, {
@@ -2266,7 +2300,7 @@
             "type" : "variable_if"
           }, {
             "type" : "frontmost_application_if",
-            "bundle_identifiers" : [ "com.todesktop.230313mzl4w4u92" ]
+            "bundle_identifiers" : [ "com.todesktop.230313mzl4w4u92", "dev.zed.Zed" ]
           } ],
           "type" : "basic"
         }, {
@@ -2285,7 +2319,7 @@
             "type" : "variable_if"
           }, {
             "type" : "frontmost_application_if",
-            "bundle_identifiers" : [ "com.todesktop.230313mzl4w4u92" ]
+            "bundle_identifiers" : [ "com.todesktop.230313mzl4w4u92", "dev.zed.Zed" ]
           } ],
           "type" : "basic"
         }, {
@@ -2304,7 +2338,7 @@
             "type" : "variable_if"
           }, {
             "type" : "frontmost_application_if",
-            "bundle_identifiers" : [ "com.todesktop.230313mzl4w4u92" ]
+            "bundle_identifiers" : [ "com.todesktop.230313mzl4w4u92", "dev.zed.Zed" ]
           } ],
           "type" : "basic"
         } ]
@@ -2438,96 +2472,6 @@
           "type" : "basic"
         } ]
       }, {
-        "description" : "Caps Lock Mode (Tap Esc, Hold Layer)",
-        "manipulators" : [ {
-          "from" : {
-            "key_code" : "caps_lock",
-            "modifiers" : {
-              "optional" : [ "any" ]
-            }
-          },
-          "to" : [ {
-            "key_code" : "escape"
-          } ],
-          "conditions" : [ {
-            "name" : "caps_lock-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
-            "key_code" : "a"
-          },
-          "to" : [ {
-            "key_code" : "caps_lock"
-          } ],
-          "conditions" : [ {
-            "name" : "caps_lock-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
-            "key_code" : "spacebar"
-          },
-          "to" : [ {
-            "key_code" : "spacebar"
-          }, {
-            "key_code" : "equal_sign"
-          }, {
-            "key_code" : "spacebar"
-          } ],
-          "conditions" : [ {
-            "name" : "caps_lock-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
-            "key_code" : "t"
-          },
-          "to" : [ {
-            "modifiers" : [ "control", "shift" ],
-            "key_code" : "g"
-          } ],
-          "conditions" : [ {
-            "name" : "caps_lock-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
-            "key_code" : "j"
-          },
-          "to" : [ {
-            "key_code" : "hyphen"
-          } ],
-          "conditions" : [ {
-            "name" : "caps_lock-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
-            "key_code" : "k"
-          },
-          "to" : [ {
-            "modifiers" : [ "left_shift" ],
-            "key_code" : "hyphen"
-          } ],
-          "conditions" : [ {
-            "name" : "caps_lock-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        } ]
-      }, {
         "description" : "Escape Mode (Hold Esc)",
         "manipulators" : [ {
           "from" : {
@@ -2577,19 +2521,6 @@
           "to" : [ {
             "modifiers" : [ "command", "shift", "control", "option" ],
             "key_code" : "0"
-          } ],
-          "conditions" : [ {
-            "name" : "escape-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
-            "key_code" : "f"
-          },
-          "to" : [ {
-            "key_code" : "mission_control"
           } ],
           "conditions" : [ {
             "name" : "escape-mode",
@@ -2717,6 +2648,34 @@
             "pointing_button" : "button1"
           }, {
             "shell_command" : "osascript -e '\n                                        set theFile to POSIX file \"/Users/johnlindquist/.config/snippets/continue.txt\"\n                                          set fileContents to read theFile as «class utf8»\n                                          set the clipboard to fileContents\n                                          tell application \"System Events\"\n                                              keystroke \"v\" using command down\n                                          end tell\n                                          delay 0.1\n                                          tell application \"System Events\"\n                                              keystroke return\n                                          end tell\n                                          '"
+          } ],
+          "conditions" : [ {
+            "name" : "escape-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "key_code" : "semicolon"
+          },
+          "to" : [ {
+            "modifiers" : [ "left_command" ],
+            "key_code" : "escape"
+          } ],
+          "conditions" : [ {
+            "name" : "escape-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "key_code" : "l"
+          },
+          "to" : [ {
+            "modifiers" : [ "command", "option" ],
+            "key_code" : "k"
           } ],
           "conditions" : [ {
             "name" : "escape-mode",
@@ -3520,7 +3479,7 @@
             "key_code" : "x"
           },
           "to" : [ {
-            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/remove_empty_spaces_improved.sh"
+            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/remove_empty_spaces_improved_improved.sh"
           } ],
           "conditions" : [ {
             "name" : "equal-mode",
@@ -3559,7 +3518,7 @@
             "key_code" : "s"
           },
           "to" : [ {
-            "shell_command" : "/opt/homebrew/bin/yabai --restart-service || /opt/homebrew/bin/yabai --start-service"
+            "shell_command" : "/opt/homebrew/bin/yabai --restart-service || /opt/homebrew/bin/yabai --start-service -c /Users/johnlindquist/.config/yabairc"
           } ],
           "conditions" : [ {
             "name" : "equal-mode",
@@ -3792,11 +3751,23 @@
         "description" : "Home Mode (Hold Home)",
         "manipulators" : [ {
           "from" : {
+            "key_code" : "grave_accent_and_tilde"
+          },
+          "to" : [ {
+            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/space_left.sh"
+          } ],
+          "conditions" : [ {
+            "name" : "home-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
             "key_code" : "q"
           },
           "to" : [ {
-            "modifiers" : [ "command", "shift", "control", "option" ],
-            "key_code" : "f1"
+            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/focus_direction.sh west"
           } ],
           "conditions" : [ {
             "name" : "home-mode",
@@ -3837,8 +3808,7 @@
             "key_code" : "r"
           },
           "to" : [ {
-            "modifiers" : [ "command", "shift", "control", "option" ],
-            "key_code" : "f4"
+            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/focus_direction.sh east"
           } ],
           "conditions" : [ {
             "name" : "home-mode",
@@ -3851,8 +3821,7 @@
             "key_code" : "t"
           },
           "to" : [ {
-            "modifiers" : [ "command", "shift", "control", "option" ],
-            "key_code" : "f5"
+            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/space_right.sh"
           } ],
           "conditions" : [ {
             "name" : "home-mode",
@@ -3932,11 +3901,23 @@
           "type" : "basic"
         }, {
           "from" : {
+            "key_code" : "hyphen"
+          },
+          "to" : [ {
+            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/move_window_to_previous_empty_space.sh"
+          } ],
+          "conditions" : [ {
+            "name" : "home-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
             "key_code" : "a"
           },
           "to" : [ {
-            "modifiers" : [ "command", "shift", "control", "option" ],
-            "key_code" : "f11"
+            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/move_window_left_half.sh"
           } ],
           "conditions" : [ {
             "name" : "home-mode",
@@ -3949,8 +3930,7 @@
             "key_code" : "s"
           },
           "to" : [ {
-            "modifiers" : [ "command", "shift", "control", "option" ],
-            "key_code" : "f12"
+            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/move_window_center_66.sh"
           } ],
           "conditions" : [ {
             "name" : "home-mode",
@@ -3963,8 +3943,7 @@
             "key_code" : "d"
           },
           "to" : [ {
-            "modifiers" : [ "command", "shift", "control", "option" ],
-            "key_code" : "f13"
+            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/move_window_center_full.sh"
           } ],
           "conditions" : [ {
             "name" : "home-mode",
@@ -3977,7 +3956,7 @@
             "key_code" : "f"
           },
           "to" : [ {
-            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/detach_chrome_tab.sh"
+            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/move_window_right_half.sh"
           } ],
           "conditions" : [ {
             "name" : "home-mode",
@@ -3990,8 +3969,7 @@
             "key_code" : "g"
           },
           "to" : [ {
-            "modifiers" : [ "command", "shift", "control", "option" ],
-            "key_code" : "f15"
+            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/move_window_to_next_empty_space.sh"
           } ],
           "conditions" : [ {
             "name" : "home-mode",
@@ -4004,7 +3982,7 @@
             "key_code" : "h"
           },
           "to" : [ {
-            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/focus_direction.sh west"
+            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/move_to_previous_display.sh"
           } ],
           "conditions" : [ {
             "name" : "home-mode",
@@ -4017,7 +3995,7 @@
             "key_code" : "j"
           },
           "to" : [ {
-            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/focus_direction.sh south"
+            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/move_window_center_66.sh"
           } ],
           "conditions" : [ {
             "name" : "home-mode",
@@ -4030,7 +4008,7 @@
             "key_code" : "k"
           },
           "to" : [ {
-            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/focus_direction.sh north"
+            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/move_window_center_full.sh"
           } ],
           "conditions" : [ {
             "name" : "home-mode",
@@ -4043,7 +4021,7 @@
             "key_code" : "l"
           },
           "to" : [ {
-            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/focus_direction.sh east"
+            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/move_window_right_half.sh"
           } ],
           "conditions" : [ {
             "name" : "home-mode",
@@ -4254,6 +4232,72 @@
           "to" : [ {
             "modifiers" : [ "command", "shift" ],
             "key_code" : "d"
+          } ],
+          "conditions" : [ {
+            "name" : "home-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "key_code" : "1"
+          },
+          "to" : [ {
+            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/move_window_to_display_1.sh"
+          } ],
+          "conditions" : [ {
+            "name" : "home-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "key_code" : "2"
+          },
+          "to" : [ {
+            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/move_window_to_display_2.sh"
+          } ],
+          "conditions" : [ {
+            "name" : "home-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "key_code" : "3"
+          },
+          "to" : [ {
+            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/move_window_to_display_3.sh"
+          } ],
+          "conditions" : [ {
+            "name" : "home-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "key_code" : "4"
+          },
+          "to" : [ {
+            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/move_window_to_display_4.sh"
+          } ],
+          "conditions" : [ {
+            "name" : "home-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "key_code" : "left_shift"
+          },
+          "to" : [ {
+            "modifiers" : [ "left_shift" ],
+            "key_code" : "f11"
           } ],
           "conditions" : [ {
             "name" : "home-mode",
@@ -4792,7 +4836,7 @@
             "type" : "variable_if"
           }, {
             "type" : "frontmost_application_if",
-            "bundle_identifiers" : [ "com.microsoft.VSCode", "com.todesktop.230313mzl4w4u92", "com.todesktop.23052492jqa5xjo", "com.exafunction.windsurf", "com.visualstudio.code.insiders", "dev.warp.Warp-Stable" ]
+            "bundle_identifiers" : [ "com.microsoft.VSCode", "com.todesktop.230313mzl4w4u92", "com.todesktop.23052492jqa5xjo", "com.exafunction.windsurf", "com.visualstudio.code.insiders", "dev.warp.Warp-Stable", "dev.zed.Zed" ]
           } ],
           "type" : "basic"
         }, {
@@ -4832,7 +4876,7 @@
           },
           "conditions" : [ {
             "type" : "frontmost_application_if",
-            "bundle_identifiers" : [ "com.microsoft.VSCode", "com.todesktop.230313mzl4w4u92", "com.todesktop.23052492jqa5xjo", "com.exafunction.windsurf", "com.visualstudio.code.insiders", "dev.warp.Warp-Stable" ]
+            "bundle_identifiers" : [ "com.microsoft.VSCode", "com.todesktop.230313mzl4w4u92", "com.todesktop.23052492jqa5xjo", "com.exafunction.windsurf", "com.visualstudio.code.insiders", "dev.warp.Warp-Stable", "dev.zed.Zed" ]
           } ]
         }, {
           "from" : {
@@ -4848,7 +4892,7 @@
             "type" : "variable_if"
           }, {
             "type" : "frontmost_application_if",
-            "bundle_identifiers" : [ "com.microsoft.VSCode", "com.todesktop.230313mzl4w4u92", "com.todesktop.23052492jqa5xjo", "com.exafunction.windsurf", "com.visualstudio.code.insiders", "dev.warp.Warp-Stable" ]
+            "bundle_identifiers" : [ "com.microsoft.VSCode", "com.todesktop.230313mzl4w4u92", "com.todesktop.23052492jqa5xjo", "com.exafunction.windsurf", "com.visualstudio.code.insiders", "dev.warp.Warp-Stable", "dev.zed.Zed" ]
           } ],
           "type" : "basic"
         }, {
@@ -4886,7 +4930,7 @@
           },
           "conditions" : [ {
             "type" : "frontmost_application_if",
-            "bundle_identifiers" : [ "com.microsoft.VSCode", "com.todesktop.230313mzl4w4u92", "com.todesktop.23052492jqa5xjo", "com.exafunction.windsurf", "com.visualstudio.code.insiders", "dev.warp.Warp-Stable" ]
+            "bundle_identifiers" : [ "com.microsoft.VSCode", "com.todesktop.230313mzl4w4u92", "com.todesktop.23052492jqa5xjo", "com.exafunction.windsurf", "com.visualstudio.code.insiders", "dev.warp.Warp-Stable", "dev.zed.Zed" ]
           } ]
         } ]
       }, {
@@ -6480,58 +6524,6 @@
           } ]
         }, {
           "from" : {
-            "key_code" : "d"
-          },
-          "to" : [ {
-            "modifiers" : [ "command", "shift", "option" ],
-            "key_code" : "s"
-          } ],
-          "conditions" : [ {
-            "name" : "opt-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "type" : "basic",
-          "parameters" : {
-            "basic.simultaneous_threshold_milliseconds" : 140
-          },
-          "to" : [ {
-            "set_variable" : {
-              "name" : "opt-mode",
-              "value" : 1
-            }
-          }, {
-            "modifiers" : [ "command", "shift", "option" ],
-            "key_code" : "s"
-          } ],
-          "from" : {
-            "simultaneous" : [ {
-              "key_code" : "a"
-            }, {
-              "key_code" : "d"
-            } ],
-            "simultaneous_options" : {
-              "detect_key_down_uninterruptedly" : true,
-              "key_down_order" : "strict",
-              "key_up_order" : "strict_inverse",
-              "key_up_when" : "any",
-              "to_after_key_up" : [ {
-                "set_variable" : {
-                  "name" : "opt-mode",
-                  "value" : 0
-                }
-              } ]
-            }
-          },
-          "conditions" : [ {
-            "name" : "multitouch_extension_finger_count_total",
-            "value" : 0,
-            "type" : "variable_if"
-          } ]
-        }, {
-          "from" : {
             "key_code" : "m"
           },
           "to" : [ {
@@ -6636,6 +6628,62 @@
           } ]
         }, {
           "from" : {
+            "key_code" : "d"
+          },
+          "to" : [ {
+            "modifiers" : [ "command", "shift", "control", "option" ],
+            "key_code" : "0"
+          }, {
+            "key_code" : "home"
+          } ],
+          "conditions" : [ {
+            "name" : "opt-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "type" : "basic",
+          "parameters" : {
+            "basic.simultaneous_threshold_milliseconds" : 140
+          },
+          "to" : [ {
+            "set_variable" : {
+              "name" : "opt-mode",
+              "value" : 1
+            }
+          }, {
+            "modifiers" : [ "command", "shift", "control", "option" ],
+            "key_code" : "0"
+          }, {
+            "key_code" : "home"
+          } ],
+          "from" : {
+            "simultaneous" : [ {
+              "key_code" : "a"
+            }, {
+              "key_code" : "d"
+            } ],
+            "simultaneous_options" : {
+              "detect_key_down_uninterruptedly" : true,
+              "key_down_order" : "strict",
+              "key_up_order" : "strict_inverse",
+              "key_up_when" : "any",
+              "to_after_key_up" : [ {
+                "set_variable" : {
+                  "name" : "opt-mode",
+                  "value" : 0
+                }
+              } ]
+            }
+          },
+          "conditions" : [ {
+            "name" : "multitouch_extension_finger_count_total",
+            "value" : 0,
+            "type" : "variable_if"
+          } ]
+        }, {
+          "from" : {
             "key_code" : "f"
           },
           "to" : [ {
@@ -6719,6 +6767,110 @@
               "key_code" : "a"
             }, {
               "key_code" : "left_shift"
+            } ],
+            "simultaneous_options" : {
+              "detect_key_down_uninterruptedly" : true,
+              "key_down_order" : "strict",
+              "key_up_order" : "strict_inverse",
+              "key_up_when" : "any",
+              "to_after_key_up" : [ {
+                "set_variable" : {
+                  "name" : "opt-mode",
+                  "value" : 0
+                }
+              } ]
+            }
+          },
+          "conditions" : [ {
+            "name" : "multitouch_extension_finger_count_total",
+            "value" : 0,
+            "type" : "variable_if"
+          } ]
+        }, {
+          "from" : {
+            "key_code" : "r"
+          },
+          "to" : [ {
+            "modifiers" : [ "command", "shift", "control", "option" ],
+            "key_code" : "1"
+          } ],
+          "conditions" : [ {
+            "name" : "opt-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "type" : "basic",
+          "parameters" : {
+            "basic.simultaneous_threshold_milliseconds" : 140
+          },
+          "to" : [ {
+            "set_variable" : {
+              "name" : "opt-mode",
+              "value" : 1
+            }
+          }, {
+            "modifiers" : [ "command", "shift", "control", "option" ],
+            "key_code" : "1"
+          } ],
+          "from" : {
+            "simultaneous" : [ {
+              "key_code" : "a"
+            }, {
+              "key_code" : "r"
+            } ],
+            "simultaneous_options" : {
+              "detect_key_down_uninterruptedly" : true,
+              "key_down_order" : "strict",
+              "key_up_order" : "strict_inverse",
+              "key_up_when" : "any",
+              "to_after_key_up" : [ {
+                "set_variable" : {
+                  "name" : "opt-mode",
+                  "value" : 0
+                }
+              } ]
+            }
+          },
+          "conditions" : [ {
+            "name" : "multitouch_extension_finger_count_total",
+            "value" : 0,
+            "type" : "variable_if"
+          } ]
+        }, {
+          "from" : {
+            "key_code" : "semicolon"
+          },
+          "to" : [ {
+            "modifiers" : [ "left_command" ],
+            "key_code" : "escape"
+          } ],
+          "conditions" : [ {
+            "name" : "opt-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "type" : "basic",
+          "parameters" : {
+            "basic.simultaneous_threshold_milliseconds" : 140
+          },
+          "to" : [ {
+            "set_variable" : {
+              "name" : "opt-mode",
+              "value" : 1
+            }
+          }, {
+            "modifiers" : [ "left_command" ],
+            "key_code" : "escape"
+          } ],
+          "from" : {
+            "simultaneous" : [ {
+              "key_code" : "a"
+            }, {
+              "key_code" : "semicolon"
             } ],
             "simultaneous_options" : {
               "detect_key_down_uninterruptedly" : true,
@@ -8881,7 +9033,7 @@
             "type" : "variable_if"
           }, {
             "type" : "frontmost_application_if",
-            "bundle_identifiers" : [ "com.microsoft.VSCode", "com.todesktop.230313mzl4w4u92", "com.todesktop.23052492jqa5xjo", "com.exafunction.windsurf", "com.visualstudio.code.insiders", "dev.warp.Warp-Stable" ]
+            "bundle_identifiers" : [ "com.microsoft.VSCode", "com.todesktop.230313mzl4w4u92", "com.todesktop.23052492jqa5xjo", "com.exafunction.windsurf", "com.visualstudio.code.insiders", "dev.warp.Warp-Stable", "dev.zed.Zed" ]
           } ],
           "type" : "basic"
         }, {
@@ -8919,7 +9071,7 @@
           },
           "conditions" : [ {
             "type" : "frontmost_application_if",
-            "bundle_identifiers" : [ "com.microsoft.VSCode", "com.todesktop.230313mzl4w4u92", "com.todesktop.23052492jqa5xjo", "com.exafunction.windsurf", "com.visualstudio.code.insiders", "dev.warp.Warp-Stable" ]
+            "bundle_identifiers" : [ "com.microsoft.VSCode", "com.todesktop.230313mzl4w4u92", "com.todesktop.23052492jqa5xjo", "com.exafunction.windsurf", "com.visualstudio.code.insiders", "dev.warp.Warp-Stable", "dev.zed.Zed" ]
           } ]
         }, {
           "from" : {
@@ -8982,7 +9134,7 @@
             "type" : "variable_if"
           }, {
             "type" : "frontmost_application_if",
-            "bundle_identifiers" : [ "com.microsoft.VSCode", "com.todesktop.230313mzl4w4u92", "com.todesktop.23052492jqa5xjo", "com.exafunction.windsurf", "com.visualstudio.code.insiders", "dev.warp.Warp-Stable" ]
+            "bundle_identifiers" : [ "com.microsoft.VSCode", "com.todesktop.230313mzl4w4u92", "com.todesktop.23052492jqa5xjo", "com.exafunction.windsurf", "com.visualstudio.code.insiders", "dev.warp.Warp-Stable", "dev.zed.Zed" ]
           } ],
           "type" : "basic"
         }, {
@@ -9020,7 +9172,7 @@
           },
           "conditions" : [ {
             "type" : "frontmost_application_if",
-            "bundle_identifiers" : [ "com.microsoft.VSCode", "com.todesktop.230313mzl4w4u92", "com.todesktop.23052492jqa5xjo", "com.exafunction.windsurf", "com.visualstudio.code.insiders", "dev.warp.Warp-Stable" ]
+            "bundle_identifiers" : [ "com.microsoft.VSCode", "com.todesktop.230313mzl4w4u92", "com.todesktop.23052492jqa5xjo", "com.exafunction.windsurf", "com.visualstudio.code.insiders", "dev.warp.Warp-Stable", "dev.zed.Zed" ]
           } ]
         }, {
           "from" : {
@@ -9036,7 +9188,7 @@
             "type" : "variable_if"
           }, {
             "type" : "frontmost_application_if",
-            "bundle_identifiers" : [ "com.microsoft.VSCode", "com.todesktop.230313mzl4w4u92", "com.todesktop.23052492jqa5xjo", "com.exafunction.windsurf", "com.visualstudio.code.insiders", "dev.warp.Warp-Stable" ]
+            "bundle_identifiers" : [ "com.microsoft.VSCode", "com.todesktop.230313mzl4w4u92", "com.todesktop.23052492jqa5xjo", "com.exafunction.windsurf", "com.visualstudio.code.insiders", "dev.warp.Warp-Stable", "dev.zed.Zed" ]
           } ],
           "type" : "basic"
         }, {
@@ -9074,7 +9226,7 @@
           },
           "conditions" : [ {
             "type" : "frontmost_application_if",
-            "bundle_identifiers" : [ "com.microsoft.VSCode", "com.todesktop.230313mzl4w4u92", "com.todesktop.23052492jqa5xjo", "com.exafunction.windsurf", "com.visualstudio.code.insiders", "dev.warp.Warp-Stable" ]
+            "bundle_identifiers" : [ "com.microsoft.VSCode", "com.todesktop.230313mzl4w4u92", "com.todesktop.23052492jqa5xjo", "com.exafunction.windsurf", "com.visualstudio.code.insiders", "dev.warp.Warp-Stable", "dev.zed.Zed" ]
           } ]
         }, {
           "from" : {
@@ -9744,51 +9896,6 @@
           }
         }, {
           "from" : {
-            "key_code" : "n"
-          },
-          "to" : [ {
-            "shell_command" : "/usr/local/bin/cursor ~/.config"
-          } ],
-          "conditions" : [ {
-            "name" : "open-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "type" : "basic",
-          "parameters" : {
-            "basic.simultaneous_threshold_milliseconds" : 140
-          },
-          "to" : [ {
-            "set_variable" : {
-              "name" : "open-mode",
-              "value" : 1
-            }
-          }, {
-            "shell_command" : "/usr/local/bin/cursor ~/.config"
-          } ],
-          "from" : {
-            "simultaneous" : [ {
-              "key_code" : "semicolon"
-            }, {
-              "key_code" : "n"
-            } ],
-            "simultaneous_options" : {
-              "detect_key_down_uninterruptedly" : true,
-              "key_down_order" : "strict",
-              "key_up_order" : "strict_inverse",
-              "key_up_when" : "any",
-              "to_after_key_up" : [ {
-                "set_variable" : {
-                  "name" : "open-mode",
-                  "value" : 0
-                }
-              } ]
-            }
-          }
-        }, {
-          "from" : {
             "key_code" : "t"
           },
           "to" : [ {
@@ -9818,6 +9925,51 @@
               "key_code" : "semicolon"
             }, {
               "key_code" : "t"
+            } ],
+            "simultaneous_options" : {
+              "detect_key_down_uninterruptedly" : true,
+              "key_down_order" : "strict",
+              "key_up_order" : "strict_inverse",
+              "key_up_when" : "any",
+              "to_after_key_up" : [ {
+                "set_variable" : {
+                  "name" : "open-mode",
+                  "value" : 0
+                }
+              } ]
+            }
+          }
+        }, {
+          "from" : {
+            "key_code" : "w"
+          },
+          "to" : [ {
+            "shell_command" : "/usr/local/bin/cursor ~/dev/claude-workshop-live"
+          } ],
+          "conditions" : [ {
+            "name" : "open-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "type" : "basic",
+          "parameters" : {
+            "basic.simultaneous_threshold_milliseconds" : 140
+          },
+          "to" : [ {
+            "set_variable" : {
+              "name" : "open-mode",
+              "value" : 1
+            }
+          }, {
+            "shell_command" : "/usr/local/bin/cursor ~/dev/claude-workshop-live"
+          } ],
+          "from" : {
+            "simultaneous" : [ {
+              "key_code" : "semicolon"
+            }, {
+              "key_code" : "w"
             } ],
             "simultaneous_options" : {
               "detect_key_down_uninterruptedly" : true,
@@ -11971,6 +12123,597 @@
               "to_after_key_up" : [ {
                 "set_variable" : {
                   "name" : "command-mode",
+                  "value" : 0
+                }
+              } ]
+            }
+          }
+        }, {
+          "from" : {
+            "key_code" : "left_command"
+          },
+          "to" : [ {
+            "modifiers" : [ "command", "shift", "control", "option" ],
+            "key_code" : "g"
+          } ],
+          "conditions" : [ {
+            "name" : "command-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "type" : "basic",
+          "parameters" : {
+            "basic.simultaneous_threshold_milliseconds" : 140
+          },
+          "to" : [ {
+            "set_variable" : {
+              "name" : "command-mode",
+              "value" : 1
+            }
+          }, {
+            "modifiers" : [ "command", "shift", "control", "option" ],
+            "key_code" : "g"
+          } ],
+          "from" : {
+            "simultaneous" : [ {
+              "key_code" : "c"
+            }, {
+              "key_code" : "left_command"
+            } ],
+            "simultaneous_options" : {
+              "detect_key_down_uninterruptedly" : true,
+              "key_down_order" : "strict",
+              "key_up_order" : "strict_inverse",
+              "key_up_when" : "any",
+              "to_after_key_up" : [ {
+                "set_variable" : {
+                  "name" : "command-mode",
+                  "value" : 0
+                }
+              } ]
+            }
+          }
+        } ]
+      }, {
+        "description" : "Control Option Mode",
+        "manipulators" : [ {
+          "from" : {
+            "key_code" : "h",
+            "modifiers" : {
+              "optional" : [ "any" ]
+            }
+          },
+          "to" : [ {
+            "key_code" : "left_arrow",
+            "modifiers" : [ "left_control", "left_option" ]
+          } ],
+          "conditions" : [ {
+            "name" : "control-option-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "type" : "basic",
+          "parameters" : {
+            "basic.simultaneous_threshold_milliseconds" : 140
+          },
+          "to" : [ {
+            "set_variable" : {
+              "name" : "control-option-mode",
+              "value" : 1
+            }
+          }, {
+            "key_code" : "left_arrow",
+            "modifiers" : [ "left_control", "left_option" ]
+          } ],
+          "from" : {
+            "simultaneous" : [ {
+              "key_code" : "x"
+            }, {
+              "key_code" : "h"
+            } ],
+            "simultaneous_options" : {
+              "detect_key_down_uninterruptedly" : true,
+              "key_down_order" : "strict",
+              "key_up_order" : "strict_inverse",
+              "key_up_when" : "any",
+              "to_after_key_up" : [ {
+                "set_variable" : {
+                  "name" : "control-option-mode",
+                  "value" : 0
+                }
+              } ]
+            }
+          }
+        }, {
+          "from" : {
+            "key_code" : "j",
+            "modifiers" : {
+              "optional" : [ "any" ]
+            }
+          },
+          "to" : [ {
+            "key_code" : "down_arrow",
+            "modifiers" : [ "left_control", "left_option" ]
+          } ],
+          "conditions" : [ {
+            "name" : "control-option-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "type" : "basic",
+          "parameters" : {
+            "basic.simultaneous_threshold_milliseconds" : 140
+          },
+          "to" : [ {
+            "set_variable" : {
+              "name" : "control-option-mode",
+              "value" : 1
+            }
+          }, {
+            "key_code" : "down_arrow",
+            "modifiers" : [ "left_control", "left_option" ]
+          } ],
+          "from" : {
+            "simultaneous" : [ {
+              "key_code" : "x"
+            }, {
+              "key_code" : "j"
+            } ],
+            "simultaneous_options" : {
+              "detect_key_down_uninterruptedly" : true,
+              "key_down_order" : "strict",
+              "key_up_order" : "strict_inverse",
+              "key_up_when" : "any",
+              "to_after_key_up" : [ {
+                "set_variable" : {
+                  "name" : "control-option-mode",
+                  "value" : 0
+                }
+              } ]
+            }
+          }
+        }, {
+          "from" : {
+            "key_code" : "k",
+            "modifiers" : {
+              "optional" : [ "any" ]
+            }
+          },
+          "to" : [ {
+            "key_code" : "up_arrow",
+            "modifiers" : [ "left_control", "left_option" ]
+          } ],
+          "conditions" : [ {
+            "name" : "control-option-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "type" : "basic",
+          "parameters" : {
+            "basic.simultaneous_threshold_milliseconds" : 140
+          },
+          "to" : [ {
+            "set_variable" : {
+              "name" : "control-option-mode",
+              "value" : 1
+            }
+          }, {
+            "key_code" : "up_arrow",
+            "modifiers" : [ "left_control", "left_option" ]
+          } ],
+          "from" : {
+            "simultaneous" : [ {
+              "key_code" : "x"
+            }, {
+              "key_code" : "k"
+            } ],
+            "simultaneous_options" : {
+              "detect_key_down_uninterruptedly" : true,
+              "key_down_order" : "strict",
+              "key_up_order" : "strict_inverse",
+              "key_up_when" : "any",
+              "to_after_key_up" : [ {
+                "set_variable" : {
+                  "name" : "control-option-mode",
+                  "value" : 0
+                }
+              } ]
+            }
+          }
+        }, {
+          "from" : {
+            "key_code" : "l",
+            "modifiers" : {
+              "optional" : [ "any" ]
+            }
+          },
+          "to" : [ {
+            "key_code" : "right_arrow",
+            "modifiers" : [ "left_control", "left_option" ]
+          } ],
+          "conditions" : [ {
+            "name" : "control-option-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "type" : "basic",
+          "parameters" : {
+            "basic.simultaneous_threshold_milliseconds" : 140
+          },
+          "to" : [ {
+            "set_variable" : {
+              "name" : "control-option-mode",
+              "value" : 1
+            }
+          }, {
+            "key_code" : "right_arrow",
+            "modifiers" : [ "left_control", "left_option" ]
+          } ],
+          "from" : {
+            "simultaneous" : [ {
+              "key_code" : "x"
+            }, {
+              "key_code" : "l"
+            } ],
+            "simultaneous_options" : {
+              "detect_key_down_uninterruptedly" : true,
+              "key_down_order" : "strict",
+              "key_up_order" : "strict_inverse",
+              "key_up_when" : "any",
+              "to_after_key_up" : [ {
+                "set_variable" : {
+                  "name" : "control-option-mode",
+                  "value" : 0
+                }
+              } ]
+            }
+          }
+        }, {
+          "from" : {
+            "key_code" : "j"
+          },
+          "to" : [ {
+            "modifiers" : [ "command" ],
+            "key_code" : "down_arrow"
+          } ],
+          "conditions" : [ {
+            "name" : "control-option-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "type" : "basic",
+          "parameters" : {
+            "basic.simultaneous_threshold_milliseconds" : 140
+          },
+          "to" : [ {
+            "set_variable" : {
+              "name" : "control-option-mode",
+              "value" : 1
+            }
+          }, {
+            "modifiers" : [ "command" ],
+            "key_code" : "down_arrow"
+          } ],
+          "from" : {
+            "simultaneous" : [ {
+              "key_code" : "x"
+            }, {
+              "key_code" : "j"
+            } ],
+            "simultaneous_options" : {
+              "detect_key_down_uninterruptedly" : true,
+              "key_down_order" : "strict",
+              "key_up_order" : "strict_inverse",
+              "key_up_when" : "any",
+              "to_after_key_up" : [ {
+                "set_variable" : {
+                  "name" : "control-option-mode",
+                  "value" : 0
+                }
+              } ]
+            }
+          }
+        }, {
+          "from" : {
+            "key_code" : "k"
+          },
+          "to" : [ {
+            "modifiers" : [ "command" ],
+            "key_code" : "up_arrow"
+          } ],
+          "conditions" : [ {
+            "name" : "control-option-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "type" : "basic",
+          "parameters" : {
+            "basic.simultaneous_threshold_milliseconds" : 140
+          },
+          "to" : [ {
+            "set_variable" : {
+              "name" : "control-option-mode",
+              "value" : 1
+            }
+          }, {
+            "modifiers" : [ "command" ],
+            "key_code" : "up_arrow"
+          } ],
+          "from" : {
+            "simultaneous" : [ {
+              "key_code" : "x"
+            }, {
+              "key_code" : "k"
+            } ],
+            "simultaneous_options" : {
+              "detect_key_down_uninterruptedly" : true,
+              "key_down_order" : "strict",
+              "key_up_order" : "strict_inverse",
+              "key_up_when" : "any",
+              "to_after_key_up" : [ {
+                "set_variable" : {
+                  "name" : "control-option-mode",
+                  "value" : 0
+                }
+              } ]
+            }
+          }
+        }, {
+          "from" : {
+            "key_code" : "left_command"
+          },
+          "to" : [ {
+            "modifiers" : [ "command", "shift", "control", "option" ],
+            "key_code" : "g"
+          } ],
+          "conditions" : [ {
+            "name" : "control-option-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "type" : "basic",
+          "parameters" : {
+            "basic.simultaneous_threshold_milliseconds" : 140
+          },
+          "to" : [ {
+            "set_variable" : {
+              "name" : "control-option-mode",
+              "value" : 1
+            }
+          }, {
+            "modifiers" : [ "command", "shift", "control", "option" ],
+            "key_code" : "g"
+          } ],
+          "from" : {
+            "simultaneous" : [ {
+              "key_code" : "x"
+            }, {
+              "key_code" : "left_command"
+            } ],
+            "simultaneous_options" : {
+              "detect_key_down_uninterruptedly" : true,
+              "key_down_order" : "strict",
+              "key_up_order" : "strict_inverse",
+              "key_up_when" : "any",
+              "to_after_key_up" : [ {
+                "set_variable" : {
+                  "name" : "control-option-mode",
+                  "value" : 0
+                }
+              } ]
+            }
+          }
+        }, {
+          "from" : {
+            "key_code" : "h",
+            "modifiers" : {
+              "optional" : [ "any" ]
+            }
+          },
+          "to" : [ {
+            "key_code" : "left_arrow",
+            "modifiers" : [ "left_command", "left_option" ]
+          } ],
+          "conditions" : [ {
+            "name" : "command-option-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "type" : "basic",
+          "parameters" : {
+            "basic.simultaneous_threshold_milliseconds" : 140
+          },
+          "to" : [ {
+            "set_variable" : {
+              "name" : "command-option-mode",
+              "value" : 1
+            }
+          }, {
+            "key_code" : "left_arrow",
+            "modifiers" : [ "left_command", "left_option" ]
+          } ],
+          "from" : {
+            "simultaneous" : [ {
+              "key_code" : "b"
+            }, {
+              "key_code" : "h"
+            } ],
+            "simultaneous_options" : {
+              "detect_key_down_uninterruptedly" : true,
+              "key_down_order" : "strict",
+              "key_up_order" : "strict_inverse",
+              "key_up_when" : "any",
+              "to_after_key_up" : [ {
+                "set_variable" : {
+                  "name" : "command-option-mode",
+                  "value" : 0
+                }
+              } ]
+            }
+          }
+        }, {
+          "from" : {
+            "key_code" : "j",
+            "modifiers" : {
+              "optional" : [ "any" ]
+            }
+          },
+          "to" : [ {
+            "key_code" : "down_arrow",
+            "modifiers" : [ "left_command", "left_option" ]
+          } ],
+          "conditions" : [ {
+            "name" : "command-option-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "type" : "basic",
+          "parameters" : {
+            "basic.simultaneous_threshold_milliseconds" : 140
+          },
+          "to" : [ {
+            "set_variable" : {
+              "name" : "command-option-mode",
+              "value" : 1
+            }
+          }, {
+            "key_code" : "down_arrow",
+            "modifiers" : [ "left_command", "left_option" ]
+          } ],
+          "from" : {
+            "simultaneous" : [ {
+              "key_code" : "b"
+            }, {
+              "key_code" : "j"
+            } ],
+            "simultaneous_options" : {
+              "detect_key_down_uninterruptedly" : true,
+              "key_down_order" : "strict",
+              "key_up_order" : "strict_inverse",
+              "key_up_when" : "any",
+              "to_after_key_up" : [ {
+                "set_variable" : {
+                  "name" : "command-option-mode",
+                  "value" : 0
+                }
+              } ]
+            }
+          }
+        }, {
+          "from" : {
+            "key_code" : "k",
+            "modifiers" : {
+              "optional" : [ "any" ]
+            }
+          },
+          "to" : [ {
+            "key_code" : "up_arrow",
+            "modifiers" : [ "left_command", "left_option" ]
+          } ],
+          "conditions" : [ {
+            "name" : "command-option-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "type" : "basic",
+          "parameters" : {
+            "basic.simultaneous_threshold_milliseconds" : 140
+          },
+          "to" : [ {
+            "set_variable" : {
+              "name" : "command-option-mode",
+              "value" : 1
+            }
+          }, {
+            "key_code" : "up_arrow",
+            "modifiers" : [ "left_command", "left_option" ]
+          } ],
+          "from" : {
+            "simultaneous" : [ {
+              "key_code" : "b"
+            }, {
+              "key_code" : "k"
+            } ],
+            "simultaneous_options" : {
+              "detect_key_down_uninterruptedly" : true,
+              "key_down_order" : "strict",
+              "key_up_order" : "strict_inverse",
+              "key_up_when" : "any",
+              "to_after_key_up" : [ {
+                "set_variable" : {
+                  "name" : "command-option-mode",
+                  "value" : 0
+                }
+              } ]
+            }
+          }
+        }, {
+          "from" : {
+            "key_code" : "l",
+            "modifiers" : {
+              "optional" : [ "any" ]
+            }
+          },
+          "to" : [ {
+            "key_code" : "right_arrow",
+            "modifiers" : [ "left_command", "left_option" ]
+          } ],
+          "conditions" : [ {
+            "name" : "command-option-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "type" : "basic",
+          "parameters" : {
+            "basic.simultaneous_threshold_milliseconds" : 140
+          },
+          "to" : [ {
+            "set_variable" : {
+              "name" : "command-option-mode",
+              "value" : 1
+            }
+          }, {
+            "key_code" : "right_arrow",
+            "modifiers" : [ "left_command", "left_option" ]
+          } ],
+          "from" : {
+            "simultaneous" : [ {
+              "key_code" : "b"
+            }, {
+              "key_code" : "l"
+            } ],
+            "simultaneous_options" : {
+              "detect_key_down_uninterruptedly" : true,
+              "key_down_order" : "strict",
+              "key_up_order" : "strict_inverse",
+              "key_up_when" : "any",
+              "to_after_key_up" : [ {
+                "set_variable" : {
+                  "name" : "command-option-mode",
                   "value" : 0
                 }
               } ]
@@ -15349,7 +16092,7 @@
             "key_code" : "f"
           },
           "to" : [ {
-            "shell_command" : "/usr/bin/osascript /Users/johnlindquist/.config/focus-tab.scpt \"assistant.google.com/tasks\""
+            "shell_command" : "/usr/bin/osascript /Users/johnlindquist/.config/focus-tab.scpt \"typefully.com\""
           } ],
           "conditions" : [ {
             "name" : "period-mode",
@@ -15368,7 +16111,7 @@
               "value" : 1
             }
           }, {
-            "shell_command" : "/usr/bin/osascript /Users/johnlindquist/.config/focus-tab.scpt \"assistant.google.com/tasks\""
+            "shell_command" : "/usr/bin/osascript /Users/johnlindquist/.config/focus-tab.scpt \"typefully.com\""
           } ],
           "from" : {
             "simultaneous" : [ {
@@ -16446,8 +17189,8 @@
             "key_code" : "1"
           },
           "to" : [ {
-            "modifiers" : [ "command" ],
-            "key_code" : "backslash"
+            "modifiers" : [ "command", "shift", "control", "option" ],
+            "key_code" : "f1"
           } ],
           "conditions" : [ {
             "name" : "launch-mode",
@@ -16466,8 +17209,8 @@
               "value" : 1
             }
           }, {
-            "modifiers" : [ "command" ],
-            "key_code" : "backslash"
+            "modifiers" : [ "command", "shift", "control", "option" ],
+            "key_code" : "f1"
           } ],
           "from" : {
             "simultaneous" : [ {
@@ -16493,8 +17236,8 @@
             "key_code" : "2"
           },
           "to" : [ {
-            "modifiers" : [ "command", "control", "option" ],
-            "key_code" : "backslash"
+            "modifiers" : [ "command", "shift", "control", "option" ],
+            "key_code" : "f2"
           } ],
           "conditions" : [ {
             "name" : "launch-mode",
@@ -16513,8 +17256,8 @@
               "value" : 1
             }
           }, {
-            "modifiers" : [ "command", "control", "option" ],
-            "key_code" : "backslash"
+            "modifiers" : [ "command", "shift", "control", "option" ],
+            "key_code" : "f2"
           } ],
           "from" : {
             "simultaneous" : [ {
@@ -16857,7 +17600,7 @@
             "key_code" : "f"
           },
           "to" : [ {
-            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/launch_focus_app.sh \"Warp\""
+            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/launch_focus_app.sh \"WezTerm\""
           } ],
           "conditions" : [ {
             "name" : "launch-mode",
@@ -16876,7 +17619,7 @@
               "value" : 1
             }
           }, {
-            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/launch_focus_app.sh \"Warp\""
+            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/launch_focus_app.sh \"WezTerm\""
           } ],
           "from" : {
             "simultaneous" : [ {
@@ -17217,7 +17960,7 @@
             "key_code" : "x"
           },
           "to" : [ {
-            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/launch_focus_app.sh \"Users/johnlindquist/Applications/Chrome Apps.localized/Messages.app\""
+            "shell_command" : "/Users/johnlindquist/.config/scripts/wezterm_run.sh 'devx'"
           } ],
           "conditions" : [ {
             "name" : "launch-mode",
@@ -17236,7 +17979,7 @@
               "value" : 1
             }
           }, {
-            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/launch_focus_app.sh \"Users/johnlindquist/Applications/Chrome Apps.localized/Messages.app\""
+            "shell_command" : "/Users/johnlindquist/.config/scripts/wezterm_run.sh 'devx'"
           } ],
           "from" : {
             "simultaneous" : [ {
@@ -17453,15 +18196,15 @@
     "devices" : [ {
       "identifiers" : {
         "is_pointing_device" : true,
-        "product_id" : 50475,
-        "vendor_id" : 1133
+        "product_id" : 30,
+        "vendor_id" : 8526
       },
       "ignore" : false
     }, {
       "identifiers" : {
-        "is_pointing_device" : true,
-        "product_id" : 50504,
-        "vendor_id" : 1133
+        "is_game_pad" : true,
+        "product_id" : 30,
+        "vendor_id" : 8526
       },
       "ignore" : false
     } ],

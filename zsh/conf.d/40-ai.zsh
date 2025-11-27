@@ -271,7 +271,7 @@ github_tasks() { claude --settings "$HOME/.claude-settings/github-tasks.json" "$
 create_repo() { local args="${@:-Initialize a repository in: $(pwd)}"; claude --settings "$HOME/.claude-settings/repoinit.json" "$args"; }
 
 # Claude shorthand variants
-dopus() { claude --dangerously-skip-permissions "$@"; }
+dopus() { claude --model opus --dangerously-skip-permissions "$@"; }
 popus() { dopus "$(pbpaste) --- $@"; }
 copus() { claude --dangerously-skip-permissions "$@" --continue; }
 conpus() { claude --allowedTools mcp__container-use__environment_checkpoint,mcp__container-use__environment_create,mcp__container-use__environment_add_service,mcp__container-use__environment_file_delete,mcp__container-use__environment_file_list,mcp__container-use__environment_file_read,mcp__container-use__environment_file_write,mcp__container-use__environment_open,mcp__container-use__environment_run_cmd,mcp__container-use__environment_update --dangerously-skip-permissions "$@"; }
@@ -405,6 +405,97 @@ Step 2: Write a summary to $file_name"
 claude-demo() { claude "Write a poem about the following: $@"; }
 
 goo() { gemini -m gemini-3-pro-preview "$@"; }
+
+# =============================================================================
+# Gemini Diagram Generator (nanobanana extension)
+# =============================================================================
+# Interactive diagram generation with style selection
+# Usage: diagram [prompt] or just `diagram` for interactive mode
+
+diagram() {
+  command -v gemini &>/dev/null || { echo "gemini CLI not found"; return 1; }
+
+  # Diagram types
+  local -a types=(
+    "flowchart:Process flows, decision trees, workflows"
+    "architecture:System architecture, microservices, infrastructure"
+    "sequence:Sequence diagrams, API interactions"
+    "database:Database schemas, entity relationships"
+    "network:Network topology, server configurations"
+    "wireframe:UI/UX mockups, page layouts"
+    "mindmap:Concept maps, idea hierarchies"
+  )
+
+  # Visual styles
+  local -a styles=(
+    "professional:Clean corporate look"
+    "clean:Minimalist design"
+    "hand-drawn:Sketch-like appearance"
+    "technical:Engineering blueprint style"
+  )
+
+  local selected_type selected_style prompt
+
+  # Select type
+  if command -v fzf &>/dev/null; then
+    selected_type=$(printf '%s\n' "${types[@]}" | fzf --height 40% --reverse \
+      --delimiter=':' --with-nth=1 \
+      --preview='echo {2}' --preview-window=up:1 \
+      --header="Select diagram type" | cut -d: -f1)
+  else
+    echo "Select diagram type:"
+    select opt in "${types[@]%%:*}"; do
+      selected_type="$opt"
+      break
+    done
+  fi
+  [[ -z "$selected_type" ]] && { echo "Cancelled"; return 0; }
+
+  # Select style
+  if command -v fzf &>/dev/null; then
+    selected_style=$(printf '%s\n' "${styles[@]}" | fzf --height 40% --reverse \
+      --delimiter=':' --with-nth=1 \
+      --preview='echo {2}' --preview-window=up:1 \
+      --header="Select visual style" | cut -d: -f1)
+  else
+    echo "Select style:"
+    select opt in "${styles[@]%%:*}"; do
+      selected_style="$opt"
+      break
+    done
+  fi
+  [[ -z "$selected_style" ]] && { echo "Cancelled"; return 0; }
+
+  # Get prompt (from args or interactive)
+  if [[ $# -gt 0 ]]; then
+    prompt="$*"
+  else
+    echo -n "Describe your diagram: "
+    read -r prompt
+  fi
+  [[ -z "$prompt" ]] && { echo "No description provided"; return 1; }
+
+  # Build and execute command
+  local cmd="/diagram \"$prompt\" --type=$selected_type --style=$selected_style"
+  echo "Running: gemini --yolo '$cmd'"
+  gemini --yolo "$cmd"
+  # Open latest generated diagram
+  local latest=$(ls -t ~/nanobanana-output/*.png ./nanobanana-output/*.png 2>/dev/null | head -1)
+  [[ -n "$latest" ]] && open "$latest"
+}
+
+# Quick diagram variants for common types
+diagram-flow() { gemini --yolo "/diagram \"$*\" --type=flowchart --style=professional" && _diagram_open; }
+diagram-arch() { gemini --yolo "/diagram \"$*\" --type=architecture --style=technical" && _diagram_open; }
+diagram-seq() { gemini --yolo "/diagram \"$*\" --type=sequence --style=clean" && _diagram_open; }
+diagram-db() { gemini --yolo "/diagram \"$*\" --type=database --style=professional" && _diagram_open; }
+diagram-wire() { gemini --yolo "/diagram \"$*\" --type=wireframe --style=hand-drawn" && _diagram_open; }
+
+# Helper to open latest diagram
+_diagram_open() {
+  local latest=$(ls -t ~/nanobanana-output/*.png ./nanobanana-output/*.png 2>/dev/null | head -1)
+  [[ -n "$latest" ]] && open "$latest"
+}
 
 github-issue-create() {
   claude --settings "$HOME/.claude/settings/settings.github.json" --system-prompt "Load the Skill(github) and load the referenced CREATE_ISSUE.md file to create an issue for the following" "$@"

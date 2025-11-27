@@ -5,7 +5,7 @@ sudo yabai --load-sa
 yabai -m config debug_output on
 
 # Set default layout to BSP
-yabai -m config layout bsp
+# yabai -m config layout bsp
 
 # Always start with vertical splits = columns
 yabai -m config split_type   vertical # columns forever
@@ -13,7 +13,7 @@ yabai -m config auto_balance off      # let us decide widths
 yabai -m config window_placement second_child  # new window on the right
 
 # Guard rails for main apps
-yabai -m rule --add app="^Google Chrome$" manage=on sub-layer=norma
+yabai -m rule --add app="^Google Chrome$" manage=on sub-layer=normal
 yabai -m rule --add app="^Code$"          manage=on sub-layer=normal
 yabai -m rule --add app="^Cursor$"        manage=on sub-layer=normal
 
@@ -26,6 +26,10 @@ yabai -m rule --add app="^System Preferences$"    manage=off
 yabai -m rule --add app="^System Settings$"    manage=off
 yabai -m rule --add app="^Displays$"    manage=off
 yabai -m rule --add app="^ChatGPT$"    manage=off
+yabai -m rule --add app="^1Password$"    manage=off
+yabai -m rule --add app="^1Password Extension$"    manage=off
+yabai -m rule --add app="^Cleanshot X$"    manage=off
+
 
 # Ignore all file dialogs and popups
 yabai -m rule --add title="(Copy|Bin|About This Mac|Info|Finder Preferences|Preferences|General)" manage=off

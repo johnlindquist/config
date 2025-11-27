@@ -10,14 +10,22 @@ SCRIPT_NAME="move_window_to_display_2.sh"
 YABAI_PATH="/opt/homebrew/bin/yabai"
 JQ_PATH="/opt/homebrew/bin/jq"
 
-TARGET_DISPLAY_INDEX=2
+# Logical grid slot we want: 1=top-left, 2=top-right, 3=bottom-left, 4=bottom-right
+TARGET_GRID_SLOT=2
 
 log_state() {
   local type="$1"
   local window_id=$($YABAI_PATH -m query --windows --window | $JQ_PATH -r '.id' 2>/dev/null || echo "unknown")
   local current_display=$($YABAI_PATH -m query --windows --window | $JQ_PATH -r '.display' 2>/dev/null || echo "unknown")
-  "$LOGGER_SCRIPT_PATH" "$SCRIPT_NAME" "$type" "WindowID: $window_id, Current Display: $current_display, Target Display: $TARGET_DISPLAY_INDEX"
+  "$LOGGER_SCRIPT_PATH" "$SCRIPT_NAME" "$type" "WindowID: $window_id, Current Display: $current_display, Target Grid Slot: $TARGET_GRID_SLOT"
 }
+
+# Source display mapping helper
+DISPLAY_HELPER_PATH="$(dirname "$0")/display_mapping.sh"
+if [[ -f "$DISPLAY_HELPER_PATH" ]]; then
+  # shellcheck disable=SC1090
+  . "$DISPLAY_HELPER_PATH"
+fi
 
 log_state "BEFORE_STATE"
 
@@ -27,8 +35,14 @@ if [[ -z "$window_id" || "$window_id" == "null" ]]; then
   exit 1
 fi
 
-"$LOGGER_SCRIPT_PATH" "$SCRIPT_NAME" "ACTION" "Moving window $window_id to display $TARGET_DISPLAY_INDEX."
-$YABAI_PATH -m window "$window_id" --display "$TARGET_DISPLAY_INDEX"
+target_display_index=$(get_display_index_for_grid_slot "$TARGET_GRID_SLOT")
+if [[ -z "$target_display_index" ]]; then
+  "$LOGGER_SCRIPT_PATH" "$SCRIPT_NAME" "ERROR" "Could not resolve target display for grid slot $TARGET_GRID_SLOT. Ensure sufficient displays are connected."
+  exit 1
+fi
+
+"$LOGGER_SCRIPT_PATH" "$SCRIPT_NAME" "ACTION" "Moving window $window_id to grid slot $TARGET_GRID_SLOT (display index $target_display_index)."
+$YABAI_PATH -m window "$window_id" --display "$target_display_index"
 move_exit=$?
 if [[ $move_exit -ne 0 ]]; then
   "$LOGGER_SCRIPT_PATH" "$SCRIPT_NAME" "ERROR" "Failed to move window (Exit code: $move_exit)."

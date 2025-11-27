@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
-# ---------- move_window_left_half.sh ----------
-# Resizes the focused window to the left half of the screen at full height.
+# ---------- move_window_center_full.sh ----------
+# Resizes the focused window to full screen (maximized).
 
 # --- Script Setup ---
-SCRIPT_NAME="move_window_left_half"
+SCRIPT_NAME="move_window_center_full"
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 LOGGER_SCRIPT_PATH="$SCRIPT_DIR/log_helper.sh"
 
 # Log the start of the script
-"$LOGGER_SCRIPT_PATH" "$SCRIPT_NAME" "START" "Script execution started - Resize window to left half"
+"$LOGGER_SCRIPT_PATH" "$SCRIPT_NAME" "START" "Script execution started - Resize window to full screen"
 
 # --- Script Logic ---
 y=/opt/homebrew/bin/yabai
@@ -50,9 +50,9 @@ if [[ -z "$window_id" || "$window_id" == "null" ]]; then
 fi
 "$LOGGER_SCRIPT_PATH" "$SCRIPT_NAME" "INFO" "Focused window ID: $window_id"
 
-# 2. Resize window to left half using grid (1 row, 2 cols, start at col 0, width 1, height 1)
-"$LOGGER_SCRIPT_PATH" "$SCRIPT_NAME" "ACTION" "Resizing window $window_id to left half"
-$y -m window --grid 1:2:0:0:1:1
+# 2. Resize window to full screen using grid (1 row, 1 col, full width and height)
+"$LOGGER_SCRIPT_PATH" "$SCRIPT_NAME" "ACTION" "Resizing window $window_id to full screen"
+$y -m window --grid 1:1:0:0:1:1
 if [[ $? -eq 0 ]]; then
     "$LOGGER_SCRIPT_PATH" "$SCRIPT_NAME" "INFO" "Grid resize command executed successfully"
 else
@@ -67,4 +67,8 @@ focus_window "$window_id"
 # Log after state
 log_state "AFTER"
 
-"$LOGGER_SCRIPT_PATH" "$SCRIPT_NAME" "END" "Script execution finished" 
+"$LOGGER_SCRIPT_PATH" "$SCRIPT_NAME" "END" "Script execution finished"
+
+
+
+
