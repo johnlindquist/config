@@ -240,14 +240,34 @@ end
 
 -- Smart new pane: creates a pane using Zellij-style auto-layout
 local function smart_new_pane(window, pane)
+  local log_file = io.open(os.getenv("HOME") .. "/.config/wezterm/debug.log", "a")
+  local function log(msg)
+    if log_file then
+      log_file:write(os.date("%H:%M:%S") .. " " .. msg .. "\n")
+      log_file:flush()
+    end
+  end
+  
+  log("smart_new_pane: CALLED")
+  
   local tab = window:active_tab()
+  if not tab then
+    log("ERROR: tab is nil")
+    if log_file then log_file:close() end
+    return
+  end
+  
   local mode = get_layout_mode(tab)
+  log("mode=" .. tostring(mode))
+  
   local panes = tab:panes()
   local pane_count = #panes
+  log("pane_count=" .. tostring(pane_count))
   
   -- Preserve working directory: new pane starts in same directory as current
   local cwd = pane:get_current_working_dir()
   local cwd_path = cwd and cwd.file_path or nil
+  log("cwd_path=" .. tostring(cwd_path))
 
   -- =========================================================================
   -- FIX: Handle Main Layouts with balanced stack splitting
@@ -277,8 +297,14 @@ local function smart_new_pane(window, pane)
 
     -- Split the largest stack pane (Bottom for main-vertical, Right for main-horizontal)
     local dir = (mode == 'main-vertical') and 'Bottom' or 'Right'
-    target_pane:split({ direction = dir, size = { Percent = 50 }, cwd = cwd_path })
-    wezterm.log_info(string.format('Smart split (main layout): mode=%s, dir=%s, count=%d', mode, dir, pane_count + 1))
+    local split_args = { direction = dir, size = 0.5 }
+    if cwd_path then
+      split_args.cwd = cwd_path
+    end
+    log("splitting largest pane, dir=" .. dir)
+    target_pane:split(split_args)
+    log("split complete")
+    if log_file then log_file:close() end
     return
   end
 
@@ -286,16 +312,30 @@ local function smart_new_pane(window, pane)
   -- Handle Tiled/Standard Layouts
   -- =========================================================================
   local direction = get_smart_split_direction(pane, mode, pane_count)
-  local size = { Percent = 50 }
+  
+  -- Size as a float (0.5 = 50%) - pane:split() expects float, not {Percent=N}
+  local size = 0.5
 
   -- Special sizing for the first split in Main layouts (60/40 split)
   if (mode == 'main-vertical' or mode == 'main-horizontal') and pane_count == 1 then
-    size = { Percent = 40 }  -- New stack pane gets 40%, main keeps 60%
+    size = 0.4  -- New stack pane gets 40%, main keeps 60%
   end
 
   -- Perform the split on the current pane
-  pane:split({ direction = direction, size = size, cwd = cwd_path })
-  wezterm.log_info(string.format('Smart split: mode=%s, dir=%s, count=%d', mode, direction, pane_count + 1))
+  local split_args = { direction = direction, size = size }
+  if cwd_path then
+    split_args.cwd = cwd_path
+  end
+  log("splitting current pane, dir=" .. direction .. ", size=" .. tostring(size))
+  local success, err = pcall(function()
+    pane:split(split_args)
+  end)
+  if success then
+    log("split complete")
+  else
+    log("ERROR: split failed: " .. tostring(err))
+  end
+  if log_file then log_file:close() end
 end
 
 -- ============================================================================
@@ -1113,7 +1153,7 @@ config.keys = {
   -- WHY pipe: Visual mnemonic - a pipe is vertical
   { mods = "LEADER", key = "|", action = act.SplitHorizontal { domain = "CurrentPaneDomain" } },
   
-  -- SMART SPLIT RIGHT: Cmd+D
+  -- SMART SPLIT: Cmd+D
   -- WHY: Uses the smart layout system instead of always splitting right.
   -- Respects the current layout mode (tiled, main-vertical, etc.)
   {
