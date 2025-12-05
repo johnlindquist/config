@@ -35,6 +35,7 @@ path=(
 
   # User tools
   "$HOME/.local/bin"
+  "$HOME/agents/instructions"
 
   # Keep existing PATH entries
   $path

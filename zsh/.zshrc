@@ -48,6 +48,19 @@ if command -v zoxide &>/dev/null; then
     __zoxide_zi "$@"
   }
 
+  # t = interactive jump that also opens the directory in Cursor
+  function t() {
+    __zoxide_doctor
+    local result
+    result="$(\command zoxide query --interactive -- "$@")" || return $?
+    __zoxide_cd "${result}" || return $?
+    if command -v cursor &>/dev/null; then
+      cursor "${result}"
+    else
+      echo "cursor not found in PATH"
+    fi
+  }
+
   # j = quick jump (non-interactive, for when you know where you're going)
   function j() {
     __zoxide_z "$@"

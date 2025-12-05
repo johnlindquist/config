@@ -1,0 +1,31 @@
+{
+  "manual_call_templates": [
+    {
+      "name": "memory_write",
+      "call_template_type": "cli",
+      "commands": [
+        {
+          "command": "basic-memory tool write-note --project memory --title UTCP_ARG_title_UTCP_END --folder UTCP_ARG_folder_UTCP_END --content UTCP_ARG_content_UTCP_END"
+        }
+      ]
+    },
+    {
+      "name": "memory_read",
+      "call_template_type": "cli",
+      "commands": [
+        {
+          "command": "basic-memory tool read-note --project memory UTCP_ARG_identifier_UTCP_END"
+        }
+      ]
+    },
+    {
+      "name": "memory_search",
+      "call_template_type": "cli",
+      "commands": [
+        {
+          "command": "basic-memory tool search-notes --project memory UTCP_ARG_query_UTCP_END"
+        }
+      ]
+    }
+  ]
+}

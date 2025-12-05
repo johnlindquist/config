@@ -325,9 +325,10 @@ h() { claude --model haiku "$@"; }
 unalias x 2>/dev/null
 x() { claude --dangerously-skip-permissions "$@"; }
 
-dex() { codex --dangerously-bypass-approvals-and-sandbox; }
+dex() { codex --dangerously-bypass-approvals-and-sandbox "$@"; }
 xcon() { claude --dangerously-skip-permissions --continue "$@"; }
 xres() { claude --dangerously-skip-permissions --resume "$@"; }
+xfor() { claude --dangerously-skip-permissions --resume --fork-session "$@"; }
 
 unalias cc 2>/dev/null
 cc() { claude "$@"; }

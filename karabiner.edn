@@ -25,7 +25,10 @@
                        :return       {:key :return_or_enter}
                        :tilde        {:key :grave_accent_and_tilde}
 
-                       ;; Colemak Layout Aliases (for easier mnemonics in rules)
+                       ;; Colemak Layout Aliases (use :-X where X is the Colemak letter)
+                       ;; Quick Reference: QWERTY -> Colemak
+                       ;; E->F, R->P, T->G, Y->J, U->L, I->U, O->Y, P->;
+                       ;; S->R, D->S, F->T, G->D, J->N, K->E, L->I, ;->O, N->K
                        :-q          {:key :q}
                        :-w          {:key :w}
                        :-f          {:key :e}           ; Colemak 'F' is QWERTY 'E'
@@ -61,7 +64,24 @@
                        :right_click  {:pkey :button2}} ; Added for clarity based on usage later
 
  ;; --- OUTPUT ACTION ALIASES (:tos) ---
- :tos                 {;; Basic Keys
+ :tos                 {;; Mode Reset - single source of truth for all mode resets
+                       :reset-all-modes [{:set ["caps-lock-mode" 0]}
+                                         {:set ["fn-mode" 0]}
+                                         {:set ["opt-mode" 0]}
+                                         {:set ["shift-opt-mode" 0]}
+                                         {:set ["movement-mode" 0]}
+                                         {:set ["cursor-mode" 0]}
+                                         {:set ["delete-mode" 0]}
+                                         {:set ["nav-mode" 0]}
+                                         {:set ["snippet-mode" 0]}
+                                         {:set ["kit-mode" 0]}
+                                         {:set ["button2-mode" 0]}
+                                         {:set ["button4-mode" 0]}
+                                         {:set ["button5-mode" 0]}
+                                         {:set ["escape-mode" 0]}
+                                         {:set ["home-mode" 0]}]
+
+                       ;; Basic Keys
                        :delete       {:key :delete_or_backspace}
                        :return       {:key :return_or_enter}
                        :tilde        {:key :grave_accent_and_tilde}
@@ -195,7 +215,14 @@
 
  ;; --- SCRIPT TEMPLATES ---
  ;; Templates for generating shell commands using osascript, security, kenv, etc.
- :templates           {:beep "osascript -e 'beep'"
+ :templates           {;; Common path shortcuts (DRY principle)
+                       :script "/bin/bash /Users/johnlindquist/.config/scripts/%s.sh"
+                       :cursor "/usr/local/bin/cursor %s"
+
+                       ;; Layer indicator (shows notification when layer activates)
+                       :notify "osascript -e 'display notification \"%s\" with title \"Layer\"'"
+
+                       :beep "osascript -e 'beep'"
                        :beep2 "osascript -e 'beep 2'"
                        :new-note "osascript -e 'tell application id \"m.runningwithcrayons.Alfred\" to run trigger \"new-note\" in workflow \"com.johnlindquist.new-note\" with argument \"\"'"
                        :new-blog "osascript -e 'tell application id \"com.runningwithcrayons.Alfred\" to run trigger \"new-blog\" in workflow \"com.johnlindquist.new-blog\" with argument \"\"'"
@@ -211,7 +238,7 @@
                        :kit "~/.kit/kar \"%s\""
                        :focus "~/.kit/kar focus \"%s\""
                        :launch "/bin/bash /Users/johnlindquist/.config/scripts/launch_focus_app.sh \"%s\""
-                      :wezterm "/Users/johnlindquist/.config/scripts/wezterm_run.sh '%s'"
+                       :wezterm "/Users/johnlindquist/.config/scripts/wezterm_run.sh \"%s\""
                        :open-chrome "osascript -e 'tell application \"Google Chrome\"\nactivate\nopen location \"%s\"\nend tell'"
                        ;; Inside your :templates map in karabiner.edn
 
@@ -332,6 +359,7 @@
                        :screenflow ["net.telestream.screenflow10"]
                        :screenstudio ["com.timpler.screenstudio"]
                        :slack      ["com.tinyspeck.slackmacgap"]
+                       :wezterm    ["com.github.wez.wezterm"]
                        :windows    ["com.microsoft.rdc.macos", "com.parallels.desktop.appstore"]} ; RDP, Parallels
  ;; :webstorm ["com.jetbrains.Webstorm"] ; Example if needed
 
@@ -345,8 +373,7 @@
                        :escape-mode    {:key :escape
                                         :params  {:basic.to_if_alone_timeout_milliseconds 200
                                                   :basic.to_if_held_down_threshold_milliseconds 200}
-                                        :alone [;; reset all modes on tap
-                                                {:key :escape}
+                                        :alone [{:key :escape}
                                                 {:set ["caps-lock-mode" 0]}
                                                 {:set ["fn-mode" 0]}
                                                 {:set ["opt-mode" 0]}
@@ -357,13 +384,11 @@
                                                 {:set ["nav-mode" 0]}
                                                 {:set ["snippet-mode" 0]}
                                                 {:set ["kit-mode" 0]}
-                                                {:set ["button2-mode" 0]} ; Added missing modes? Check if needed
+                                                {:set ["button2-mode" 0]}
                                                 {:set ["button4-mode" 0]}
                                                 {:set ["button5-mode" 0]}
                                                 {:set ["escape-mode" 0]}
-                                                {:set ["home-mode" 0]}
-                                                ;;
-                                                ]}
+                                                {:set ["home-mode" 0]}]}
                        ;; {:set ["submit-dictation-mode" 0]}
                        ;;
 
@@ -390,9 +415,7 @@
                        :finder-mode        {:key :e} ; Press E + another key ('F' in Colemak, for Finder actions)
                        :peek-mode          {:key :r} ; Press R + another key ('P' in Colemak, for Peek actions)
                        :go-mode            {:key :t} ; Press T + another key ('G' in Colemak, for Go actions)
-                       :t-mode             {:key :t} ; Duplicate of :go-mode? Or different context?
                        :presentation-mode  {:key :p} ; Press P + another key (';' in Colemak, for presentations)
-                       :backslash-mode     {:key :backslash} ; Press \ + another key
 
                        ;; Home Row Simlayers (with trackpad avoidance)
                        ;; :condi ensures the layer only activates if NOT touching the trackpad
@@ -403,21 +426,18 @@
                        :cursor-mode        {:key :g  :condi ["multitouch_extension_finger_count_total" 0]} ; G + key ('D' Colemak, Cursor actions layer)
                        :delete-mode        {:key :j} ; J + key ('N' Colemak, Deletion layer)
                        :nav-mode           {:key :k} ; K + key ('E' Colemak, Navigation layer)
-                       :i-mode             {:key :l} ; L + key ('I' Colemak, seems unused in rules?)
                        :period-mode        {:key :period} ; . + key (URL opening and focusing layer)
                        :comma-mode         {:key :comma} ; , + key (URL opening layer)
                        :semicolon-mode     {:key :semicolon} ; ; + key ('O' Colemak, Special character layer)
                        :launch-mode        {:key :u} ; U + key ('L' Colemak, App launching layer) - Note: also defined in :layers with F24 trigger
-                       :open-mode          {:key :semicolon} ; ; + key ('O' Colemak, Project opening layer) - Note: conflicts with :semicolon-mode if 'O' Colemak is ';' Qwerty
                        :snippet-mode       {:key :quote} ; ' + key ('O' Colemak? Seems incorrect, ' is ' on Qwerty, P on Colemak - Check Colemak mapping) - Snippet layer
                        :emoji-mode         {:key :z} ; Z + key (Emoji layer)
 
                        ;; Bottom Row Simlayers
                        :command-mode       {:key :c} ; C + key (Command layer)
-                       :control-option-mode {:key :x}; X + key (Control Option layer)
-                       :command-option-mode {:key :b}; X + key (Control Option layer)
+                       :ctrl-opt-mode {:key :x}; X + key (Control Option layer)
+                       :cmd-opt-mode {:key :b}; X + key (Control Option layer)
                        :command-shift-mode {:key :v} ; V + key (Command Shift layer)
-                       :bookmark-mode      {:key :b} ; B + key (Bookmark layer)
                        :kit-mode           {:key :n} ; N + key ('K' Colemak, Script Kit layer)
                        :media-mode         {:key :m} ; M + key (Media keys layer)
                        :slash-mode         {:key :slash} ; / + key (Seems unused?)
@@ -442,19 +462,7 @@
                                 [:caps_lock ["escape-mode" 1] nil {:alone {:key :escape} :afterup {:set ["escape-mode" 0]}}]
                                 ;; [:fn :equal_sign]
                                 [:left_option :left_option nil {:alone   {:key :semicolon :modi :left_command}
-                                                                :afterup [{:set ["home-mode" 0]}
-                                                                          {:set ["fn-mode" 0]}
-                                                                          {:set ["opt-mode" 0]}
-                                                                          {:set ["shift-opt-mode" 0]}
-                                                                          {:set ["movement-mode" 0]}
-                                                                          {:set ["cursor-mode" 0]}
-                                                                          {:set ["delete-mode" 0]}
-                                                                          {:set ["nav-mode" 0]}
-                                                                          {:set ["snippet-mode" 0]}
-                                                                          {:set ["kit-mode" 0]}
-                                                                          {:set ["button2-mode" 0]} ; Added missing modes? Check if needed
-                                                                          {:set ["button4-mode" 0]}
-                                                                          {:set ["escape-mode" 0]}]}]]}
+                                                                :afterup :reset-all-modes}]]}
                        ;;
 
                        {:des "Global Button2-Mode"
@@ -645,6 +653,10 @@
                                 [:condi :chrome :button2-mode]
                                 [:-w [{:pkey :button1} :!Cw]]
                                 [:-a [{:pkey :button1} [:delay-key "e"]]]]}
+
+                       {:des   "WezTerm"
+                        :rules [:wezterm ; Apply only when WezTerm is frontmost
+                                [:left_command :left_command nil {:alone :go_to_file}]]}
 
                        {:des   "VS Code / Cursor"
                         :rules [:code ; Apply only when :code apps are frontmost
@@ -887,6 +899,9 @@
                                 [:-i :!SOi] ; Tab+I (L Colemak) -> Shift+Opt+I ?
                                 [:-q :vk_consumer_next] ; M+F (E Colemak) -> Next Track
                                 [:-p :vk_consumer_play]
+                                [:-t [:launch "Google Tasks"]]
+                                [:-k [:launch "Google Keep"]]
+                                [:-m [:launch "/Users/johnlindquist/Applications/Chrome Apps.localized/Messages.app"]]
 
                                 ;;
 ]} ; M+P (R Colemak) -> Play/Pause
@@ -1185,17 +1200,6 @@
                                 [:-t :open_next_editor] ; K+T (F Colemak) -> Next Editor/Tab (Cmd+Opt+Right)
                                 [:-d :focus_prev_editor_group]]} ; K+D (G Colemak) -> Focus Prev Group (Opt+Shift+F16)
 
-                       {:des   "Open Mode (Semicolon + Key / O Colemak Layer)"
-                        :rules [:open-mode
-                                ;; Open projects/configs via Semicolon + Key
-                                ;; [:-c [:code-project "~/.config"]] ; Semicolon+C -> Open ~/.config
-                                [:-z ["/usr/local/bin/cursor ~/dev/agent"]] ; Semicolon+K (E Colemak) -> Open ~/.config in Cursor
-                                ;; [:-k ["/usr/local/bin/cursor ~/.config"]] ; Semicolon+K (E Colemak) -> Open ~/.config in Cursor
-                                [:-g ["/Users/johnlindquist/scripts/scripts/goku-notify.ts"]]
-                                [:-w ["/usr/local/bin/cursor ~/dev/claude-workshop-live"]]
-
-                                ;;
-]} ; Semicolon+G (T Colemak) -> Reload Karabiner
 
                        {:des   "Snippet Mode (Quote + Key)"
                         :rules [:snippet-mode
@@ -1261,14 +1265,13 @@
                                 [:left_command {:key :g :modi :hyper}]
                                 ;;
 ]} ; C+E (K Colemak) -> Go to Home (Cmd+Up)
-                       {:des "Control Option Mode"
-                        :rules [:control-option-mode
-                                ;; Control-Option-modified arrow keys and actions via C + Key
-                                ;; Arrow keys with Control-Option
-                                [:##h :!TOleft_arrow] ; C+H -> Cmd+Left
-                                [:##j :!TOdown_arrow] ; C+J (Y Colemak) -> Cmd+Down
-                                [:##k :!TOup_arrow]   ; C+K (E Colemak) -> Cmd+Up
-                                [:##l :!TOright_arrow]; C+L (U Colemak) -> Cmd+Right
+                       {:des "Ctrl+Opt Mode (X + Key)"
+                        :rules [:ctrl-opt-mode
+                                ;; Ctrl+Opt modified arrow keys via X + Key
+                                [:##h :!TOleft_arrow] ; X+H -> Ctrl+Opt+Left
+                                [:##j :!TOdown_arrow] ; X+J -> Ctrl+Opt+Down
+                                [:##k :!TOup_arrow]   ; X+K -> Ctrl+Opt+Up
+                                [:##l :!TOright_arrow] ; X+L -> Ctrl+Opt+Right
                                 ;; Go Home/End
                                 [:-n :go_end] ; C+N (J Colemak) -> Go to End (Cmd+Down)
                                 [:-e :go_home]
@@ -1276,17 +1279,16 @@
                                 ;;
                                 ]}
 
-                       {:des "Control Option Mode"
-                        :rules [:command-option-mode
-                                ;; Control-Option-modified arrow keys and actions via C + Key
-                                ;; Arrow keys with Control-Option
-                                [:##h :!COleft_arrow] ; C+H -> Cmd+Left
-                                [:##j :!COdown_arrow] ; C+J (Y Colemak) -> Cmd+Down
-                                [:##k :!COup_arrow]   ; C+K (E Colemak) -> Cmd+Up
-                                [:##l :!COright_arrow]; C+L (U Colemak) -> Cmd+Right
-
-                                ;;
-                                ]}
+                       {:des "Cmd+Opt Mode (B + Key)"
+                        :rules [:cmd-opt-mode
+                                ;; Cmd+Opt modified arrow keys via B + Key
+                                [:##h :!COleft_arrow] ; B+H -> Cmd+Opt+Left
+                                [:##j :!COdown_arrow] ; B+J -> Cmd+Opt+Down
+                                [:##k :!COup_arrow]   ; B+K -> Cmd+Opt+Up
+                                [:##l :!COright_arrow] ; B+L -> Cmd+Opt+Right
+                                ;; Bookmark shortcuts (merged from bookmark-mode)
+                                [:-m :!COk] ; B+M -> Cmd+Opt+K
+                                [:-n :!COTb]]}
                        {:des   "Command Shift Mode (V + Key)"
                         :rules [:command-shift-mode
                                 ;; Command-modified arrow keys and actions via C + Key
@@ -1295,12 +1297,6 @@
                                 [:##j :!CSdown_arrow] ; C+J (Y Colemak) -> Cmd+Down
                                 [:##k :!CSup_arrow]   ; C+K (E Colemak) -> Cmd+Up
                                 [:##l :!CSright_arrow]]}; C+L (U Colemak) -> Cmd+Right
-
-                       {:des   "Bookmark Mode (B + Key)"
-                        :rules [:bookmark-mode
-                                ;; Browser related actions via B + Key
-                                [:-m :!COk] ; B+M -> Cmd+Opt+K ?
-                                [:-l :!COTb]]} ; B+L (U Colemak) -> Cmd+Opt+Ctrl+B ?
 
                        {:des   "Media Mode (M + Key)"
                         :rules [:media-mode
@@ -1312,22 +1308,21 @@
 
                        {:des   "Kit Mode (N + Key / K Colemak Layer)"
                         :rules [:kit-mode
-                                ;; Script Kit related actions (opening projects/URLs) via N + Key
-                                [:-q ["/usr/local/bin/cursor ~/dev/cdp-cli-container/cdp-cli"]] ; N+Q -> Open Kit Discussions
-                                [:-s ["/usr/local/bin/cursor ~/.kit"]] ; N+S (R Colemak) -> Open ~/.kit in Cursor
-                                [:-r ["/usr/local/bin/cursor ~/dev/rubrics"]] ; N+R (P Colemak) -> Open rubrics project
-                                [:-d ["/usr/local/bin/cursor ~/dev/kit-docs"]] ; N+D (G Colemak) -> Open kit-docs project
-                                [:-f ["/usr/local/bin/cursor ~/dev/file-forge"]] ; N+F (E Colemak) -> Open file-forge project
-                                [:-g ["/usr/local/bin/cursor ~/dev/script-generator"]] ; N+G (T Colemak) -> Open script-generator project
-                                [:-v ["/usr/local/bin/cursor ~/.kenv"]] ; N+V -> Open ~/.kenv in Cursor
-                                [:-t ["/usr/local/bin/cursor ~/dev/kit"]] ; N+T (F Colemak) -> Open kit project
-                                [:-c ["/usr/local/bin/cursor ~/dev/kit-container"]]
-                                ;; [:-g ["/usr/local/bin/cursor ~/dev/globals"]] ; Duplicate G mapping?
-                                [:-a ["/usr/local/bin/cursor ~/dev/agentconfig"]] ; N+A -> Open app project
-                                ;; [:-s ["/usr/local/bin/cursor ~/dev/scriptkit.com"]] ; Duplicate S mapping?
-                                [:-w ["/usr/local/bin/cursor ~/dev/cursor-workshop-marp"]] ; N+W -> Open workshop project
-                                [:-x ["/usr/local/bin/cursor ~/dev/exercises"]] ; N+X -> Open exercises project
-                                ;; GitHub Actions/Releases/Discussions via Number Keys
+                                ;; Open projects in Cursor via N + Key
+                                [:-q [:cursor "~/dev/cdp-cli-container/cdp-cli"]]
+                                [:-s [:cursor "~/.kit"]]
+                                [:-r [:cursor "~/dev/rubrics"]]
+                                [:-d [:cursor "~/dev/kit-docs"]]
+                                [:-f [:cursor "~/dev/file-forge"]]
+                                [:-g [:cursor "~/dev/script-generator"]]
+                                [:-v [:cursor "~/.kenv"]]
+                                [:-t [:cursor "~/dev/kit"]]
+                                [:-c [:cursor "~/dev/kit-container"]]
+                                [:-a [:cursor "~/dev/agentconfig"]]
+                                [:-w [:cursor "~/dev/cursor-workshop-marp"]]
+                                [:-x [:cursor "~/dev/exercises"]]
+                                [:-z [:cursor "~/dev/agent"]]
+                                ;; GitHub Actions/Releases/Discussions
                                 [:1 ["~/.kenv/bin/focus-tab github.com/johnlindquist/kitapp/actions"]]
                                 [:2 ["~/.kenv/bin/focus-tab github.com/johnlindquist/kitapp/releases"]]
                                 [:3 ["~/.kenv/bin/focus-tab github.com/johnlindquist/kit/discussions"]]
@@ -1382,49 +1377,47 @@
                        ;;                 ;; [:-t :!COS0] ; Duplicate T mapping? Cmd+Opt+Shift+0?
                        ;;                 ]}
 
-                       {:des   "Period Mode (. + Key / Open URLs)"
+                       {:des   "Period Mode (. + Key) - Focus or Open URLs"
                         :rules [:period-mode
-                                ;; Open common URLs via Period + Key
-                                [:-s [:focus-or-open-chrome "dashboard.stripe.com/payment-links/plink_1RMGuI2nImeJXwdJfV33uYU5"]]
-                                [:-c [:focus-or-open-chrome "chatgpt.com"]] ; .+C -> Open ChatGPT
-                                [:-e [:focus-or-open-chrome "egghead.io"]]        ; .+E (K Colemak) -> Open Egghead
-                                [:-g [:focus-or-open-chrome "gemini.google.com"]]   ; .+G (T Colemak) -> Open Gmail
-                                [:-p [:focus-or-open-chrome "perplexity.ai"]]     ; .+P (R Colemak) -> Open Perplexity
-                                [:-j [:focus-or-open-chrome "js.new"]]            ; .+J (N Colemak) -> Open js.new
-                                [:-k [:focus-or-open-chrome "github.com/search?q=extension%3A.edn+filename%3Akarabiner.edn&type=Code&ref=advsearch&l=&l="]] ; .+K (E Colemak) -> Search GitHub for karabiner.edn
-                                [:-l [:focus-or-open-chrome "http://localhost:4200"]]    ; .+L (U Colemak) -> Open localhost:4200
-                                [:-m [:focus-or-open-chrome "www.youtube.com/watch?v=jfKfPfyJRdk&ab_channel=LofiGirl"]] ; .+M -> Open Lofi Girl
-                                ;; [:-t [:focus-or-open-chrome "github.com/johnlindquist/kit/actions"]] ; .+T (F Colemak) -> Open Kit Actions
-                                [:-a [:focus-or-open-chrome "aistudio.google.com/prompts/new_chat"]] ; .+A -> Open KitApp Actions
-                                [:-u [:focus-or-open-chrome "builder.egghead.io"]] ; .+U (I Colemak) -> Open Egghead Upload
-                                [:-x [:focus-or-open-chrome "x.com"]]              ; .+X -> Open X.com
-                                [:-q [:focus-or-open-chrome "chatgpt.com/codex"]]              ; .+Q -> Open ChatGPT Codex
-                                [:-w [:focus-or-open-chrome "calendar.google.com/calendar/u/1/r"]] ; .+W -> Open Google Calendar (User 1)
-                                [:-y [:focus-or-open-chrome "youtube.com"]]        ; .+Y (O Colemak) -> Open YouTube
-                                [:1 [:focus-or-open-chrome "mail.google.com/mail/u/0"]]        ; 1 -> Open Gmail (User 0)
-                                [:2 [:focus-or-open-chrome "mail.google.com/mail/u/1"]]        ; 2 -> Open Gmail (User 1)
-                                [:-t [:focus-or-open-chrome "typefully.com"]]]}        ; 2 -> Open Gmail (User 1)
+                                ;; Focus existing tab or open new (use Comma mode for always-new-tab)
+                                [:-a [:focus-or-open-chrome "aistudio.google.com/prompts/new_chat"]]
+                                [:-c [:focus-or-open-chrome "chatgpt.com"]]
+                                [:-e [:focus-or-open-chrome "egghead.io"]]
+                                [:-g [:focus-or-open-chrome "gemini.google.com"]]
+                                [:-j [:focus-or-open-chrome "js.new"]]
+                                [:-k [:focus-or-open-chrome "github.com/search?q=extension%3A.edn+filename%3Akarabiner.edn&type=Code"]]
+                                [:-l [:focus-or-open-chrome "http://localhost:4200"]]
+                                [:-m [:focus-or-open-chrome "www.youtube.com/watch?v=jfKfPfyJRdk&ab_channel=LofiGirl"]]
+                                [:-p [:focus-or-open-chrome "perplexity.ai"]]
+                                [:-q [:focus-or-open-chrome "chatgpt.com/codex"]]
+                                [:-s [:focus-or-open-chrome "dashboard.stripe.com"]]
+                                [:-t [:focus-or-open-chrome "typefully.com"]]
+                                [:-u [:focus-or-open-chrome "builder.egghead.io"]]
+                                [:-w [:focus-or-open-chrome "calendar.google.com/calendar/u/1/r"]]
+                                [:-x [:focus-or-open-chrome "x.com"]]
+                                [:-y [:focus-or-open-chrome "youtube.com"]]
+                                [:1 [:focus-or-open-chrome "mail.google.com/mail/u/0"]]
+                                [:2 [:focus-or-open-chrome "mail.google.com/mail/u/1"]]]}        ; 2 -> Open Gmail (User 1)
 
-                       {:des   "Comma Mode (, + Key / Open URLs)"
+                       {:des   "Comma Mode (, + Key) - Always Open New Tab"
                         :rules [:comma-mode
-                                ;; Open common URLs via Period + Key
-                                [:-c [:open-new-tab "chatgpt.com"]] ; .+C -> Open ChatGPT
-                                [:-e [:open-new-tab "egghead.io"]]        ; .+E (K Colemak) -> Open Egghead
-                                [:-g [:open-new-tab "gemini.google.com"]]   ; .+G (T Colemak) -> Open Gmail
-                                [:-p [:open-new-tab "perplexity.ai"]]     ; .+P (R Colemak) -> Open Perplexity
-                                [:-j [:open-new-tab "js.new"]]            ; .+J (N Colemak) -> Open js.new
-                                [:-k [:open-new-tab "github.com/search?q=extension%3A.edn+filename%3Akarabiner.edn&type=Code&ref=advsearch&l=&l="]] ; .+K (E Colemak) -> Search GitHub for karabiner.edn
-                                [:-l [:open-new-tab "http://localhost:4200"]]    ; .+L (U Colemak) -> Open localhost:4200
-                                [:-m [:open-new-tab "www.youtube.com/watch?v=jfKfPfyJRdk&ab_channel=LofiGirl"]] ; .+M -> Open Lofi Girl
-                                [:-t [:open-new-tab "github.com/johnlindquist/kit/actions"]] ; .+T (F Colemak) -> Open Kit Actions
-                                [:-a [:open-new-tab "aistudio.google.com/prompts/new_chat"]] ; .+A -> Open KitApp Actions
-                                [:-u [:open-new-tab "builder.egghead.io"]] ; .+U (I Colemak) -> Open Egghead Upload
-                                [:-x [:open-new-tab "pro.x.com"]]              ; .+X -> Open X.com
-                                [:-w [:open-new-tab "calendar.google.com/calendar/u/1/r"]] ; .+W -> Open Google Calendar (User 1)
-                                [:-y [:open-new-tab "youtube.com"]]        ; .+Y (O Colemak) -> Open YouTube
-                                [:1 [:open-new-tab "mail.google.com/mail/u/0"]]        ; 1 -> Open Gmail (User 0)
-                                [:2 [:open-new-tab "mail.google.com/mail/u/1"]]        ; 2 -> Open Gmail (User 1)
-                                [:-t [:open-new-tab "assistant.google.com/tasks"]]]}        ; 2 -> Open Gmail (User 1)
+                                ;; Always opens new tab (use Period mode to focus existing)
+                                [:-a [:open-new-tab "aistudio.google.com/prompts/new_chat"]]
+                                [:-c [:open-new-tab "chatgpt.com"]]
+                                [:-e [:open-new-tab "egghead.io"]]
+                                [:-g [:open-new-tab "gemini.google.com"]]
+                                [:-j [:open-new-tab "js.new"]]
+                                [:-k [:open-new-tab "github.com/search?q=extension%3A.edn+filename%3Akarabiner.edn&type=Code"]]
+                                [:-l [:open-new-tab "http://localhost:4200"]]
+                                [:-m [:open-new-tab "www.youtube.com/watch?v=jfKfPfyJRdk&ab_channel=LofiGirl"]]
+                                [:-p [:open-new-tab "perplexity.ai"]]
+                                [:-t [:open-new-tab "assistant.google.com/tasks"]]
+                                [:-u [:open-new-tab "builder.egghead.io"]]
+                                [:-w [:open-new-tab "calendar.google.com/calendar/u/1/r"]]
+                                [:-x [:open-new-tab "pro.x.com"]]
+                                [:-y [:open-new-tab "youtube.com"]]
+                                [:1 [:open-new-tab "mail.google.com/mail/u/0"]]
+                                [:2 [:open-new-tab "mail.google.com/mail/u/1"]]]}        ; 2 -> Open Gmail (User 1)
 
                        {:des   "Presentation Mode (P + Key / ; Colemak)"
                         :rules [:presentation-mode
@@ -1453,7 +1446,7 @@
                                 [:-c [:launch "Cursor"]] ; Launch+C -> Launch Cursor
                                 [:-k "launchctl kickstart -k org.pqrs.karabiner.karabiner_console_user_server"] ; Launch+K (E Colemak) -> Restart Karabiner
                                 [:-y [:launch "YouTube Music"]] ; Launch+Y (O Colemak) -> Launch YouTube Music
-                                [:-r [:launch "Restream Chat"]] ; Launch+R (S Colemak) -> Launch Restream Chat
+                                [:-r [:wezterm "cd ~/research && x --append-system-prompt='Research the users query then write the result to a markdown file ./<shortened-slugified-query>.md'"]] ; Launch+R -> WezTerm research mode
                                 [:-s [:launch "Slack"]] ; Launch+S (D Colemak) -> Launch Slack
                                 ;; [:-w [:launch "Windsurf"]] ; Launch+W -> Launch Windsurf
                                 [:-z [:launch "Zed"]] ; Launch+Z -> Launch Zoom

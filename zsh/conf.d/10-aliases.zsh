@@ -8,11 +8,50 @@
 command -v bat &>/dev/null && alias cat='bat --no-pager'
 command -v eza &>/dev/null && alias ls='eza'
 command -v trash &>/dev/null && alias rm='trash'
+command -v bun &>/dev/null && alias -s ts='bun'
+
+alias -s md='_handle_md'
+_handle_md() {
+  local file="$1"
+  shift
+
+  # Check ~/agents/instructions if file doesn't exist locally
+  if [[ ! -f "$file" && -f "$HOME/agents/instructions/$file" ]]; then
+    file="$HOME/agents/instructions/$file"
+  fi
+
+  # Pass file and any remaining args (--model, --silent, etc.) to handler
+  bun run /Users/johnlindquist/agents/src/index.ts "$file" "$@"
+}
 
 #### Editor shortcuts (override EDITOR_CMD in local.zsh)
 : "${EDITOR_CMD:=cursor}"
 alias zd="zed"
 alias s='source $ZDOTDIR/.zshrc'
+
+# Pipe to markdown file and open in VS Code
+# Usage: some_command | codemd [optional_name]
+codemd() {
+  local name="${1:-output}"
+  local timestamp=$(date +%Y%m%d_%H%M%S)
+  local tmpdir="${TMPDIR:-/tmp}/codemd"
+  mkdir -p "$tmpdir"
+  local file="$tmpdir/${name}_${timestamp}.md"
+  touch "$file"
+  code-insiders "$file"
+}
+
+v(){
+  code-insiders "$@"
+}
+
+p(){
+  copilot --model claude-opus-4.5 --allow-all-tools -ps "$@"
+}
+
+pi(){
+  copilot --model claude-opus-4.5 --allow-all-tools ${1:+--interactive} "$@"
+}
 
 #### Package management
 alias pup="pnpm dlx npm-check-updates -i -p pnpm"
@@ -188,6 +227,9 @@ files() {
 slugify() {
   tr '[:upper:]' '[:lower:]' | tr -d '[:punct:]' | tr ' ' '-' | tr '/' '-'
 }
+
+# Copy file contents to clipboard
+cf() { pbcopy < "$1"; }
 
 # MCP inspector
 mcpi() { bunx @modelcontextprotocol/inspector@latest "$@"; }
@@ -490,6 +532,7 @@ devx() {
 typeset -gA _SPACE_TRIGGERS
 _SPACE_TRIGGERS[dev]="_dev_navigate"
 _SPACE_TRIGGERS[z]="__zoxide_zi"
+_SPACE_TRIGGERS[t]="t"
 
 # Universal space trigger - checks all registered commands
 _space_trigger() {
@@ -506,3 +549,45 @@ _space_trigger() {
 
 zle -N _space_trigger
 bindkey " " _space_trigger
+
+# =============================================================================
+# YouTube Download
+# =============================================================================
+# Download YouTube videos to ~/Downloads
+# Usage: yt <url> [-q quality]
+# Quality: 360 (default), 480, 720, 1080, 4k, best, audio
+
+yt() {
+  [[ -z "$1" ]] && { echo "Usage: yt <url> [-q 360|480|720|1080|4k|best|audio]"; return 1; }
+  command -v yt-dlp &>/dev/null || { echo "yt-dlp required: brew install yt-dlp"; return 1; }
+
+  local url="" quality="360"
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      -q|--quality) quality="$2"; shift 2 ;;
+      -*) echo "Unknown option: $1"; return 1 ;;
+      *) url="$1"; shift ;;
+    esac
+  done
+
+  [[ -z "$url" ]] && { echo "URL required"; return 1; }
+
+  local output_dir="$HOME/Downloads"
+  local format_opts=()
+
+  case "$quality" in
+    audio|mp3)  format_opts=(-x --audio-format mp3) ;;
+    360)        format_opts=(-f "bestvideo[height<=360]+bestaudio/best[height<=360]") ;;
+    480)        format_opts=(-f "bestvideo[height<=480]+bestaudio/best[height<=480]") ;;
+    720)        format_opts=(-f "bestvideo[height<=720]+bestaudio/best[height<=720]") ;;
+    1080)       format_opts=(-f "bestvideo[height<=1080]+bestaudio/best[height<=1080]") ;;
+    4k)         format_opts=(-f "bestvideo[height<=2160]+bestaudio/best[height<=2160]") ;;
+    best)       format_opts=(-f "bestvideo+bestaudio/best") ;;
+    *)          echo "Unknown quality: $quality"; return 1 ;;
+  esac
+
+  echo "📥 Downloading (${quality}) to $output_dir..."
+  yt-dlp "${format_opts[@]}" --merge-output-format mp4 -o "$output_dir/%(title)s.%(ext)s" "$url"
+  open ~/Downloads
+}
