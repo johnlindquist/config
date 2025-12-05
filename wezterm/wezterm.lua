@@ -1113,16 +1113,20 @@ config.keys = {
   -- WHY pipe: Visual mnemonic - a pipe is vertical
   { mods = "LEADER", key = "|", action = act.SplitHorizontal { domain = "CurrentPaneDomain" } },
   
-  -- SPLIT RIGHT: Cmd+D
-  -- WHY: iTerm2-style horizontal split - creates new pane to the right
+  -- SMART SPLIT RIGHT: Cmd+D
+  -- WHY: Uses the smart layout system instead of always splitting right.
+  -- Respects the current layout mode (tiled, main-vertical, etc.)
   {
     mods = "CMD",
     key = "d",
-    action = act.SplitHorizontal { domain = "CurrentPaneDomain" },
+    action = wezterm.action_callback(function(window, pane)
+      smart_new_pane(window, pane)
+    end),
   },
   
-  -- SPLIT DOWN: Cmd+Shift+D
-  -- WHY: iTerm2-style vertical split - creates new pane below
+  -- SIMPLE SPLIT DOWN: Cmd+Shift+D
+  -- WHY: Sometimes you just want a vertical split regardless of layout mode.
+  -- This bypasses the smart layout system for manual control.
   {
     mods = "CMD|SHIFT",
     key = "d",
