@@ -32,7 +32,8 @@
 -- ============================================================================
 --
 -- CUSTOM FUNCTIONS (reusable logic):
---   • get_layout_mode() / set_layout_mode()  - Track layout state per tab
+--   • is_vim()                                 - Detect Neovim for smart keybindings
+--   • get_layout_mode() / set_layout_mode()   - Track layout state per tab
 --   • cycle_layout_mode()                     - Cycle through layout options
 --   • get_smart_split_direction()             - Calculate optimal split direction
 --   • smart_new_pane()                        - Zellij-style intelligent pane creation
@@ -49,13 +50,18 @@
 -- ACTION CALLBACKS (keybindings that run Lua):
 --   • Cmd+T      → Spawns tab + shows zoxide picker (two actions chained)
 --   • Cmd+P      → Builds dynamic tab list with process info for fuzzy search
+--   • Cmd+K      → Vim-aware scrollback clear (passes through in Neovim)
 --   • Alt+N      → Calls smart_new_pane() for layout-aware splitting
 --   • Alt+]/[    → Cycles layout modes with toast notifications
 --   • Alt+Space  → Builds layout mode picker dynamically
+--   • Leader+Z   → Zen mode toggle (hide UI for focus)
 --
--- EXTERNAL TOOL INTEGRATION:
---   • wezterm.run_child_process({'zoxide', 'query', '-l'}) - Get frecent directories
---   • workspace_switcher plugin                            - zoxide-powered workspaces
+-- KEY TABLES (modal keybindings):
+--   • resize_pane → Enter resize mode with Leader+R, use hjkl freely
+--
+-- PLUGINS:
+--   • workspace_switcher  - zoxide-powered workspace switching
+--   • resurrect           - Session persistence (save/restore workspaces)
 --
 -- This level of customization is simply impossible in terminals like iTerm2,
 -- Alacritty, or Kitty. WezTerm lets you BUILD your ideal terminal workflow.
@@ -66,6 +72,20 @@ local wezterm = require 'wezterm'    -- Core API for configuration and utilities
 local config = wezterm.config_builder()  -- Type-safe config builder (validates options)
 local act = wezterm.action           -- Shorthand for action definitions (keybindings)
 local mux = wezterm.mux              -- Multiplexer API for programmatic control
+
+-- ============================================================================
+-- HELPER FUNCTIONS (POWER USER UTILITIES)
+-- ============================================================================
+
+-- Detect if the current pane is running Neovim/Vim
+-- WHY: Many keybindings should behave differently in Vim vs shell.
+-- For example, Cmd+K should clear scrollback in shell but pass through to Vim.
+-- Used by: Smart navigation, smart scrollback clear
+local function is_vim(pane)
+  local process_info = pane:get_foreground_process_info()
+  local process_name = process_info and process_info.executable or ""
+  return process_name:find("n?vim") ~= nil
+end
 
 -- ============================================================================
 -- ZELLIJ-STYLE AUTO-LAYOUT SYSTEM
@@ -157,12 +177,17 @@ local function cycle_layout_mode(current, direction)
 end
 
 -- ============================================================================
--- SMART SPLIT DIRECTION CALCULATION
+-- SMART SPLIT DIRECTION CALCULATION (FIXED)
 -- ============================================================================
 -- WHY: The "tiled" mode uses aspect ratio to decide split direction, which
 -- creates more balanced layouts. Wide panes split horizontally, tall panes
 -- split vertically. This prevents the "all vertical strips" problem you get
 -- with naive splitting.
+--
+-- FIX: Terminal cells aren't square - they're taller than wide (typical aspect
+-- ratio ~2.2:1). We multiply height by 2.2 to compare actual visual dimensions
+-- rather than raw cell counts. Without this, "tiled" mode creates too many
+-- vertical splits.
 --
 -- For main layouts, we track pane count to know when to switch from creating
 -- the main split to adding to the stack.
@@ -171,8 +196,11 @@ end
 local function get_smart_split_direction(pane, mode, pane_count)
   -- Get pane dimensions in cells (cols/rows, not pixels)
   local dims = pane:get_dimensions()
-  local width = dims.cols              -- Width in character columns
-  local height = dims.viewport_rows    -- Height in character rows
+  local width = dims.cols                    -- Width in character columns
+  -- FIX: Multiply height by 2.2 to adjust for cell aspect ratio
+  -- Fonts are typically ~2.2x taller than wide, so raw row count
+  -- understates visual height. This prevents excessive vertical splits.
+  local height = dims.viewport_rows * 2.2    -- Adjusted for cell aspect ratio
 
   if mode == 'vertical' then
     -- Vertical stack: always split below current pane
@@ -190,49 +218,13 @@ local function get_smart_split_direction(pane, mode, pane_count)
     return pane_count == 1 and 'Bottom' or 'Right'
   else
     -- 'tiled' mode: Intelligent aspect-ratio-based splitting
-    -- This creates a balanced grid by always splitting the larger dimension
-    if width > height * 2 then
-      -- Very wide pane: split horizontally to reduce width
-      return 'Right'
-    elseif height > width then
-      -- Taller than wide: split vertically to reduce height
-      return 'Bottom'
-    else
-      -- Roughly square: alternate based on pane count for variety
-      -- Odd count = split right, even count = split bottom
-      return (pane_count % 2 == 1) and 'Right' or 'Bottom'
-    end
+    -- Split the larger visual dimension (now correctly compared)
+    return (width > height) and 'Right' or 'Bottom'
   end
 end
 
 -- ============================================================================
--- SPLIT SIZE CALCULATION
--- ============================================================================
--- WHY 60/40 for main layouts: The 60% main / 40% stack ratio is a widely-used
--- development layout. The main pane is large enough for an editor with good
--- line length, while the stack has enough space for terminals.
---
--- WHY 50% for everything else: Even splits are predictable and easy to work with.
-
--- Calculate split size based on pane count and layout mode
-local function get_split_size(mode, pane_count)
-  if mode == 'main-vertical' or mode == 'main-horizontal' then
-    if pane_count == 1 then
-      -- First split: main pane keeps 60%, new pane gets 40%
-      -- WHY Percent = 40: The size is for the NEW pane, not the original
-      return { Percent = 40 }
-    else
-      -- Subsequent splits in the stack: split evenly
-      return { Percent = 50 }
-    end
-  else
-    -- All other modes: even 50/50 splits
-    return { Percent = 50 }
-  end
-end
-
--- ============================================================================
--- SMART NEW PANE FUNCTION
+-- SMART NEW PANE FUNCTION (FIXED)
 -- ============================================================================
 -- WHY: This is the core of the Zellij-style layout system. Instead of users
 -- manually choosing split direction each time, this function makes intelligent
@@ -240,38 +232,69 @@ end
 --
 -- BEHAVIOR: Pressing Alt+n creates a new pane using the current layout mode's
 -- logic. For main layouts, it correctly targets the stack pane (not the main).
+--
+-- FIX: The original code always split the LAST pane in the stack, which caused
+-- the bottom pane to shrink infinitely (50% → 25% → 12.5%...) while the top
+-- remained huge. The fix finds the LARGEST pane in the stack and splits that,
+-- keeping the layout balanced automatically.
 
 -- Smart new pane: creates a pane using Zellij-style auto-layout
 local function smart_new_pane(window, pane)
   local tab = window:active_tab()
   local mode = get_layout_mode(tab)
-  local pane_count = #tab:panes()
+  local panes = tab:panes()
+  local pane_count = #panes
   
   -- Preserve working directory: new pane starts in same directory as current
   local cwd = pane:get_current_working_dir()
   local cwd_path = cwd and cwd.file_path or nil
 
-  -- Determine split direction and size based on layout mode
-  local direction = get_smart_split_direction(pane, mode, pane_count)
-  local size = get_split_size(mode, pane_count)
-
-  -- For main layouts with multiple panes, split the STACK, not the main pane
-  -- This ensures new panes are added to the terminal stack, not inside the editor
-  local target_pane = pane
+  -- =========================================================================
+  -- FIX: Handle Main Layouts with balanced stack splitting
+  -- =========================================================================
+  -- In main layouts (main-vertical, main-horizontal), panes[1] is the "main"
+  -- pane (editor), and panes[2..N] are the "stack" (terminals).
+  -- 
+  -- OLD BUG: Always splitting the last pane caused infinite halving:
+  --   Stack: [100%] → [50%, 50%] → [50%, 25%, 25%] → [50%, 25%, 12.5%, 12.5%]
+  --
+  -- FIX: Find the largest pane in the stack and split THAT one:
+  --   Stack: [100%] → [50%, 50%] → [33%, 33%, 33%] (approximately)
   if (mode == 'main-vertical' or mode == 'main-horizontal') and pane_count > 1 then
-    -- Get all panes and target the last one (the bottom of the stack)
-    local panes = tab:panes()
-    target_pane = panes[#panes]
+    -- Find the largest pane in the stack (skip main pane at index 1)
+    local target_pane = panes[2]  -- Default to first stack pane
+    local max_area = 0
+
+    for i = 2, pane_count do
+      local p = panes[i]
+      local dim = p:get_dimensions()
+      local area = dim.cols * dim.viewport_rows
+      if area > max_area then
+        max_area = area
+        target_pane = p
+      end
+    end
+
+    -- Split the largest stack pane (Bottom for main-vertical, Right for main-horizontal)
+    local dir = (mode == 'main-vertical') and 'Bottom' or 'Right'
+    target_pane:split({ direction = dir, size = { Percent = 50 }, cwd = cwd_path })
+    wezterm.log_info(string.format('Smart split (main layout): mode=%s, dir=%s, count=%d', mode, dir, pane_count + 1))
+    return
   end
 
-  -- Perform the split
-  target_pane:split({
-    direction = direction,
-    size = size,
-    cwd = cwd_path,  -- New pane inherits working directory
-  })
+  -- =========================================================================
+  -- Handle Tiled/Standard Layouts
+  -- =========================================================================
+  local direction = get_smart_split_direction(pane, mode, pane_count)
+  local size = { Percent = 50 }
 
-  -- Debug logging to help troubleshoot layout behavior
+  -- Special sizing for the first split in Main layouts (60/40 split)
+  if (mode == 'main-vertical' or mode == 'main-horizontal') and pane_count == 1 then
+    size = { Percent = 40 }  -- New stack pane gets 40%, main keeps 60%
+  end
+
+  -- Perform the split on the current pane
+  pane:split({ direction = direction, size = size, cwd = cwd_path })
   wezterm.log_info(string.format('Smart split: mode=%s, dir=%s, count=%d', mode, direction, pane_count + 1))
 end
 
@@ -743,6 +766,17 @@ end
 local workspace_switcher = wezterm.plugin.require("https://github.com/MLFlexer/smart_workspace_switcher.wezterm")
 -- Tell the plugin where to find zoxide binary (Homebrew location on macOS)
 workspace_switcher.zoxide_path = "/opt/homebrew/bin/zoxide"
+
+-- ============================================================================
+-- PLUGIN: RESURRECT (Session Persistence)
+-- ============================================================================
+-- WHY: Without this, closing WezTerm loses all your tabs, panes, and layout.
+-- Resurrect automatically saves and restores your workspace state.
+--
+-- USAGE:
+--   Leader+S = Save current workspace state
+--   Leader+R = Restore saved workspace state
+local resurrect = wezterm.plugin.require("https://github.com/MLFlexer/resurrect.wezterm")
 
 -- ============================================================================
 -- APPEARANCE CONFIGURATION
@@ -1369,7 +1403,138 @@ config.keys = {
   { mods = "LEADER|SHIFT", key = "v", action = wezterm.action_callback(function(w, p) apply_layout(w, 'side_by_side') end) },
   { mods = "LEADER|SHIFT", key = "f", action = wezterm.action_callback(function(w, p) apply_layout(w, 'focus') end) },
   { mods = "LEADER|SHIFT", key = "m", action = wezterm.action_callback(function(w, p) apply_layout(w, 'monitor') end) },
+
+  -- ============================================================================
+  -- POWER USER FEATURES
+  -- ============================================================================
+
+  -- SESSION PERSISTENCE: Leader+S / Leader+R
+  -- WHY: Save your entire workspace layout before closing, restore it later
+  {
+    mods = "LEADER",
+    key = "s",
+    action = wezterm.action_callback(function(win, pane)
+      resurrect.save_state(resurrect.workspace_state.get_workspace_state())
+      win:toast_notification('WezTerm', 'Workspace saved', nil, 1000)
+    end),
+  },
+
+  -- QUICK SELECT: Leader+Space
+  -- WHY: Highlights all URLs, hashes, IPs on screen. Type the label to copy.
+  -- Game-changer for copying git hashes, URLs, etc. without using the mouse.
+  { mods = "LEADER", key = "Space", action = act.QuickSelect },
+
+  -- PROMOTE PANE: Leader+Enter
+  -- WHY: In main layouts, quickly swap any pane with the main (largest) pane
+  -- Useful for "promoting" a terminal from the stack to the editor position
+  { mods = "LEADER", key = "Enter", action = act.PaneSelect { mode = "SwapWithActive" } },
+
+  -- SCROLLBACK SEARCH: Cmd+F
+  -- WHY: Direct access to search without entering copy mode first
+  { mods = "CMD", key = "f", action = act.Search 'CurrentSelectionOrEmptyString' },
+
+  -- ZEN MODE TOGGLE: Leader+Z (overrides pane zoom)
+  -- WHY: Sometimes you want zero distractions - hide tab bar, remove padding
+  -- NOTE: This replaces the default Leader+Z zoom. Use Alt+F for pane zoom instead.
+  {
+    mods = "LEADER",
+    key = "z",
+    action = wezterm.action_callback(function(window, pane)
+      local overrides = window:get_config_overrides() or {}
+      if overrides.enable_tab_bar == false then
+        -- Exit Zen Mode: restore tab bar and padding
+        overrides.enable_tab_bar = true
+        overrides.window_padding = { left = 10, right = 10, top = 10, bottom = 10 }
+        window:toast_notification('WezTerm', 'Zen Mode OFF', nil, 1000)
+      else
+        -- Enter Zen Mode: hide tab bar, remove padding
+        overrides.enable_tab_bar = false
+        overrides.window_padding = { left = 0, right = 0, top = 0, bottom = 0 }
+        window:toast_notification('WezTerm', 'Zen Mode ON', nil, 1000)
+      end
+      window:set_config_overrides(overrides)
+    end),
+  },
+
+  -- SMART SCROLLBACK CLEAR: Cmd+K (Vim-aware)
+  -- WHY: Cmd+K normally clears scrollback, but in Neovim it would break the UI.
+  -- This version passes through to Vim, only clears in regular shell.
+  {
+    mods = "CMD",
+    key = "k",
+    action = wezterm.action_callback(function(window, pane)
+      if is_vim(pane) then
+        -- In Vim: pass the key through
+        window:perform_action(act.SendKey({ key = 'k', mods = 'CMD' }), pane)
+      else
+        -- In shell: clear scrollback and redraw prompt
+        window:perform_action(act.ClearScrollback 'ScrollbackOnly', pane)
+        window:perform_action(act.SendKey({ key = 'L', mods = 'CTRL' }), pane)
+      end
+    end),
+  },
 }  -- End of config.keys
+
+-- ============================================================================
+-- KEY TABLES (MODAL KEYBINDINGS)
+-- ============================================================================
+-- WHY: Holding Alt+Shift+h repeatedly to resize is ergonomically painful.
+-- Key Tables let you enter a "mode" where single keys perform actions.
+--
+-- RESIZE MODE: Press Leader+R to enter, then use h/j/k/l freely to resize.
+-- Press Escape to exit. Much more comfortable for fine-grained adjustments.
+
+config.key_tables = {
+  resize_pane = {
+    { key = 'h', action = act.AdjustPaneSize { 'Left', 1 } },
+    { key = 'j', action = act.AdjustPaneSize { 'Down', 1 } },
+    { key = 'k', action = act.AdjustPaneSize { 'Up', 1 } },
+    { key = 'l', action = act.AdjustPaneSize { 'Right', 1 } },
+    { key = 'Escape', action = 'PopKeyTable' },
+    { key = 'Enter', action = 'PopKeyTable' },
+  },
+}
+
+-- Add the resize mode activation key (must be done after config.keys is defined)
+table.insert(config.keys, {
+  mods = "LEADER",
+  key = "r",
+  action = act.ActivateKeyTable { name = 'resize_pane', one_shot = false },
+})
+
+-- ============================================================================
+-- HYPERLINK RULES
+-- ============================================================================
+-- WHY: Make URLs, emails, and custom patterns Cmd+clickable.
+-- Much faster than selecting and copying manually.
+
+config.hyperlink_rules = {
+  -- Standard URLs (http, https, ftp, file, mailto, ssh, git)
+  { regex = '\\b\\w+://[\\w.-]+\\.[a-z]{2,15}\\S*\\b', format = '$0' },
+  
+  -- Email addresses
+  { regex = '\\b[\\w.+-]+@[\\w-]+(\\.[\\w-]+)+\\b', format = 'mailto:$0' },
+  
+  -- File paths (starting with / or ~)
+  { regex = '\\b(/[\\w.-]+)+/?\\b', format = 'file://$0' },
+  
+  -- GitHub-style issue/PR references (uncomment and customize for your repos)
+  -- { regex = '#(\\d+)', format = 'https://github.com/YOUR-ORG/YOUR-REPO/issues/$1' },
+  -- { regex = 'gh-(\\d+)', format = 'https://github.com/YOUR-ORG/YOUR-REPO/issues/$1' },
+}
+
+-- ============================================================================
+-- VISUAL BELL (No Audio)
+-- ============================================================================
+-- WHY: System beeps are annoying, especially in quiet environments or with
+-- headphones. Visual bell provides feedback without sound.
+
+config.audible_bell = "Disabled"
+config.visual_bell = {
+  fade_in_duration_ms = 75,
+  fade_out_duration_ms = 75,
+  target = 'CursorColor',  -- Flash the cursor instead of the whole screen
+}
 
 -- ============================================================================
 -- DYNAMIC THEME (MACOS APPEARANCE)
