@@ -177,7 +177,63 @@ local function cycle_layout_mode(current, direction)
 end
 
 -- ============================================================================
--- SMART SPLIT DIRECTION CALCULATION (FIXED)
+-- HELPER FUNCTIONS FOR SMART LAYOUTS
+-- ============================================================================
+
+-- Debug flag: set to true to enable logging
+local DEBUG_LAYOUTS = false
+
+-- Percent helper for pane:split size (pane:split wants a NUMBER, not {Percent=N})
+local function pct(n) return n / 100.0 end
+
+-- Safe cwd extraction (handles both string and Url object formats)
+-- WHY: pane:get_current_working_dir() returned a string historically,
+-- but now returns a Url object with .file_path property
+local function cwd_path(cwd)
+  if not cwd then return nil end
+  if type(cwd) == "string" then return cwd end
+  return cwd.file_path
+end
+
+-- Calculate split size based on pane count and layout mode
+local function get_split_size(mode, pane_count)
+  if mode == 'main-vertical' or mode == 'main-horizontal' then
+    return (pane_count == 1) and pct(40) or pct(50)
+  end
+  return pct(50)
+end
+
+-- Pick the "stack" target pane based on pane geometry, not list order
+-- WHY: panes[#panes] isn't reliable - pane order doesn't match visual position.
+-- Use tab:panes_with_info() to get coordinates and pick by position.
+local function pick_stack_pane(tab, mode)
+  local info = tab:panes_with_info()
+  if #info == 0 then
+    return tab:active_pane()
+  end
+
+  local best = info[1]
+  if mode == 'main-vertical' then
+    -- Rightmost pane; tie-breaker = lowest (largest top value)
+    for _, p in ipairs(info) do
+      if (p.left > best.left) or (p.left == best.left and p.top > best.top) then
+        best = p
+      end
+    end
+  else
+    -- main-horizontal: Bottommost pane; tie-breaker = rightmost (largest left)
+    for _, p in ipairs(info) do
+      if (p.top > best.top) or (p.top == best.top and p.left > best.left) then
+        best = p
+      end
+    end
+  end
+
+  return best.pane
+end
+
+-- ============================================================================
+-- SMART SPLIT DIRECTION CALCULATION
 -- ============================================================================
 -- WHY: The "tiled" mode uses aspect ratio to decide split direction, which
 -- creates more balanced layouts. Wide panes split horizontally, tall panes
@@ -188,9 +244,6 @@ end
 -- ratio ~2.2:1). We multiply height by 2.2 to compare actual visual dimensions
 -- rather than raw cell counts. Without this, "tiled" mode creates too many
 -- vertical splits.
---
--- For main layouts, we track pane count to know when to switch from creating
--- the main split to adding to the stack.
 
 -- Calculate optimal split direction based on pane dimensions and layout mode
 local function get_smart_split_direction(pane, mode, pane_count)
@@ -198,144 +251,77 @@ local function get_smart_split_direction(pane, mode, pane_count)
   local dims = pane:get_dimensions()
   local width = dims.cols                    -- Width in character columns
   -- FIX: Multiply height by 2.2 to adjust for cell aspect ratio
-  -- Fonts are typically ~2.2x taller than wide, so raw row count
-  -- understates visual height. This prevents excessive vertical splits.
   local height = dims.viewport_rows * 2.2    -- Adjusted for cell aspect ratio
 
   if mode == 'vertical' then
-    -- Vertical stack: always split below current pane
     return 'Bottom'
   elseif mode == 'horizontal' then
-    -- Horizontal row: always split to the right
     return 'Right'
   elseif mode == 'main-vertical' then
-    -- Main-vertical: First split creates the right panel, subsequent splits
-    -- add to the stack on the right side (splitting that panel further)
     return pane_count == 1 and 'Right' or 'Bottom'
   elseif mode == 'main-horizontal' then
-    -- Main-horizontal: First split creates bottom panel, subsequent splits
-    -- add to the stack on the bottom (splitting that panel further)
     return pane_count == 1 and 'Bottom' or 'Right'
   else
-    -- 'tiled' mode: Intelligent aspect-ratio-based splitting
-    -- Split the larger visual dimension (now correctly compared)
+    -- 'tiled' mode: Split the larger visual dimension
     return (width > height) and 'Right' or 'Bottom'
   end
 end
 
 -- ============================================================================
--- SMART NEW PANE FUNCTION (FIXED)
+-- SMART NEW PANE FUNCTION
 -- ============================================================================
 -- WHY: This is the core of the Zellij-style layout system. Instead of users
 -- manually choosing split direction each time, this function makes intelligent
 -- choices based on the current layout mode.
 --
--- BEHAVIOR: Pressing Alt+n creates a new pane using the current layout mode's
--- logic. For main layouts, it correctly targets the stack pane (not the main).
---
--- FIX: The original code always split the LAST pane in the stack, which caused
--- the bottom pane to shrink infinitely (50% → 25% → 12.5%...) while the top
--- remained huge. The fix finds the LARGEST pane in the stack and splits that,
--- keeping the layout balanced automatically.
+-- BEHAVIOR: Pressing Alt+n or Cmd+D creates a new pane using the current
+-- layout mode's logic. For main layouts, it correctly targets the stack pane
+-- by geometry (not list order).
 
 -- Smart new pane: creates a pane using Zellij-style auto-layout
 local function smart_new_pane(window, pane)
-  local log_file = io.open(os.getenv("HOME") .. "/.config/wezterm/debug.log", "a")
-  local function log(msg)
-    if log_file then
-      log_file:write(os.date("%H:%M:%S") .. " " .. msg .. "\n")
-      log_file:flush()
-    end
-  end
-  
-  log("smart_new_pane: CALLED")
-  
   local tab = window:active_tab()
-  if not tab then
-    log("ERROR: tab is nil")
-    if log_file then log_file:close() end
-    return
-  end
+  if not tab then return end
   
   local mode = get_layout_mode(tab)
-  log("mode=" .. tostring(mode))
-  
-  local panes = tab:panes()
-  local pane_count = #panes
-  log("pane_count=" .. tostring(pane_count))
-  
-  -- Preserve working directory: new pane starts in same directory as current
-  local cwd = pane:get_current_working_dir()
-  local cwd_path = cwd and cwd.file_path or nil
-  log("cwd_path=" .. tostring(cwd_path))
+  local pane_count = #tab:panes()
 
-  -- =========================================================================
-  -- FIX: Handle Main Layouts with balanced stack splitting
-  -- =========================================================================
-  -- In main layouts (main-vertical, main-horizontal), panes[1] is the "main"
-  -- pane (editor), and panes[2..N] are the "stack" (terminals).
-  -- 
-  -- OLD BUG: Always splitting the last pane caused infinite halving:
-  --   Stack: [100%] → [50%, 50%] → [50%, 25%, 25%] → [50%, 25%, 12.5%, 12.5%]
-  --
-  -- FIX: Find the largest pane in the stack and split THAT one:
-  --   Stack: [100%] → [50%, 50%] → [33%, 33%, 33%] (approximately)
+  -- Preserve working directory
+  local cwd = cwd_path(pane:get_current_working_dir())
+
+  -- Choose target pane: for main layouts, pick the stack pane by geometry
+  local target = pane
   if (mode == 'main-vertical' or mode == 'main-horizontal') and pane_count > 1 then
-    -- Find the largest pane in the stack (skip main pane at index 1)
-    local target_pane = panes[2]  -- Default to first stack pane
-    local max_area = 0
-
-    for i = 2, pane_count do
-      local p = panes[i]
-      local dim = p:get_dimensions()
-      local area = dim.cols * dim.viewport_rows
-      if area > max_area then
-        max_area = area
-        target_pane = p
-      end
-    end
-
-    -- Split the largest stack pane (Bottom for main-vertical, Right for main-horizontal)
-    local dir = (mode == 'main-vertical') and 'Bottom' or 'Right'
-    local split_args = { direction = dir, size = 0.5 }
-    if cwd_path then
-      split_args.cwd = cwd_path
-    end
-    log("splitting largest pane, dir=" .. dir)
-    target_pane:split(split_args)
-    log("split complete")
-    if log_file then log_file:close() end
-    return
+    target = pick_stack_pane(tab, mode)
   end
 
-  -- =========================================================================
-  -- Handle Tiled/Standard Layouts
-  -- =========================================================================
-  local direction = get_smart_split_direction(pane, mode, pane_count)
-  
-  -- Size as a float (0.5 = 50%) - pane:split() expects float, not {Percent=N}
-  local size = 0.5
+  local direction = get_smart_split_direction(target, mode, pane_count)
+  local size = get_split_size(mode, pane_count)
 
-  -- Special sizing for the first split in Main layouts (60/40 split)
-  if (mode == 'main-vertical' or mode == 'main-horizontal') and pane_count == 1 then
-    size = 0.4  -- New stack pane gets 40%, main keeps 60%
-  end
-
-  -- Perform the split on the current pane
+  -- Build split arguments
   local split_args = { direction = direction, size = size }
-  if cwd_path then
-    split_args.cwd = cwd_path
+  if cwd then
+    split_args.cwd = cwd
   end
-  log("splitting current pane, dir=" .. direction .. ", size=" .. tostring(size))
-  local success, err = pcall(function()
-    pane:split(split_args)
+
+  -- Perform the split
+  local success, result = pcall(function()
+    return target:split(split_args)
   end)
-  if success then
-    log("split complete")
-  else
-    log("ERROR: split failed: " .. tostring(err))
+  
+  if DEBUG_LAYOUTS then
+    local log_file = io.open(os.getenv("HOME") .. "/.config/wezterm/debug.log", "a")
+    if log_file then
+      log_file:write(string.format("%s smart_new_pane: mode=%s dir=%s size=%s success=%s\n",
+        os.date("%H:%M:%S"), mode, direction, size, tostring(success)))
+      log_file:close()
+    end
   end
-  if log_file then log_file:close() end
+
+  -- Activate the new pane for predictable focus behavior
+  if success and result then
+    result:activate()
+  end
 end
 
 -- ============================================================================
@@ -377,11 +363,12 @@ function layouts.dev(window, cwd)
   local main = tab:active_pane()
 
   -- Create right side (40% of total width) for terminal stack
-  local right = main:split({ direction = 'Right', size = { Percent = 40 }, cwd = cwd })
+  local right = main:split({ direction = 'Right', size = pct(40), cwd = cwd })
   -- Split the right pane in half vertically for two terminals
-  right:split({ direction = 'Bottom', size = { Percent = 50 }, cwd = cwd })
+  right:split({ direction = 'Bottom', size = pct(50), cwd = cwd })
 
-  -- Set a descriptive title for the tab
+  -- Set layout mode so Alt+N/Cmd+D continues the pattern
+  set_layout_mode(tab, 'main-vertical')
   tab:set_title('dev')
   return tab
 end
@@ -409,8 +396,10 @@ function layouts.editor(window, cwd)
   local main = tab:active_pane()
 
   -- Bottom terminal gets 25% of height - enough for a few lines of output
-  main:split({ direction = 'Bottom', size = { Percent = 25 }, cwd = cwd })
+  main:split({ direction = 'Bottom', size = pct(25), cwd = cwd })
 
+  -- Set layout mode so Alt+N/Cmd+D continues the pattern
+  set_layout_mode(tab, 'main-horizontal')
   tab:set_title('editor')
   return tab
 end
@@ -435,10 +424,12 @@ function layouts.three_col(window, cwd)
   local main = tab:active_pane()
 
   -- First split: Create right 2/3 of screen (66%)
-  main:split({ direction = 'Right', size = { Percent = 66 }, cwd = cwd })
+  main:split({ direction = 'Right', size = pct(66), cwd = cwd })
   -- Second split: Split the active (right) pane in half to create middle and right
-  tab:active_pane():split({ direction = 'Right', size = { Percent = 50 }, cwd = cwd })
+  tab:active_pane():split({ direction = 'Right', size = pct(50), cwd = cwd })
 
+  -- Set layout mode so Alt+N/Cmd+D continues the pattern
+  set_layout_mode(tab, 'horizontal')
   tab:set_title('3col')
   return tab
 end
@@ -467,10 +458,11 @@ function layouts.monitor(window, cwd)
   main:send_text('htop\n')
 
   -- Create bottom pane (40% of height) for logs
-  local logs = main:split({ direction = 'Bottom', size = { Percent = 40 }, cwd = cwd })
+  local logs = main:split({ direction = 'Bottom', size = pct(40), cwd = cwd })
   -- Provide a helpful hint for the logs pane
   logs:send_text('# tail -f your logs here\n')
 
+  set_layout_mode(tab, 'vertical')
   tab:set_title('monitor')
   return tab
 end
@@ -493,12 +485,13 @@ function layouts.quad(window, cwd)
   local main = tab:active_pane()
 
   -- Create right column (50% of width)
-  local right = main:split({ direction = 'Right', size = { Percent = 50 }, cwd = cwd })
+  local right = main:split({ direction = 'Right', size = pct(50), cwd = cwd })
   -- Split left column into top-left and bottom-left
-  main:split({ direction = 'Bottom', size = { Percent = 50 }, cwd = cwd })
+  main:split({ direction = 'Bottom', size = pct(50), cwd = cwd })
   -- Split right column into top-right and bottom-right
-  right:split({ direction = 'Bottom', size = { Percent = 50 }, cwd = cwd })
+  right:split({ direction = 'Bottom', size = pct(50), cwd = cwd })
 
+  set_layout_mode(tab, 'tiled')
   tab:set_title('quad')
   return tab
 end
@@ -526,10 +519,11 @@ function layouts.stacked(window, cwd)
   local main = tab:active_pane()
 
   -- First split: bottom 66% of screen
-  main:split({ direction = 'Bottom', size = { Percent = 66 }, cwd = cwd })
+  main:split({ direction = 'Bottom', size = pct(66), cwd = cwd })
   -- Second split: split the 66% in half to create middle and bottom rows
-  tab:active_pane():split({ direction = 'Bottom', size = { Percent = 50 }, cwd = cwd })
+  tab:active_pane():split({ direction = 'Bottom', size = pct(50), cwd = cwd })
 
+  set_layout_mode(tab, 'vertical')
   tab:set_title('stacked')
   return tab
 end
@@ -550,8 +544,9 @@ function layouts.side_by_side(window, cwd)
   local main = tab:active_pane()
 
   -- Simple 50/50 horizontal split
-  main:split({ direction = 'Right', size = { Percent = 50 }, cwd = cwd })
+  main:split({ direction = 'Right', size = pct(50), cwd = cwd })
 
+  set_layout_mode(tab, 'horizontal')
   tab:set_title('split')
   return tab
 end
@@ -574,8 +569,9 @@ function layouts.focus(window, cwd)
   local main = tab:active_pane()
 
   -- Small 25% sidebar on the right - enough for a narrow terminal
-  main:split({ direction = 'Right', size = { Percent = 25 }, cwd = cwd })
+  main:split({ direction = 'Right', size = pct(25), cwd = cwd })
 
+  set_layout_mode(tab, 'main-vertical')
   tab:set_title('focus')
   return tab
 end
@@ -1257,9 +1253,8 @@ config.keys = {
       local current = get_layout_mode(tab)
       local new_mode = cycle_layout_mode(current, 1)  -- +1 = forward
       
-      -- Store the new mode
-      wezterm.GLOBAL.layout_modes = wezterm.GLOBAL.layout_modes or {}
-      wezterm.GLOBAL.layout_modes[tostring(tab:tab_id())] = new_mode
+      -- Use centralized setter (avoids drift)
+      set_layout_mode(tab, new_mode)
       
       -- Find human-readable name for the toast notification
       local mode_name = new_mode
@@ -1267,9 +1262,7 @@ config.keys = {
         if m.id == new_mode then mode_name = m.name .. ' - ' .. m.desc break end
       end
       
-      -- Show feedback to user
       window:toast_notification('WezTerm', 'Layout: ' .. mode_name, nil, 2000)
-      wezterm.log_info('Layout mode changed to: ' .. new_mode)
     end),
   },
 
@@ -1283,8 +1276,7 @@ config.keys = {
       local current = get_layout_mode(tab)
       local new_mode = cycle_layout_mode(current, -1)  -- -1 = backward
       
-      wezterm.GLOBAL.layout_modes = wezterm.GLOBAL.layout_modes or {}
-      wezterm.GLOBAL.layout_modes[tostring(tab:tab_id())] = new_mode
+      set_layout_mode(tab, new_mode)
       
       local mode_name = new_mode
       for _, m in ipairs(LAYOUT_MODES) do
@@ -1292,7 +1284,6 @@ config.keys = {
       end
       
       window:toast_notification('WezTerm', 'Layout: ' .. mode_name, nil, 2000)
-      wezterm.log_info('Layout mode changed to: ' .. new_mode)
     end),
   },
 
@@ -1318,8 +1309,7 @@ config.keys = {
       action = wezterm.action_callback(function(window, pane, id, label)
         if id then
           local tab = window:active_tab()
-          wezterm.GLOBAL.layout_modes = wezterm.GLOBAL.layout_modes or {}
-          wezterm.GLOBAL.layout_modes[tostring(tab:tab_id())] = id
+          set_layout_mode(tab, id)
           window:toast_notification('WezTerm', 'Layout: ' .. label, nil, 2000)
         end
       end),
