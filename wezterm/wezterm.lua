@@ -784,10 +784,11 @@ local function scheme_for_cwd(pane)
   
   -- Define your project-to-scheme mappings here
   -- Order matters: first match wins, so put specific paths before general ones
+  -- NOTE: Scheme names have no spaces (e.g., "GruvboxDark" not "Gruvbox Dark")
   local mappings = {
-    { pattern = "~/dev/zellij", scheme = "Gruvbox Dark" },       -- Zellij project
-    { pattern = "~/dev/kit-container", scheme = "Gruvbox Dark" }, -- Kit project
-    { pattern = "~", scheme = "Gruvbox Dark" },                   -- Fallback for home
+    -- Add custom mappings here, e.g.:
+    -- { pattern = "~/dev/special-project", scheme = "Catppuccin Mocha" },
+    -- { pattern = "~/work", scheme = "Tokyo Night" },
   }
   
   -- Find first matching pattern
@@ -1675,14 +1676,19 @@ end)
 wezterm.on("update-status", function(window, pane)
   -- DYNAMIC COLOR SCHEME BASED ON CWD
   -- Check if the current directory has a custom color scheme mapping
+  -- NOTE: Only update if scheme changes to avoid visual flashing during picker use
   local scheme = scheme_for_cwd(pane)
-  if scheme then
+  local current_overrides = window:get_config_overrides() or {}
+  local current_scheme = current_overrides.color_scheme
+
+  if scheme and scheme ~= current_scheme then
     -- Override the color scheme for this window based on directory
     window:set_config_overrides({ color_scheme = scheme })
-  else
-    -- Clear any overrides to use the default scheme
+  elseif not scheme and current_scheme then
+    -- Clear scheme override only if we had one before
     window:set_config_overrides({})
   end
+  -- If no scheme and no current override, do nothing (avoid flash)
 
   -- DISABLE LEFT STATUS BAR
   -- WHY: The hostname (e.g., "johns") isn't useful in most local setups
