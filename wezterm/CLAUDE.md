@@ -198,6 +198,62 @@ end)
 
 ## Troubleshooting
 
+### Config Not Loading / Wrong Config
+
+WezTerm searches for config files in this order:
+1. `--config-file` CLI argument
+2. `$WEZTERM_CONFIG_FILE` environment variable
+3. `$XDG_CONFIG_HOME/wezterm/wezterm.lua` (recommended: `~/.config/wezterm/wezterm.lua`)
+4. `~/.wezterm.lua` (legacy location)
+
+**IMPORTANT**: If you have BOTH `~/.wezterm.lua` AND `~/.config/wezterm/wezterm.lua`, WezTerm may load the wrong one depending on environment variables. The `WEZTERM_CONFIG_FILE` env var takes precedence.
+
+To debug which config is loading:
+```bash
+# Check for competing config files
+ls -la ~/.wezterm.lua ~/.config/wezterm/wezterm.lua
+
+# Check env var
+echo $WEZTERM_CONFIG_FILE
+
+# Test config and see keybindings
+wezterm show-keys 2>&1 | head -30
+
+# Test config with debug logging
+WEZTERM_LOG=config=debug wezterm show-keys 2>&1 | grep -i error
+```
+
+**Fix**: Remove or rename `~/.wezterm.lua` if you want to use `~/.config/wezterm/wezterm.lua`:
+```bash
+mv ~/.wezterm.lua ~/.wezterm.lua.bak
+```
+
+### Pane vs PaneInformation Objects
+
+In event handlers like `format-tab-title` and `format-window-title`, the `pane` parameter is a **PaneInformation table**, not a **Pane object**:
+- PaneInformation: Use `pane.current_working_dir` (property access)
+- Pane object: Use `pane:get_current_working_dir()` (method call)
+
+To handle both:
+```lua
+local cwd
+if pane.get_current_working_dir then
+  cwd = pane:get_current_working_dir()  -- Pane object
+else
+  cwd = pane.current_working_dir        -- PaneInformation table
+end
+```
+
+### Color Scheme Not Found
+
+Color scheme names changed in upstream iTerm2-Color-Schemes:
+- ❌ `'Gruvbox Dark'` (old name with space)
+- ✅ `'GruvboxDark'` (new name, no space)
+
+### Debug Overlay
+
+Press `Ctrl+Shift+L` to open the debug overlay - shows Lua errors and provides a REPL.
+
 ### Ctrl+A Not Working?
 
 If you set `Ctrl+A` as your leader key, it intercepts the readline "beginning of line" shortcut. Either:

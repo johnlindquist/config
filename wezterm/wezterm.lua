@@ -745,8 +745,17 @@ end
 -- Shorten cwd for display (shows last 2 path components)
 -- WHY: Full paths are too long for titles. "~/dev/my-project" becomes "dev/my-project"
 -- This gives enough context to distinguish directories without wasting space.
+-- NOTE: Handles both Pane objects (method call) and PaneInformation tables (property access)
 local function short_cwd(pane)
-  local cwd = pane:get_current_working_dir()
+  -- Handle both Pane objects and PaneInformation tables
+  local cwd
+  if pane.get_current_working_dir then
+    -- It's a Pane object - use method call
+    cwd = pane:get_current_working_dir()
+  else
+    -- It's a PaneInformation table - use property access
+    cwd = pane.current_working_dir
+  end
   if not cwd then return "~" end  -- Fallback if cwd unavailable
   local home = os.getenv("HOME") or ""
   -- Replace home directory with ~ for readability
@@ -823,7 +832,7 @@ local resurrect = wezterm.plugin.require("https://github.com/MLFlexer/resurrect.
 -- WHY Gruvbox Dark: A warm, retro color scheme that's easy on the eyes for
 -- long coding sessions. Popular in the terminal/vim community.
 -- ALTERNATIVES: "Catppuccin Mocha", "Tokyo Night", "One Dark", "Dracula"
-config.color_scheme = 'Gruvbox Dark'
+config.color_scheme = 'GruvboxDark'
 
 -- FONT CONFIGURATION
 -- WHY JetBrains Mono: Purpose-built for code with excellent ligatures,
@@ -1021,91 +1030,67 @@ config.keys = {
   },
 
   -- ============================================================================
-  -- FUZZY TAB PICKER: Cmd+P
+  -- SMART TAB/DIRECTORY PICKER: Cmd+P
   -- ============================================================================
-  -- WHY: VS Code-style Cmd+P for quick navigation. Shows all tabs with their
-  -- current directory and process, enabling fuzzy search to find what you want.
+  -- WHY: Zoxide-powered unified picker. Shows your frecent directories and
+  -- intelligently switches to existing tabs or opens new ones.
   --
-  -- FORMAT:
-  -- - Single pane tabs: "~/path/to/dir · process_name"
-  -- - Multi-pane tabs: "dir1:zsh | dir2:nvim | dir3:node"
+  -- BEHAVIOR:
+  -- 1. Shows zoxide directories (frecency-ranked)
+  -- 2. [open] = tab already open at this dir (will switch to it)
+  -- 3. [new] = no tab open (will create new tab)
+  -- 4. Select any entry -> switches if tab exists, opens new if not
   {
     mods = "CMD",
     key = "p",
     action = wezterm.action_callback(function(window, pane)
-      local tabs = window:mux_window():tabs()
       local home = os.getenv("HOME") or ""
-      local choices = {}
+      local tabs = window:mux_window():tabs()
 
-      -- Build a choice entry for each tab
+      -- Build a map of directories that have open tabs
+      -- Maps: directory path -> { tab = tab_object, tab_id = id }
+      local open_dirs = {}
       for _, t in ipairs(tabs) do
-        local panes = t:panes()
-        local pane_count = #panes
-
-        if pane_count == 1 then
-          -- SINGLE PANE: Show "~/path/to/dir · process_name"
-          local p = panes[1]
+        for _, p in ipairs(t:panes()) do
           local cwd = p:get_current_working_dir()
-          local cwd_path = "~"
           if cwd and cwd.file_path then
-            cwd_path = cwd.file_path:gsub("^" .. home, "~")
+            open_dirs[cwd.file_path] = { tab = t, tab_id = t:tab_id() }
           end
-
-          -- Get the running process (e.g., "zsh", "nvim", "node")
-          local process_info = p:get_foreground_process_info()
-          local process = "shell"
-          if process_info and process_info.executable then
-            process = process_info.executable:match("([^/]+)$") or "shell"
-          end
-
-          table.insert(choices, {
-            id = tostring(t:tab_id()),
-            label = string.format("%s · %s", cwd_path, process),
-          })
-        else
-          -- MULTIPLE PANES: Show "dir1:zsh | dir2:nvim | dir3:node"
-          local pane_list = {}
-          for i, p in ipairs(panes) do
-            local cwd = p:get_current_working_dir()
-            local cwd_path = "~"
-            if cwd and cwd.file_path then
-              -- Use short path (just the directory name) for compactness
-              local full_path = cwd.file_path:gsub("^" .. home, "~")
-              cwd_path = full_path:match("([^/]+)$") or full_path
-            end
-
-            local process_info = p:get_foreground_process_info()
-            local process = "shell"
-            if process_info and process_info.executable then
-              process = process_info.executable:match("([^/]+)$") or "shell"
-            end
-
-            table.insert(pane_list, cwd_path .. ":" .. process)
-          end
-
-          -- Join all pane descriptions with " | "
-          table.insert(choices, {
-            id = tostring(t:tab_id()),
-            label = table.concat(pane_list, " | "),
-          })
         end
       end
 
-      -- Show the fuzzy picker
+      -- Get zoxide directories
+      local success, stdout, stderr = wezterm.run_child_process({ '/opt/homebrew/bin/zoxide', 'query', '-l' })
+      if not success then
+        wezterm.log_error("zoxide failed: " .. tostring(stderr))
+        return
+      end
+
+      local choices = {}
+      for line in stdout:gmatch('[^\n]+') do
+        local display = line:gsub("^" .. home, "~")
+        -- Show [open] if tab exists, [new] if not
+        local indicator = open_dirs[line] and "[open] " or "[new]  "
+        table.insert(choices, { id = line, label = indicator .. display })
+      end
+
+      -- Show the picker
       window:perform_action(
         act.InputSelector({
-          title = "Switch Tab",
+          title = "Switch Tab or Open Directory",
           choices = choices,
           fuzzy = true,
           action = wezterm.action_callback(function(inner_window, inner_pane, id, label)
-            if id then
-              -- Find and activate the selected tab
-              for _, t in ipairs(inner_window:mux_window():tabs()) do
-                if tostring(t:tab_id()) == id then
-                  t:activate()
-                  break
-                end
-              end
+            if not id then return end  -- User cancelled
+
+            -- Check if a tab is already open at this directory
+            local existing = open_dirs[id]
+            if existing then
+              -- Switch to existing tab
+              existing.tab:activate()
+            else
+              -- Open new tab at this directory
+              inner_window:mux_window():spawn_tab({ cwd = id })
             end
           end),
         }),
