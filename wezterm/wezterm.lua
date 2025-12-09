@@ -1038,15 +1038,23 @@ config.keys = {
   --
   -- BEHAVIOR:
   -- 1. Shows zoxide directories (frecency-ranked)
-  -- 2. [open] = tab already open at this dir (will switch to it)
-  -- 3. [new] = no tab open (will create new tab)
+  -- 2. Green "●" = tab already open at this dir (will switch to it)
+  -- 3. Blue "○" = no tab open (will create new tab)
   -- 4. Select any entry -> switches if tab exists, opens new if not
+  --
+  -- THEMING: Uses Catppuccin Mocha colors for visual polish
   {
     mods = "CMD",
     key = "p",
     action = wezterm.action_callback(function(window, pane)
       local home = os.getenv("HOME") or ""
       local tabs = window:mux_window():tabs()
+
+      -- Gruvbox Dark colors
+      local green = "#b8bb26"   -- Open tab indicator (gruvbox green)
+      local yellow = "#fabd2f"  -- New tab indicator (gruvbox yellow)
+      local aqua = "#8ec07c"    -- Directory path (gruvbox aqua)
+      local gray = "#928374"    -- Dimmed text (gruvbox gray)
 
       -- Build a map of directories that have open tabs
       -- Maps: directory path -> { tab = tab_object, tab_id = id }
@@ -1070,15 +1078,42 @@ config.keys = {
       local choices = {}
       for line in stdout:gmatch('[^\n]+') do
         local display = line:gsub("^" .. home, "~")
-        -- Show [open] if tab exists, [new] if not
-        local indicator = open_dirs[line] and "[open] " or "[new]  "
-        table.insert(choices, { id = line, label = indicator .. display })
+        local is_open = open_dirs[line] ~= nil
+
+        -- Format with colors: "● ~/path" (green) or "○ ~/path" (yellow)
+        local label = wezterm.format({
+          { Foreground = { Color = is_open and green or yellow } },
+          { Text = is_open and "● " or "○ " },
+          { Foreground = { Color = aqua } },
+          { Text = display },
+        })
+
+        table.insert(choices, { id = line, label = label })
       end
 
-      -- Show the picker
+      -- Show the picker with styled description
       window:perform_action(
         act.InputSelector({
-          title = "Switch Tab or Open Directory",
+          title = wezterm.format({
+            { Foreground = { Color = aqua } },
+            { Attribute = { Intensity = "Bold" } },
+            { Text = "󰍉  Quick Open" },
+          }),
+          description = wezterm.format({
+            { Foreground = { Color = green } },
+            { Text = "●" },
+            { Foreground = { Color = gray } },
+            { Text = " switch to tab  " },
+            { Foreground = { Color = yellow } },
+            { Text = "○" },
+            { Foreground = { Color = gray } },
+            { Text = " open new tab" },
+          }),
+          fuzzy_description = wezterm.format({
+            { Foreground = { Color = yellow } },
+            { Attribute = { Intensity = "Bold" } },
+            { Text = "󰈞 Search: " },
+          }),
           choices = choices,
           fuzzy = true,
           action = wezterm.action_callback(function(inner_window, inner_pane, id, label)
