@@ -260,26 +260,6 @@
         "description" : "Global Modifier Rules",
         "manipulators" : [ {
           "to_if_alone" : [ {
-            "key_code" : "home"
-          } ],
-          "to_after_key_up" : [ {
-            "set_variable" : {
-              "name" : "equal-mode",
-              "value" : 0
-            }
-          } ],
-          "from" : {
-            "key_code" : "fn"
-          },
-          "to" : [ {
-            "set_variable" : {
-              "name" : "equal-mode",
-              "value" : 1
-            }
-          } ],
-          "type" : "basic"
-        }, {
-          "to_if_alone" : [ {
             "key_code" : "escape"
           } ],
           "to_after_key_up" : [ {
@@ -4366,6 +4346,294 @@
           "to" : [ {
             "modifiers" : [ "left_shift" ],
             "key_code" : "f11"
+          } ],
+          "conditions" : [ {
+            "name" : "home-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "simultaneous" : [ {
+              "key_code" : "left_control"
+            }, {
+              "key_code" : "f1"
+            } ],
+            "simultaneous_options" : {
+              "detect_key_down_uninterruptedly" : false,
+              "key_down_order" : "insensitive",
+              "key_up_order" : "insensitive",
+              "key_up_when" : "any"
+            }
+          },
+          "to" : [ {
+            "modifiers" : [ "fn" ],
+            "key_code" : "f1"
+          } ],
+          "conditions" : [ {
+            "name" : "home-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "simultaneous" : [ {
+              "key_code" : "left_control"
+            }, {
+              "key_code" : "f2"
+            } ],
+            "simultaneous_options" : {
+              "detect_key_down_uninterruptedly" : false,
+              "key_down_order" : "insensitive",
+              "key_up_order" : "insensitive",
+              "key_up_when" : "any"
+            }
+          },
+          "to" : [ {
+            "modifiers" : [ "fn" ],
+            "key_code" : "f2"
+          } ],
+          "conditions" : [ {
+            "name" : "home-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "simultaneous" : [ {
+              "key_code" : "left_control"
+            }, {
+              "key_code" : "f3"
+            } ],
+            "simultaneous_options" : {
+              "detect_key_down_uninterruptedly" : false,
+              "key_down_order" : "insensitive",
+              "key_up_order" : "insensitive",
+              "key_up_when" : "any"
+            }
+          },
+          "to" : [ {
+            "modifiers" : [ "fn" ],
+            "key_code" : "f3"
+          } ],
+          "conditions" : [ {
+            "name" : "home-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "simultaneous" : [ {
+              "key_code" : "left_control"
+            }, {
+              "key_code" : "f4"
+            } ],
+            "simultaneous_options" : {
+              "detect_key_down_uninterruptedly" : false,
+              "key_down_order" : "insensitive",
+              "key_up_order" : "insensitive",
+              "key_up_when" : "any"
+            }
+          },
+          "to" : [ {
+            "modifiers" : [ "fn" ],
+            "key_code" : "f4"
+          } ],
+          "conditions" : [ {
+            "name" : "home-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "simultaneous" : [ {
+              "key_code" : "left_control"
+            }, {
+              "key_code" : "f5"
+            } ],
+            "simultaneous_options" : {
+              "detect_key_down_uninterruptedly" : false,
+              "key_down_order" : "insensitive",
+              "key_up_order" : "insensitive",
+              "key_up_when" : "any"
+            }
+          },
+          "to" : [ {
+            "modifiers" : [ "fn" ],
+            "key_code" : "f5"
+          } ],
+          "conditions" : [ {
+            "name" : "home-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "simultaneous" : [ {
+              "key_code" : "left_control"
+            }, {
+              "key_code" : "f6"
+            } ],
+            "simultaneous_options" : {
+              "detect_key_down_uninterruptedly" : false,
+              "key_down_order" : "insensitive",
+              "key_up_order" : "insensitive",
+              "key_up_when" : "any"
+            }
+          },
+          "to" : [ {
+            "modifiers" : [ "fn" ],
+            "key_code" : "f6"
+          } ],
+          "conditions" : [ {
+            "name" : "home-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "simultaneous" : [ {
+              "key_code" : "left_control"
+            }, {
+              "key_code" : "f7"
+            } ],
+            "simultaneous_options" : {
+              "detect_key_down_uninterruptedly" : false,
+              "key_down_order" : "insensitive",
+              "key_up_order" : "insensitive",
+              "key_up_when" : "any"
+            }
+          },
+          "to" : [ {
+            "modifiers" : [ "fn" ],
+            "key_code" : "f7"
+          } ],
+          "conditions" : [ {
+            "name" : "home-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "simultaneous" : [ {
+              "key_code" : "left_control"
+            }, {
+              "key_code" : "f8"
+            } ],
+            "simultaneous_options" : {
+              "detect_key_down_uninterruptedly" : false,
+              "key_down_order" : "insensitive",
+              "key_up_order" : "insensitive",
+              "key_up_when" : "any"
+            }
+          },
+          "to" : [ {
+            "modifiers" : [ "fn" ],
+            "key_code" : "f8"
+          } ],
+          "conditions" : [ {
+            "name" : "home-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "simultaneous" : [ {
+              "key_code" : "left_control"
+            }, {
+              "key_code" : "f9"
+            } ],
+            "simultaneous_options" : {
+              "detect_key_down_uninterruptedly" : false,
+              "key_down_order" : "insensitive",
+              "key_up_order" : "insensitive",
+              "key_up_when" : "any"
+            }
+          },
+          "to" : [ {
+            "modifiers" : [ "fn" ],
+            "key_code" : "f9"
+          } ],
+          "conditions" : [ {
+            "name" : "home-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "simultaneous" : [ {
+              "key_code" : "left_control"
+            }, {
+              "key_code" : "f10"
+            } ],
+            "simultaneous_options" : {
+              "detect_key_down_uninterruptedly" : false,
+              "key_down_order" : "insensitive",
+              "key_up_order" : "insensitive",
+              "key_up_when" : "any"
+            }
+          },
+          "to" : [ {
+            "modifiers" : [ "fn" ],
+            "key_code" : "f10"
+          } ],
+          "conditions" : [ {
+            "name" : "home-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "simultaneous" : [ {
+              "key_code" : "left_control"
+            }, {
+              "key_code" : "f11"
+            } ],
+            "simultaneous_options" : {
+              "detect_key_down_uninterruptedly" : false,
+              "key_down_order" : "insensitive",
+              "key_up_order" : "insensitive",
+              "key_up_when" : "any"
+            }
+          },
+          "to" : [ {
+            "modifiers" : [ "fn" ],
+            "key_code" : "f11"
+          } ],
+          "conditions" : [ {
+            "name" : "home-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "simultaneous" : [ {
+              "key_code" : "left_control"
+            }, {
+              "key_code" : "f12"
+            } ],
+            "simultaneous_options" : {
+              "detect_key_down_uninterruptedly" : false,
+              "key_down_order" : "insensitive",
+              "key_up_order" : "insensitive",
+              "key_up_when" : "any"
+            }
+          },
+          "to" : [ {
+            "modifiers" : [ "fn" ],
+            "key_code" : "f12"
           } ],
           "conditions" : [ {
             "name" : "home-mode",
@@ -17305,7 +17573,7 @@
             "key_code" : "v"
           },
           "to" : [ {
-            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/launch_focus_app.sh \"Cursor Nightly\""
+            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/launch_focus_app.sh \"Visual Studio Code - Insiders\""
           } ],
           "conditions" : [ {
             "name" : "launch-mode",
@@ -17324,7 +17592,7 @@
               "value" : 1
             }
           }, {
-            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/launch_focus_app.sh \"Cursor Nightly\""
+            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/launch_focus_app.sh \"Visual Studio Code - Insiders\""
           } ],
           "from" : {
             "simultaneous" : [ {
@@ -18140,6 +18408,14 @@
     } ],
     "name" : "Default",
     "selected" : true,
+    "simple_modifications" : [ {
+      "from" : {
+        "apple_vendor_top_case_key_code" : "keyboard_fn"
+      },
+      "to" : [ {
+        "key_code" : "home"
+      } ]
+    } ],
     "virtual_hid_keyboard" : {
       "keyboard_type_v2" : "ansi"
     }

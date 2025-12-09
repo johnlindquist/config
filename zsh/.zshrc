@@ -98,3 +98,87 @@ done
 
 # bun completions
 [ -s "/Users/johnlindquist/.bun/_bun" ] && source "/Users/johnlindquist/.bun/_bun"
+
+# mdflow: Treat .md files as executable agents
+alias -s md='_handle_md'
+_handle_md() {
+  local input="$1"
+  shift
+
+  # Resolve input: URLs pass through, files check current dir then PATH
+  local resolved=""
+  if [[ "$input" =~ ^https?:// ]]; then
+    # URL - pass through as-is
+    resolved="$input"
+  elif [[ -f "$input" ]]; then
+    resolved="$input"
+  else
+    # Search PATH for the .md file
+    local dir
+    for dir in ${(s/:/)PATH}; do
+      if [[ -f "$dir/$input" ]]; then
+        resolved="$dir/$input"
+        break
+      fi
+    done
+  fi
+
+  if [[ -z "$resolved" ]]; then
+    echo "File not found: $input (checked current dir and PATH)"
+    return 1
+  fi
+
+  # Pass resolved file/URL and any remaining args to handler
+  if command -v mdflow &>/dev/null; then
+    mdflow "$resolved" "$@"
+  else
+    echo "mdflow not installed."
+    read -q "REPLY?Would you like to run \`bun add -g mdflow\` now? [y/N] "
+    echo
+    if [[ "$REPLY" =~ ^[Yy]$ ]]; then
+      bun add -g mdflow
+      echo
+      read -q "REPLY?Would you like to attempt to run this again? [y/N] "
+      echo
+      if [[ "$REPLY" =~ ^[Yy]$ ]]; then
+        mdflow "$resolved" "$@"
+      fi
+    else
+      return 1
+    fi
+  fi
+}
+
+# mdflow: Add agent directories to PATH
+# User agents (~/.mdflow) - run agents by name from anywhere
+export PATH="$HOME/.mdflow:$PATH"
+
+# Project agents (.mdflow) - auto-add local .mdflow/ to PATH when entering directories
+# This function runs on each directory change to update PATH dynamically
+_mdflow_chpwd() {
+  # Remove project .mdflow paths from PATH, but keep ~/.mdflow (user agents)
+  # Project paths: /path/to/project/.mdflow (4+ segments)
+  # User path: /Users/name/.mdflow (3 segments) - keep this one
+  PATH=$(echo "$PATH" | tr ':' '\n' | grep -vE '^(/[^/]+){4,}/\.mdflow$' | tr '\n' ':' | sed 's/:$//')
+  # Add current directory's .mdflow if it exists
+  if [[ -d ".mdflow" ]]; then
+    export PATH="$PWD/.mdflow:$PATH"
+  fi
+}
+
+# Hook into directory change (zsh)
+if [[ -n "$ZSH_VERSION" ]]; then
+  autoload -Uz add-zsh-hook
+  add-zsh-hook chpwd _mdflow_chpwd
+fi
+
+# Hook into directory change (bash)
+if [[ -n "$BASH_VERSION" ]]; then
+  PROMPT_COMMAND="_mdflow_chpwd${PROMPT_COMMAND:+;$PROMPT_COMMAND}"
+fi
+
+# Run once on shell start
+_mdflow_chpwd
+
+# mdflow: Short alias for mdflow command
+alias md='mdflow'

@@ -12,16 +12,52 @@ command -v bun &>/dev/null && alias -s ts='bun'
 
 alias -s md='_handle_md'
 _handle_md() {
-  local file="$1"
+  local input="$1"
   shift
-
-  # Check ~/agents/instructions if file doesn't exist locally
-  if [[ ! -f "$file" && -f "$HOME/agents/instructions/$file" ]]; then
-    file="$HOME/agents/instructions/$file"
+  
+  # Resolve input: URLs pass through, files check current dir then PATH
+  local resolved=""
+  if [[ "$input" =~ ^https?:// ]]; then
+    # URL - pass through as-is
+    resolved="$input"
+  elif [[ -f "$input" ]]; then
+    resolved="$input"
+  else
+    # Search PATH for the .md file
+    local dir
+    for dir in ${(s/:/)PATH}; do
+      if [[ -f "$dir/$input" ]]; then
+        resolved="$dir/$input"
+        break
+      fi
+    done
   fi
-
-  # Pass file and any remaining args (--model, --silent, etc.) to handler
-  bun run /Users/johnlindquist/agents/src/index.ts "$file" "$@"
+  
+  if [[ -z "$resolved" ]]; then
+    echo "File not found: $input (checked current dir and PATH)"
+    return 1
+  fi
+  
+  # Pass resolved file/URL and any remaining args (--model, --silent, etc.) to handler
+  # if md exists, use it, otherwise, offer to install markdown-agent
+  if command -v md &>/dev/null; then
+    md "$resolved" "$@"
+  else
+    echo "markdown-agent not installed."
+    read -q "REPLY?Would you like to run \`bun add -g markdown-agent\` now? [y/N] "
+    echo
+    if [[ "$REPLY" =~ ^[Yy]$ ]]; then
+      bun add -g markdown-agent
+      echo
+      read -q "REPLY?Would you like to attempt to run this again? [y/N] "
+      echo
+      if [[ "$REPLY" =~ ^[Yy]$ ]]; then
+        md "$resolved" "$@"
+      fi
+    else
+      return 1
+    fi
+  fi
 }
 
 #### Editor shortcuts (override EDITOR_CMD in local.zsh)
@@ -46,7 +82,11 @@ v(){
 }
 
 p(){
-  copilot --model claude-opus-4.5 --allow-all-tools -ps "$@"
+  copilot --model claude-opus-4.5 --allow-all-tools --silent -p "$@"
+}
+
+p.h(){
+  copilot --model claude-haiku-4.5 --allow-all-tools --silent -p "$@"
 }
 
 pi(){

@@ -458,7 +458,9 @@
  ;; --- MAIN RULE DEFINITIONS ---
  :main                [{:des   "Global Modifier Rules"
                         :rules [;; Global modifier rules
-                                [:fn ["equal-mode" 1] nil {:alone {:key :home} :afterup {:set ["equal-mode" 0]}}]
+                                ;; [:fn ["equal-mode" 1] nil {:alone {:key :home} :afterup {:set ["equal-mode" 0]}}]
+                                ;; fn key cannot be remapped on MacBook built-in keyboard (hardware limitation)
+                                ;; [:fn :home]
                                 [:caps_lock ["escape-mode" 1] nil {:alone {:key :escape} :afterup {:set ["escape-mode" 0]}}]
                                 ;; [:fn :equal_sign]
                                 [:left_option :left_option nil {:alone   {:key :semicolon :modi :left_command}
@@ -914,7 +916,7 @@
 
                        {:des   "Home Mode (Hold Home)"
                         :rules [:home-mode
-                                ;; Actions while holding Home
+                                ;; Actions while holding Home I have to go.
                                 ;; Colemak Top Row -> F1-F10 with :hyper
                                 ;; [:-q {:key :f1 :modi :hyper}]
                                 [:grave_accent_and_tilde [:space_left]]
@@ -970,7 +972,20 @@
                                 [:2 [:move_window_to_display_2]]
                                 [:3 [:move_window_to_display_3]]
                                 [:4 [:move_window_to_display_4]]
-                                [:left_shift {:key :f11 :modi :left_shift}]]}
+                                [:left_shift {:key :f11 :modi :left_shift}]
+                                ;; left_control + F-keys = fn + F-keys (media/hardware controls)
+                                [[:left_control :f1] {:key :f1 :modi :fn}]   ; brightness down
+                                [[:left_control :f2] {:key :f2 :modi :fn}]   ; brightness up
+                                [[:left_control :f3] {:key :f3 :modi :fn}]   ; mission control
+                                [[:left_control :f4] {:key :f4 :modi :fn}]   ; spotlight
+                                [[:left_control :f5] {:key :f5 :modi :fn}]   ; dictation
+                                [[:left_control :f6] {:key :f6 :modi :fn}]   ; do not disturb
+                                [[:left_control :f7] {:key :f7 :modi :fn}]   ; media back
+                                [[:left_control :f8] {:key :f8 :modi :fn}]   ; play/pause
+                                [[:left_control :f9] {:key :f9 :modi :fn}]   ; media forward
+                                [[:left_control :f10] {:key :f10 :modi :fn}] ; mute
+                                [[:left_control :f11] {:key :f11 :modi :fn}] ; volume down
+                                [[:left_control :f12] {:key :f12 :modi :fn}]]}
 
                        ;;
 
@@ -1437,7 +1452,7 @@
                                 [:2 :autofill_1password] ; Launch+1 -> Open 1Password
                                 [:spacebar :!Tdown_arrow] ; Launch+Space -> Ctrl+Down Arrow
                                 [:-a [:launch "Activity Monitor"]] ; Launch+A -> Launch Activity Monitor
-                                [:-v [:launch "Cursor Nightly"]] ; Launch+V -> Launch Cursor Nightly
+                                [:-v [:launch "Visual Studio Code - Insiders"]] ; Launch+V -> Launch Cursor Nightly
                                 [:-d [:launch "Discord"]] ; Launch+D (G Colemak) -> Launch Discord
                                 [:-f [:launch "Finder"]] ; Launch+F (E Colemak) -> Launch Finder
                                 [:-p [:launch "Pieces"]] ; Launch+P (E Colemak) -> Launch Pieces

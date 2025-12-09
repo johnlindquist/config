@@ -310,8 +310,9 @@ imagegen_clipboard() { gemini "Use the /generate command to generate: <image_pro
 gemini_plan() { local input="$@"; [ -p /dev/stdin ] && input="$(cat) $input"; gemini "Create and output a plan for: $input"; }
 
 claude_qa() { claude --append-system-prompt "$(cat qa.md)" "$@"; }
-commit() { claude "/conventional-commit" "$@" --print --verbose; }
 
+commit() { claude --dangerously-skip-permissions "Review the unstaged and staged changes. Then use a fix or feat conventional commit for the changes. If needed, git pull and rebase." --print --verbose; }
+push() { claude --dangerously-skip-permissions "Review the commited changes. If everything looks good, the git push the changes. If the push fails for any reason, explain in detail" --print --verbose; }
 claude2gemini() {
   claude --print --output-format json --max-turns 1 "$@" \
   | jq -r '.text | gsub("\\s+"; " ")' \
