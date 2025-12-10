@@ -1040,10 +1040,13 @@ config.keys = {
   -- BEHAVIOR:
   -- 1. Shows zoxide directories (frecency-ranked)
   -- 2. Green "●" = tab already open at this dir (will switch to it)
-  -- 3. Blue "○" = no tab open (will create new tab)
+  -- 3. Yellow "○" = no tab open (will create new tab)
   -- 4. Select any entry -> switches if tab exists, opens new if not
+  -- 5. FALLBACK: If no match found:
+  --    - Full path (starts with / or ~) -> create directory and open tab
+  --    - Partial name -> create ~/dev/<name> and open tab
   --
-  -- THEMING: Uses Catppuccin Mocha colors for visual polish
+  -- THEMING: Uses Gruvbox Dark colors for visual polish
   {
     mods = "CMD",
     key = "p",
@@ -1056,6 +1059,7 @@ config.keys = {
       local yellow = "#fabd2f"  -- New tab indicator (gruvbox yellow)
       local aqua = "#8ec07c"    -- Directory path (gruvbox aqua)
       local gray = "#928374"    -- Dimmed text (gruvbox gray)
+      local orange = "#fe8019"  -- Create new indicator (gruvbox orange)
 
       -- Build a map of directories that have open tabs
       -- Maps: directory path -> { tab = tab_object, tab_id = id }
@@ -1076,10 +1080,13 @@ config.keys = {
         return
       end
 
+      -- Store raw paths for matching against user input
+      local zoxide_paths = {}
       local choices = {}
       for line in stdout:gmatch('[^\n]+') do
         local display = line:gsub("^" .. home, "~")
         local is_open = open_dirs[line] ~= nil
+        table.insert(zoxide_paths, { full = line, display = display })
 
         -- Format with colors: "● ~/path" (green) or "○ ~/path" (yellow)
         local label = wezterm.format({
@@ -1104,11 +1111,15 @@ config.keys = {
             { Foreground = { Color = green } },
             { Text = "●" },
             { Foreground = { Color = gray } },
-            { Text = " switch to tab  " },
+            { Text = " switch  " },
             { Foreground = { Color = yellow } },
             { Text = "○" },
             { Foreground = { Color = gray } },
-            { Text = " open new tab" },
+            { Text = " open  " },
+            { Foreground = { Color = orange } },
+            { Text = "+" },
+            { Foreground = { Color = gray } },
+            { Text = " create new" },
           }),
           fuzzy_description = wezterm.format({
             { Foreground = { Color = yellow } },
@@ -1118,17 +1129,54 @@ config.keys = {
           choices = choices,
           fuzzy = true,
           action = wezterm.action_callback(function(inner_window, inner_pane, id, label)
-            if not id then return end  -- User cancelled
+            -- User cancelled (pressed escape with no selection)
+            if id == nil and label == nil then return end
 
-            -- Check if a tab is already open at this directory
-            local existing = open_dirs[id]
-            if existing then
-              -- Switch to existing tab
-              existing.tab:activate()
-            else
-              -- Open new tab at this directory
-              inner_window:mux_window():spawn_tab({ cwd = id })
+            -- If id is set, user selected from the list
+            if id then
+              local existing = open_dirs[id]
+              if existing then
+                existing.tab:activate()
+              else
+                inner_window:mux_window():spawn_tab({ cwd = id })
+              end
+              return
             end
+
+            -- FALLBACK: id is nil but label contains user's typed input
+            -- This happens when fuzzy search has no match
+            local user_input = label
+            if not user_input or user_input == "" then return end
+
+            -- Determine the target path
+            local target_path
+            if user_input:match("^/") then
+              -- Absolute path starting with /
+              target_path = user_input
+            elseif user_input:match("^~") then
+              -- Path starting with ~ (expand to home)
+              target_path = user_input:gsub("^~", home)
+            else
+              -- Partial name -> default to ~/dev/<name>
+              target_path = home .. "/dev/" .. user_input
+            end
+
+            -- Check if directory already exists
+            local check_success, _, _ = wezterm.run_child_process({ 'test', '-d', target_path })
+
+            if not check_success then
+              -- Directory doesn't exist, create it
+              local mkdir_success, _, mkdir_err = wezterm.run_child_process({ 'mkdir', '-p', target_path })
+              if not mkdir_success then
+                wezterm.log_error("Failed to create directory: " .. tostring(mkdir_err))
+                inner_window:toast_notification('WezTerm', 'Failed to create: ' .. target_path, nil, 3000)
+                return
+              end
+              inner_window:toast_notification('WezTerm', 'Created: ' .. target_path:gsub(home, "~"), nil, 2000)
+            end
+
+            -- Open new tab at the target directory
+            inner_window:mux_window():spawn_tab({ cwd = target_path })
           end),
         }),
         pane
@@ -1374,19 +1422,9 @@ config.keys = {
     }),
   },
 
-  -- FOCUS SHRINK: Alt+Backspace
-  -- WHY: Opposite of expand - shrink focused pane to give others more room
-  {
-    mods = "ALT",
-    key = "Backspace",
-    action = act.Multiple({
-      act.SetPaneZoomState(false),
-      act.AdjustPaneSize { "Left", -15 },
-      act.AdjustPaneSize { "Right", -15 },
-      act.AdjustPaneSize { "Up", -8 },
-      act.AdjustPaneSize { "Down", -8 },
-    }),
-  },
+  -- NOTE: Shrink shortcut removed - WezTerm's AdjustPaneSize doesn't accept
+  -- negative values. To shrink a pane, focus an adjacent pane and expand it,
+  -- or use Alt+Shift+h/j/k/l to manually resize.
 
   -- ============================================================================
   -- ZELLIJ-STYLE PANE NAVIGATION (ALT + VIM KEYS)
