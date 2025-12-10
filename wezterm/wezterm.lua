@@ -136,6 +136,29 @@ local function set_layout_mode(tab, mode)
 end
 
 -- ============================================================================
+-- DIRECTORY FOCUS HISTORY (for Cmd+P picker sorting)
+-- ============================================================================
+-- WHY: Track the order in which directories were last focused so the Cmd+P
+-- picker can show open tabs sorted by "most recently focused" first.
+-- Uses a timestamp-based approach for easy sorting.
+
+-- Record that a directory was focused (called from update-status)
+-- Uses lowercase path for case-insensitive matching on macOS
+local function record_dir_focus(dir_path)
+  if not dir_path then return end
+  wezterm.GLOBAL.dir_focus_times = wezterm.GLOBAL.dir_focus_times or {}
+  -- Store current timestamp (seconds since epoch) with normalized path
+  wezterm.GLOBAL.dir_focus_times[dir_path:lower()] = os.time()
+end
+
+-- Get the focus timestamp for a directory (returns 0 if never focused)
+-- Expects a normalized (lowercase) path
+local function get_dir_focus_time(dir_path)
+  wezterm.GLOBAL.dir_focus_times = wezterm.GLOBAL.dir_focus_times or {}
+  return wezterm.GLOBAL.dir_focus_times[dir_path] or 0
+end
+
+-- ============================================================================
 -- LAYOUT MODE DEFINITIONS
 -- ============================================================================
 -- WHY this structure: Having layout modes as a list of tables allows us to:
@@ -1062,13 +1085,16 @@ config.keys = {
       local orange = "#fe8019"  -- Create new indicator (gruvbox orange)
 
       -- Build a map of directories that have open tabs
-      -- Maps: directory path -> { tab = tab_object, tab_id = id }
+      -- Maps: directory path (lowercased) -> { tab = tab_object, tab_id = id, original_path = path }
+      -- WHY lowercase: macOS is case-insensitive, and zoxide may store paths with
+      -- different casing than WezTerm reports. Normalizing to lowercase ensures matching.
       local open_dirs = {}
       for _, t in ipairs(tabs) do
         for _, p in ipairs(t:panes()) do
           local cwd = p:get_current_working_dir()
           if cwd and cwd.file_path then
-            open_dirs[cwd.file_path] = { tab = t, tab_id = t:tab_id() }
+            local normalized = cwd.file_path:lower()
+            open_dirs[normalized] = { tab = t, tab_id = t:tab_id(), original_path = cwd.file_path }
           end
         end
       end
@@ -1081,12 +1107,27 @@ config.keys = {
       end
 
       -- Store raw paths for matching against user input
+      -- Split into two lists: open tabs first, then unopened directories
+      -- Track which normalized paths we've already seen to avoid duplicates from zoxide
       local zoxide_paths = {}
-      local choices = {}
+      local open_choices = {}
+      local unopened_choices = {}
+      local seen_normalized = {}
       for line in stdout:gmatch('[^\n]+') do
-        local display = line:gsub("^" .. home, "~")
-        local is_open = open_dirs[line] ~= nil
-        table.insert(zoxide_paths, { full = line, display = display })
+        local normalized = line:lower()
+        -- Skip duplicate paths (zoxide may have same dir with different casing)
+        if seen_normalized[normalized] then
+          goto continue
+        end
+        seen_normalized[normalized] = true
+
+        local open_entry = open_dirs[normalized]  -- Use normalized path for lookup
+        local is_open = open_entry ~= nil
+
+        -- Use the actual path from the open tab (correct casing) or zoxide's path
+        local actual_path = is_open and open_entry.original_path or line
+        local display = actual_path:gsub("^" .. home, "~")
+        table.insert(zoxide_paths, { full = actual_path, display = display })
 
         -- Format with colors: "● ~/path" (green) or "○ ~/path" (yellow)
         local label = wezterm.format({
@@ -1096,7 +1137,28 @@ config.keys = {
           { Text = display },
         })
 
-        table.insert(choices, { id = line, label = label })
+        if is_open then
+          -- Store focus time for sorting (use normalized path for consistency)
+          -- Use actual_path as id so switching works correctly
+          table.insert(open_choices, { id = actual_path, label = label, focus_time = get_dir_focus_time(normalized) })
+        else
+          table.insert(unopened_choices, { id = line, label = label })
+        end
+        ::continue::
+      end
+
+      -- Sort open tabs by most recently focused (descending by focus_time)
+      table.sort(open_choices, function(a, b)
+        return a.focus_time > b.focus_time
+      end)
+
+      -- Combine: open tabs first (sorted by recency), then unopened directories
+      local choices = {}
+      for _, choice in ipairs(open_choices) do
+        table.insert(choices, { id = choice.id, label = choice.label })
+      end
+      for _, choice in ipairs(unopened_choices) do
+        table.insert(choices, choice)
       end
 
       -- Show the picker with styled description
@@ -1134,7 +1196,8 @@ config.keys = {
 
             -- If id is set, user selected from the list
             if id then
-              local existing = open_dirs[id]
+              -- Lookup using normalized (lowercase) path since open_dirs is keyed that way
+              local existing = open_dirs[id:lower()]
               if existing then
                 existing.tab:activate()
               else
@@ -1686,30 +1749,21 @@ workspace_switcher.apply_to_config(config)
 -- CUSTOM TAB TITLES
 -- ============================================================================
 -- WHY custom titles: Default titles are often unhelpful (just "zsh" or blank).
--- Custom titles show directory + process + activity indicators, making tabs
--- much more useful when you have many open.
+-- Custom titles show the current directory name, making tabs easy to identify.
 --
--- FORMAT: [indicators] process · full_path
+-- FORMAT: [indicators] directory_name
 -- INDICATORS:
 --   ● = Unseen output (activity in background tab)
 --   🔍 = Pane is zoomed (fullscreen)
---
--- Both process and path are searchable via Cmd+P fuzzy finder.
 wezterm.on('format-tab-title', function(tab, tabs, panes, config, hover, max_width)
   local pane = tab.active_pane
   local cwd = pane.current_working_dir
-  local home = os.getenv("HOME") or ""
 
-  -- Get full path (replacing home dir with ~)
-  local full_path = "~"
+  -- Get just the last directory name
+  local dir_name = "~"
   if cwd and cwd.file_path then
-    full_path = cwd.file_path:gsub("^" .. home, "~")
+    dir_name = cwd.file_path:match("([^/]+)$") or "~"
   end
-
-  -- Get the foreground process name (what's actually running in the pane)
-  local process = pane.foreground_process_name or ""
-  process = process:match("([^/]+)$") or process  -- Extract basename
-  if process == "" then process = "shell" end      -- Fallback for empty
 
   -- UNSEEN OUTPUT INDICATOR
   -- WHY: When a background tab has new output, you want to know without
@@ -1730,8 +1784,8 @@ wezterm.on('format-tab-title', function(tab, tabs, panes, config, hover, max_wid
     zoom = "🔍 "
   end
 
-  -- Build the title: " ● 🔍 nvim · ~/dev/project "
-  local title = string.format(" %s%s%s · %s ", indicator, zoom, process, full_path)
+  -- Build the title: " ● 🔍 directory_name "
+  local title = string.format(" %s%s%s ", indicator, zoom, dir_name)
 
   -- CATPPUCCIN MOCHA COLORS
   -- Active tab: Lighter background (Surface0), bright text
@@ -1774,6 +1828,13 @@ end)
 --
 -- LEFT STATUS is disabled (removed hostname display)
 wezterm.on("update-status", function(window, pane)
+  -- TRACK DIRECTORY FOCUS TIME (for Cmd+P picker sorting)
+  -- Record when this directory was last focused so we can sort by recency
+  local cwd = pane:get_current_working_dir()
+  if cwd and cwd.file_path then
+    record_dir_focus(cwd.file_path)
+  end
+
   -- DYNAMIC COLOR SCHEME BASED ON CWD
   -- Check if the current directory has a custom color scheme mapping
   -- NOTE: Only update if scheme changes to avoid visual flashing during picker use
@@ -1854,11 +1915,6 @@ wezterm.on("update-status", function(window, pane)
     table.insert(cells, { Foreground = { Color = "#6c7086" } })  -- Overlay0 (gray)
     table.insert(cells, { Text = "  " .. path })
   end
-
-  -- TIME
-  -- WHY: Convenient clock without needing to look away from terminal
-  table.insert(cells, { Foreground = { Color = "#585b70" } })  -- Surface2 (dark gray)
-  table.insert(cells, { Text = "  " .. wezterm.strftime("%H:%M") .. " " })
 
   -- Apply the formatted status bar
   window:set_right_status(wezterm.format(cells))
