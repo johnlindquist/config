@@ -746,12 +746,13 @@ end
 -- WHY: Full paths are too long for titles. "~/dev/my-project" becomes "dev/my-project"
 -- This gives enough context to distinguish directories without wasting space.
 -- NOTE: Handles both Pane objects (method call) and PaneInformation tables (property access)
+-- PaneInformation tables have strict metatables that error on unknown fields, so we use pcall
 local function short_cwd(pane)
-  -- Handle both Pane objects and PaneInformation tables
   local cwd
-  if pane.get_current_working_dir then
-    -- It's a Pane object - use method call
-    cwd = pane:get_current_working_dir()
+  -- Try method call first (Pane object), fallback to property (PaneInformation)
+  local ok, result = pcall(function() return pane:get_current_working_dir() end)
+  if ok and result then
+    cwd = result
   else
     -- It's a PaneInformation table - use property access
     cwd = pane.current_working_dir
@@ -1348,17 +1349,43 @@ config.keys = {
     end),
   },
 
-  -- EQUALIZE PANES: Alt+=
-  -- WHY: Reset all panes to equal sizes after manual resizing
-  -- NOTE: WezTerm doesn't have native equalize, so we reset zoom state instead
+  -- RESET ZOOM: Alt+=
+  -- WHY: WezTerm doesn't have native pane equalization like tmux.
+  -- This just ensures no pane is zoomed, as a "reset" of sorts.
+  -- For manual balancing, use Alt+Shift+h/j/k/l to resize.
   {
     mods = "ALT",
     key = "=",
-    action = wezterm.action_callback(function(window, pane)
-      -- Reset zoom state (which at least ensures no pane is maximized)
-      window:perform_action(act.SetPaneZoomState(false), pane)
-      window:toast_notification('WezTerm', 'Panes equalized (zoom reset)', nil, 1500)
-    end),
+    action = act.SetPaneZoomState(false),
+  },
+
+  -- FOCUS EXPAND: Alt+Enter
+  -- WHY: Make the focused pane larger without full zoom
+  -- Expands focused pane in all directions for more working room
+  {
+    mods = "ALT",
+    key = "Enter",
+    action = act.Multiple({
+      act.SetPaneZoomState(false),
+      act.AdjustPaneSize { "Left", 15 },
+      act.AdjustPaneSize { "Right", 15 },
+      act.AdjustPaneSize { "Up", 8 },
+      act.AdjustPaneSize { "Down", 8 },
+    }),
+  },
+
+  -- FOCUS SHRINK: Alt+Backspace
+  -- WHY: Opposite of expand - shrink focused pane to give others more room
+  {
+    mods = "ALT",
+    key = "Backspace",
+    action = act.Multiple({
+      act.SetPaneZoomState(false),
+      act.AdjustPaneSize { "Left", -15 },
+      act.AdjustPaneSize { "Right", -15 },
+      act.AdjustPaneSize { "Up", -8 },
+      act.AdjustPaneSize { "Down", -8 },
+    }),
   },
 
   -- ============================================================================
