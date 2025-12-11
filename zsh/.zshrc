@@ -182,3 +182,7 @@ _mdflow_chpwd
 
 # mdflow: Short alias for mdflow command
 alias md='mdflow'
+
+# >>> MCP Agent Mail alias
+alias am='cd "/Users/johnlindquist/dev/cm/mcp_agent_mail" && scripts/run_server_with_token.sh'
+# <<< MCP Agent Mail alias

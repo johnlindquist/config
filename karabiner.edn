@@ -465,7 +465,20 @@
                                 ;; [:fn :equal_sign]
                                 [:left_option :left_option nil {:alone   {:key :semicolon :modi :left_command}
                                                                 :afterup :reset-all-modes}]]}
-                       ;;
+
+                       {:des   "Global Ctrl+F-keys → fn+F-keys (media/hardware controls)"
+                        :rules [[:!Tf1 {:key :f1 :modi :fn}]   ; brightness down
+                                [:!Tf2 {:key :f2 :modi :fn}]   ; brightness up
+                                [:!Tf3 {:key :f3 :modi :fn}]   ; mission control
+                                [:!Tf4 {:key :f4 :modi :fn}]   ; spotlight
+                                [:!Tf5 {:key :f5 :modi :fn}]   ; dictation
+                                [:!Tf6 {:key :f6 :modi :fn}]   ; do not disturb
+                                [:!Tf7 {:key :f7 :modi :fn}]   ; media back
+                                [:!Tf8 {:key :f8 :modi :fn}]   ; play/pause
+                                [:!Tf9 {:key :f9 :modi :fn}]   ; media forward
+                                [:!Tf10 {:key :f10 :modi :fn}] ; mute
+                                [:!Tf11 {:key :f11 :modi :fn}] ; volume down
+                                [:!Tf12 {:key :f12 :modi :fn}]]} ; volume up
 
                        {:des "Global Button2-Mode"
                         :rules [:button2-mode
@@ -972,20 +985,7 @@
                                 [:2 [:move_window_to_display_2]]
                                 [:3 [:move_window_to_display_3]]
                                 [:4 [:move_window_to_display_4]]
-                                [:left_shift {:key :f11 :modi :left_shift}]
-                                ;; left_control + F-keys = fn + F-keys (media/hardware controls)
-                                [[:left_control :f1] {:key :f1 :modi :fn}]   ; brightness down
-                                [[:left_control :f2] {:key :f2 :modi :fn}]   ; brightness up
-                                [[:left_control :f3] {:key :f3 :modi :fn}]   ; mission control
-                                [[:left_control :f4] {:key :f4 :modi :fn}]   ; spotlight
-                                [[:left_control :f5] {:key :f5 :modi :fn}]   ; dictation
-                                [[:left_control :f6] {:key :f6 :modi :fn}]   ; do not disturb
-                                [[:left_control :f7] {:key :f7 :modi :fn}]   ; media back
-                                [[:left_control :f8] {:key :f8 :modi :fn}]   ; play/pause
-                                [[:left_control :f9] {:key :f9 :modi :fn}]   ; media forward
-                                [[:left_control :f10] {:key :f10 :modi :fn}] ; mute
-                                [[:left_control :f11] {:key :f11 :modi :fn}] ; volume down
-                                [[:left_control :f12] {:key :f12 :modi :fn}]]}
+                                [:left_shift {:key :f11 :modi :left_shift}]]}
 
                        ;;
 
@@ -1366,7 +1366,9 @@
                                 [:g [:spacebar :equal_sign :greater_than :spacebar]] ; Space+G (D Colemak) -> " => "
                                 [:h [:equal_sign :open_brace :close_brace :left_arrow]] ; Space+H -> ={}
                                 [:b [:equal_sign :open_brace :close_brace :left_arrow]] ; Space+B -> ={}
-                                [:quote [:equal_sign :!Squote :!Squote :left_arrow]]]} ; Space+' -> =""
+                                [:quote [:equal_sign :!Squote :!Squote :left_arrow]]
+                                [:c {:key :c :modi :hyper}] ; hyper c
+]} ; Space+' -> =""
 
                        {:des   "Semicolon Mode (; + Key / O Colemak Layer / Special Chars)"
                         :rules [:semicolon-mode
@@ -1458,7 +1460,7 @@
                                 [:-p [:launch "Pieces"]] ; Launch+P (E Colemak) -> Launch Pieces
                                 [:-g [:launch "Google Chrome"]] ; Launch+G (T Colemak) -> Launch Chrome
                                 [:-t [:launch "WezTerm"]] ; Launch+T (F Colemak) -> Launch iTerm
-                                [:-c [:launch "Cursor"]] ; Launch+C -> Launch Cursor
+                                [:-c [:launch "Visual Studio Code - Insiders"]] ; Launch+C -> Launch Cursor
                                 [:-k "launchctl kickstart -k org.pqrs.karabiner.karabiner_console_user_server"] ; Launch+K (E Colemak) -> Restart Karabiner
                                 [:-y [:launch "YouTube Music"]] ; Launch+Y (O Colemak) -> Launch YouTube Music
                                 [:-r [:wezterm "cd ~/research && x --append-system-prompt='Research the users query then write the result to a markdown file ./<shortened-slugified-query>.md'"]] ; Launch+R -> WezTerm research mode

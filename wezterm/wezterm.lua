@@ -853,11 +853,61 @@ local resurrect = wezterm.plugin.require("https://github.com/MLFlexer/resurrect.
 -- ============================================================================
 -- These settings define the visual appearance of WezTerm.
 
--- COLOR SCHEME
--- WHY Gruvbox Dark: A warm, retro color scheme that's easy on the eyes for
--- long coding sessions. Popular in the terminal/vim community.
--- ALTERNATIVES: "Catppuccin Mocha", "Tokyo Night", "One Dark", "Dracula"
-config.color_scheme = 'GruvboxDark'
+-- ============================================================================
+-- HIGH CONTRAST COLOR SCHEMES
+-- ============================================================================
+-- WHY high contrast: Better readability, especially in bright environments
+-- or for users who prefer sharper text definition.
+--
+-- Available themes (all high contrast):
+--   1. Solarized Dark Higher Contrast - Enhanced Solarized with better visibility
+--   2. Hardcore - Maximum contrast, bold colors
+--   3. Dracula - Dark purple theme with vivid accent colors
+--   4. Catppuccin Mocha - Warm pastel tones with good contrast
+--   5. GruvboxDark - Warm retro theme (original)
+--   6. Tokyo Night - Cool blue/purple palette
+--   7. Selenized Dark (Gogh) - Scientifically designed for readability
+--   8. Snazzy - Vibrant colors on dark background
+--
+-- Switch themes with Cmd+Shift+T or Leader+T
+
+local HIGH_CONTRAST_THEMES = {
+  { id = 'Solarized Dark Higher Contrast', name = 'Solarized High Contrast', desc = 'Enhanced Solarized readability' },
+  { id = 'Hardcore', name = 'Hardcore', desc = 'Maximum contrast, bold colors' },
+  { id = 'Dracula', name = 'Dracula', desc = 'Dark purple with vivid accents' },
+  { id = 'Catppuccin Mocha', name = 'Catppuccin Mocha', desc = 'Warm pastels, good contrast' },
+  { id = 'GruvboxDark', name = 'Gruvbox Dark', desc = 'Warm retro classic' },
+  { id = 'Tokyo Night', name = 'Tokyo Night', desc = 'Cool blue/purple palette' },
+  { id = 'Selenized Dark (Gogh)', name = 'Selenized Dark', desc = 'Scientifically designed readability' },
+  { id = 'Snazzy', name = 'Snazzy', desc = 'Vibrant on dark' },
+}
+
+-- ============================================================================
+-- HARDCORE THEME COLORS (for UI elements)
+-- ============================================================================
+-- These colors are extracted from the Hardcore theme for consistent styling
+-- across tabs, pickers, and status bar
+local THEME = {
+  bg = '#121212',           -- Background (very dark)
+  bg_light = '#1b1d1e',     -- Slightly lighter background
+  bg_selection = '#453b39', -- Selection/highlight background
+  fg = '#a0a0a0',           -- Main foreground (gray)
+  fg_bright = '#f8f8f2',    -- Bright foreground (white)
+  fg_dim = '#505354',       -- Dimmed foreground
+  pink = '#f92672',         -- Accent: pink/magenta
+  green = '#a6e22e',        -- Accent: green
+  orange = '#fd971f',       -- Accent: orange
+  yellow = '#e6db74',       -- Accent: yellow
+  cyan = '#66d9ef',         -- Accent: cyan
+  purple = '#9e6ffe',       -- Accent: purple
+}
+
+-- Track user-selected theme globally (persists across config reloads)
+-- This prevents the update-status handler from overwriting user choice
+wezterm.GLOBAL.user_selected_theme = wezterm.GLOBAL.user_selected_theme or nil
+
+-- Default to Hardcore (maximum contrast)
+config.color_scheme = 'Hardcore'
 
 -- FONT CONFIGURATION
 -- WHY JetBrains Mono: Purpose-built for code with excellent ligatures,
@@ -931,11 +981,45 @@ config.inactive_pane_hsb = {
   brightness = 0.3,     -- 30% brightness (quite dim)
 }
 
--- PANE SPLIT LINE COLOR
--- WHY purple: Catppuccin Mauve provides good contrast against both light and
--- dark backgrounds, making split lines visible without being distracting.
+-- PANE SPLIT LINE COLOR AND TAB BAR STYLING
+-- WHY: Match the Hardcore theme for consistent visuals
 config.colors = {
-  split = '#cba6f7',  -- Catppuccin Mauve - visible purple split lines
+  split = THEME.pink,  -- Hardcore pink - high visibility split lines
+
+  -- Tab bar styling to match Hardcore theme
+  tab_bar = {
+    background = THEME.bg,
+
+    -- Active tab styling
+    active_tab = {
+      bg_color = THEME.bg_selection,
+      fg_color = THEME.fg_bright,
+      intensity = 'Bold',
+    },
+
+    -- Inactive tab styling
+    inactive_tab = {
+      bg_color = THEME.bg,
+      fg_color = THEME.fg_dim,
+    },
+
+    -- Hover over inactive tab
+    inactive_tab_hover = {
+      bg_color = THEME.bg_light,
+      fg_color = THEME.fg,
+      italic = false,
+    },
+
+    -- New tab button
+    new_tab = {
+      bg_color = THEME.bg,
+      fg_color = THEME.fg_dim,
+    },
+    new_tab_hover = {
+      bg_color = THEME.bg_selection,
+      fg_color = THEME.green,
+    },
+  },
 }
 
 -- ============================================================================
@@ -1077,12 +1161,12 @@ config.keys = {
       local home = os.getenv("HOME") or ""
       local tabs = window:mux_window():tabs()
 
-      -- Gruvbox Dark colors
-      local green = "#b8bb26"   -- Open tab indicator (gruvbox green)
-      local yellow = "#fabd2f"  -- New tab indicator (gruvbox yellow)
-      local aqua = "#8ec07c"    -- Directory path (gruvbox aqua)
-      local gray = "#928374"    -- Dimmed text (gruvbox gray)
-      local orange = "#fe8019"  -- Create new indicator (gruvbox orange)
+      -- Hardcore theme colors for picker
+      local green = THEME.green    -- Open tab indicator
+      local yellow = THEME.yellow  -- New tab indicator
+      local aqua = THEME.cyan      -- Directory path
+      local gray = THEME.fg_dim    -- Dimmed text
+      local orange = THEME.orange  -- Create new indicator
 
       -- Build a map of directories that have open tabs
       -- Maps: directory path (lowercased) -> { tab = tab_object, tab_id = id, original_path = path }
@@ -1161,11 +1245,11 @@ config.keys = {
         table.insert(choices, choice)
       end
 
-      -- Show the picker with styled description
+      -- Show the picker with Hardcore-themed styling
       window:perform_action(
         act.InputSelector({
           title = wezterm.format({
-            { Foreground = { Color = aqua } },
+            { Foreground = { Color = THEME.cyan } },
             { Attribute = { Intensity = "Bold" } },
             { Text = "󰍉  Quick Open" },
           }),
@@ -1184,7 +1268,7 @@ config.keys = {
             { Text = " create new" },
           }),
           fuzzy_description = wezterm.format({
-            { Foreground = { Color = yellow } },
+            { Foreground = { Color = THEME.pink } },
             { Attribute = { Intensity = "Bold" } },
             { Text = "󰈞 Search: " },
           }),
@@ -1614,7 +1698,89 @@ config.keys = {
 
   -- SCROLLBACK SEARCH: Cmd+F
   -- WHY: Direct access to search without entering copy mode first
-  { mods = "CMD", key = "f", action = act.Search 'CurrentSelectionOrEmptyString' },
+  { mods = "CMD", key = "f", action = act.Search { CaseInSensitiveString = '' } },
+
+  -- ============================================================================
+  -- THEME SWITCHER: Cmd+Shift+T
+  -- ============================================================================
+  -- WHY: Quick access to switch between high contrast themes
+  -- Shows a fuzzy picker with all available high contrast themes
+  {
+    mods = "CMD|SHIFT",
+    key = "t",
+    action = wezterm.action_callback(function(window, pane)
+      local choices = {}
+      for _, theme in ipairs(HIGH_CONTRAST_THEMES) do
+        table.insert(choices, {
+          id = theme.id,
+          label = theme.name .. ' - ' .. theme.desc,
+        })
+      end
+
+      window:perform_action(
+        act.InputSelector({
+          title = wezterm.format({
+            { Foreground = { Color = THEME.cyan } },
+            { Attribute = { Intensity = "Bold" } },
+            { Text = "  Select Theme" },
+          }),
+          description = wezterm.format({
+            { Foreground = { Color = THEME.fg_dim } },
+            { Text = "High contrast themes for better readability" },
+          }),
+          fuzzy_description = wezterm.format({
+            { Foreground = { Color = THEME.pink } },
+            { Attribute = { Intensity = "Bold" } },
+            { Text = " Search: " },
+          }),
+          choices = choices,
+          fuzzy = true,
+          action = wezterm.action_callback(function(inner_window, inner_pane, id, label)
+            if id then
+              -- Save user choice globally so update-status won't override it
+              wezterm.GLOBAL.user_selected_theme = id
+              -- Apply the theme immediately via config override
+              local overrides = inner_window:get_config_overrides() or {}
+              overrides.color_scheme = id
+              inner_window:set_config_overrides(overrides)
+              inner_window:toast_notification('WezTerm', 'Theme: ' .. id, nil, 2000)
+            end
+          end),
+        }),
+        pane
+      )
+    end),
+  },
+
+  -- QUICK THEME CYCLE: Leader+T
+  -- WHY: Cycle through themes without opening picker
+  {
+    mods = "LEADER",
+    key = "t",
+    action = wezterm.action_callback(function(window, pane)
+      local overrides = window:get_config_overrides() or {}
+      local current = overrides.color_scheme or config.color_scheme
+
+      -- Find current theme index
+      local current_idx = 1
+      for i, theme in ipairs(HIGH_CONTRAST_THEMES) do
+        if theme.id == current then
+          current_idx = i
+          break
+        end
+      end
+
+      -- Cycle to next theme
+      local next_idx = (current_idx % #HIGH_CONTRAST_THEMES) + 1
+      local next_theme = HIGH_CONTRAST_THEMES[next_idx]
+
+      -- Save user choice globally so update-status won't override it
+      wezterm.GLOBAL.user_selected_theme = next_theme.id
+      overrides.color_scheme = next_theme.id
+      window:set_config_overrides(overrides)
+      window:toast_notification('WezTerm', 'Theme: ' .. next_theme.name, nil, 2000)
+    end),
+  },
 
   -- ZEN MODE TOGGLE: Leader+Z (overrides pane zoom)
   -- WHY: Sometimes you want zero distractions - hide tab bar, remove padding
@@ -1787,19 +1953,19 @@ wezterm.on('format-tab-title', function(tab, tabs, panes, config, hover, max_wid
   -- Build the title: " ● 🔍 directory_name "
   local title = string.format(" %s%s%s ", indicator, zoom, dir_name)
 
-  -- CATPPUCCIN MOCHA COLORS
-  -- Active tab: Lighter background (Surface0), bright text
-  -- Inactive tab: Darker background (Base), dimmed text
+  -- HARDCORE THEME COLORS
+  -- Active tab: Selection background with bright text and pink accent
+  -- Inactive tab: Dark background with dimmed text
   if tab.is_active then
     return {
-      { Background = { Color = '#313244' } },  -- Surface0 (slightly lighter)
-      { Foreground = { Color = '#cdd6f4' } },  -- Text (bright)
+      { Background = { Color = THEME.bg_selection } },  -- Selection background
+      { Foreground = { Color = THEME.fg_bright } },     -- Bright white text
       { Text = title },
     }
   end
   return {
-    { Background = { Color = '#1e1e2e' } },    -- Base (dark)
-    { Foreground = { Color = '#6c7086' } },    -- Overlay0 (dimmed)
+    { Background = { Color = THEME.bg } },              -- Dark background
+    { Foreground = { Color = THEME.fg_dim } },          -- Dimmed gray text
     { Text = title },
   }
 end)
@@ -1837,19 +2003,21 @@ wezterm.on("update-status", function(window, pane)
 
   -- DYNAMIC COLOR SCHEME BASED ON CWD
   -- Check if the current directory has a custom color scheme mapping
-  -- NOTE: Only update if scheme changes to avoid visual flashing during picker use
-  local scheme = scheme_for_cwd(pane)
-  local current_overrides = window:get_config_overrides() or {}
-  local current_scheme = current_overrides.color_scheme
+  -- NOTE: Skip if user has manually selected a theme (via Cmd+Shift+T or Leader+T)
+  if not wezterm.GLOBAL.user_selected_theme then
+    local scheme = scheme_for_cwd(pane)
+    local current_overrides = window:get_config_overrides() or {}
+    local current_scheme = current_overrides.color_scheme
 
-  if scheme and scheme ~= current_scheme then
-    -- Override the color scheme for this window based on directory
-    window:set_config_overrides({ color_scheme = scheme })
-  elseif not scheme and current_scheme then
-    -- Clear scheme override only if we had one before
-    window:set_config_overrides({})
+    if scheme and scheme ~= current_scheme then
+      -- Override the color scheme for this window based on directory
+      window:set_config_overrides({ color_scheme = scheme })
+    elseif not scheme and current_scheme then
+      -- Clear scheme override only if we had one before
+      window:set_config_overrides({})
+    end
+    -- If no scheme and no current override, do nothing (avoid flash)
   end
-  -- If no scheme and no current override, do nothing (avoid flash)
 
   -- DISABLE LEFT STATUS BAR
   -- WHY: The hostname (e.g., "johns") isn't useful in most local setups
@@ -1864,7 +2032,7 @@ wezterm.on("update-status", function(window, pane)
   -- WHY: When you're in a special mode, you need to know to exit correctly
   local mode = window:active_key_table()
   if mode then
-    table.insert(cells, { Foreground = { Color = "#f38ba8" } })  -- Red/Pink
+    table.insert(cells, { Foreground = { Color = THEME.pink } })  -- Hardcore pink
     table.insert(cells, { Attribute = { Intensity = "Bold" } })
     table.insert(cells, { Text = " " .. mode:upper() .. " │" })
     table.insert(cells, { Attribute = { Intensity = "Normal" } })
@@ -1874,33 +2042,11 @@ wezterm.on("update-status", function(window, pane)
   -- WHY: When you press Ctrl+Q (leader), you need visual confirmation
   -- that WezTerm is waiting for the next key
   if window:leader_is_active() then
-    table.insert(cells, { Foreground = { Color = "#fab387" } })  -- Peach/Orange
+    table.insert(cells, { Foreground = { Color = THEME.orange } })  -- Hardcore orange
     table.insert(cells, { Attribute = { Intensity = "Bold" } })
     table.insert(cells, { Text = " LEADER │" })
     table.insert(cells, { Attribute = { Intensity = "Normal" } })
   end
-
-  -- LAYOUT MODE INDICATOR (Zellij-style)
-  -- WHY: Reminds you which layout mode is active for this tab
-  -- Each mode has an icon for quick visual identification
-  local tab = window:active_tab()
-  local layout_mode = get_layout_mode(tab)
-  local layout_icon = ({
-    ['tiled'] = '⊞',            -- Grid icon
-    ['vertical'] = '⬍',         -- Vertical arrows
-    ['horizontal'] = '⬌',       -- Horizontal arrows
-    ['main-vertical'] = '◧',    -- Left-heavy box
-    ['main-horizontal'] = '⬒',  -- Top-heavy box
-  })[layout_mode] or '⊞'
-  table.insert(cells, { Foreground = { Color = "#cba6f7" } })  -- Mauve/Purple
-  table.insert(cells, { Text = " " .. layout_icon .. " " .. layout_mode })
-
-  -- WORKSPACE NAME
-  -- WHY: When using workspaces, you need to know which one you're in
-  local workspace = window:active_workspace()
-  local ws_name = workspace:match("([^/]+)$") or workspace  -- Extract basename
-  table.insert(cells, { Foreground = { Color = "#89b4fa" } })  -- Blue
-  table.insert(cells, { Text = "  " .. ws_name })
 
   -- CURRENT WORKING DIRECTORY
   -- WHY: Quick reference without running pwd
@@ -1912,7 +2058,7 @@ wezterm.on("update-status", function(window, pane)
     if #path > 40 then
       path = "…" .. path:sub(-39)  -- Show last 39 chars with ellipsis
     end
-    table.insert(cells, { Foreground = { Color = "#6c7086" } })  -- Overlay0 (gray)
+    table.insert(cells, { Foreground = { Color = THEME.fg_dim } })  -- Hardcore gray
     table.insert(cells, { Text = "  " .. path })
   end
 

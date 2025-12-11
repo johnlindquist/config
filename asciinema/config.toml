@@ -1,0 +1,15 @@
+# asciinema config - https://docs.asciinema.org/manual/cli/configuration/v3/
+
+[session]
+# Limit idle time to 2 seconds max
+idle_time_limit = 2
+
+# Capture shell and term type
+capture_env = "SHELL,TERM"
+
+[playback]
+# Default playback speed
+speed = 1.0
+
+# Limit idle time during playback
+idle_time_limit = 2

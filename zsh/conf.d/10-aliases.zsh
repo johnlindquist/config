@@ -81,17 +81,43 @@ v(){
   code-insiders "$@"
 }
 
-p(){
-  copilot --model claude-opus-4.5 --allow-all-tools --silent -p "$@"
-}
+# =============================================================================
+# GitHub Copilot CLI Shortcuts
+# =============================================================================
+# Mnemonic: P = Pilot, PI = Pilot Interactive, PCON = continue, PRES = resume
+# Suffixes: (none|o)=Opus, s=Sonnet, h=Haiku, c=Codex, g=Gemini
+#
+# Examples: p "query", pi, pis, pcon, pres
+# =============================================================================
 
-p.h(){
-  copilot --model claude-haiku-4.5 --allow-all-tools --silent -p "$@"
-}
+typeset -gA _PILOT_MODELS=(
+  [_]="claude-haiku-4.5"      # default (no suffix)
+  [o]="claude-opus-4.5"      # legacy opus alias
+  [s]="claude-sonnet-4.5"
+  [h]="claude-haiku-4.5"
+  [c]="gpt-5.1-codex-max"
+  [g]="gemini-3-pro-preview"
+)
 
-pi(){
-  copilot --model claude-opus-4.5 --allow-all-tools ${1:+--interactive} "$@"
-}
+# Generate all pilot functions dynamically
+for _suffix _model in ${(kv)_PILOT_MODELS}; do
+  if [[ $_suffix == "_" ]]; then
+    # Default (no suffix): p, pi
+    eval "co()  { if [[ ! -t 0 ]]; then cat | copilot --model $_model --allow-all-tools --silent -p \"\$@\"; else copilot --model $_model --allow-all-tools --silent -p \"\$@\"; fi; }"
+    eval "ico() { if [[ ! -t 0 ]]; then cat | copilot --model $_model --allow-all-tools \${1:+-i} \"\$@\"; else copilot --model $_model --allow-all-tools \${1:+-i} \"\$@\"; fi; }"
+  else
+    # With suffix: ps, pis, ph, pih, etc.
+    eval "co${_suffix}()  { if [[ ! -t 0 ]]; then cat | copilot --model $_model --allow-all-tools --silent -p \"\$@\"; else copilot --model $_model --allow-all-tools --silent -p \"\$@\"; fi; }"
+    eval "ico${_suffix}() { if [[ ! -t 0 ]]; then cat | copilot --model $_model --allow-all-tools \${1:+-i} \"\$@\"; else copilot --model $_model --allow-all-tools \${1:+-i} \"\$@\"; fi; }"
+  fi
+done
+unset _suffix _model
+
+# Session management (model-agnostic)
+cocon() { copilot --allow-all-tools --continue; }
+icocon() { copilot --allow-all-tools --continue; }
+cores() { copilot --allow-all-tools --resume "$@"; }
+icores() { copilot --allow-all-tools --resume "$@"; }
 
 #### Package management
 alias pup="pnpm dlx npm-check-updates -i -p pnpm"
@@ -292,11 +318,13 @@ funced() {
     return 1
   }
 
-  # Find line number (matches "funcname() {" or "function funcname")
-  local line=$(grep -n -m1 "^\s*\(function \)\?${func}\s*(" "$file" | cut -d: -f1)
+  # Find line number - try multiple patterns:
+  # 1. Traditional: "funcname() {" or "function funcname"
+  # 2. Eval'd: eval "funcname()" or eval 'funcname()'
+  local line=$(grep -n -m1 -E "^\s*(function\s+)?${func}\s*\(|eval\s+[\"']${func}\s*\(" "$file" | cut -d: -f1)
   [[ -z "$line" ]] && line=1
 
-  cursor -g "$file:$line"
+  "$EDITOR_CMD" -g "$file:$line"
 }
 
 # =============================================================================
@@ -589,6 +617,70 @@ _space_trigger() {
 
 zle -N _space_trigger
 bindkey " " _space_trigger
+
+# =============================================================================
+# Asciinema Shortcuts
+# =============================================================================
+# 2-letter shortcuts for terminal recording
+# ar = record, ap = play, au = upload, ac = cat, as = stream, av = convert
+# ae = edit (cut/speed/quantize)
+
+rec() {
+  local name="$1"
+  [[ -z "$name" ]] && { echo "Usage: rec <name>"; return 1; }
+  
+  [[ ! -d slides ]] && { echo "No slides/ directory found"; return 1; }
+  
+  # Find highest numbered file in slides/
+  local highest=0
+  local file
+  for file in slides/[0-9]*.md; do
+    [[ ! -f "$file" ]] && continue
+    local num="${file##*/}"  # Remove path
+    num="${num%%_*}"          # Extract just the number part
+    num="${num##0}"           # Remove leading zeros for numeric comparison
+    [[ -z "$num" ]] && num=0
+    [[ $num -gt $highest ]] && highest=$num
+  done
+  
+  # Increment to next number and pad with zero
+  local next_num=$((highest + 1))
+  local padded_num=$(printf "%02d" $next_num)
+  
+  # Slugify the name (lowercase, replace spaces with underscores, remove special chars)
+  local slug=$(echo "$name" | tr '[:upper:]' '[:lower:]' | tr ' ' '_' | sed 's/[^a-z0-9_-]//g')
+  
+  # Build output filename
+  local output_file="slides/${padded_num}_${slug}_demo.cast"
+  
+  echo "🎬 Recording to: $output_file"
+  asciinema rec -q "$output_file"
+  echo "✅ Recorded: $output_file"
+}
+
+ar() {
+  local num="$1"
+  [[ -z "$num" ]] && { echo "Usage: ar <number>"; return 1; }
+  
+  # Find markdown file matching the number pattern
+  local md_file=$(ls slides/${num}_*.md 2>/dev/null | head -1)
+  [[ -z "$md_file" ]] && { echo "No markdown file found matching: slides/${num}_*.md"; return 1; }
+  
+  # Extract base name without extension
+  local base_name="${md_file##*/}"  # Remove path
+  base_name="${base_name%.md}"       # Remove .md extension
+  
+  # Record with matching cast filename
+  asciinema rec -q "slides/${base_name}_demo.cast"
+  echo "✅ Recorded: slides/${base_name}_demo.cast"
+}
+ap() { asciinema play "$@"; }
+au() { asciinema upload "$@"; }
+ac() { asciinema cat "$@"; }
+as() { asciinema stream "$@"; }
+av() { asciinema convert "$@"; }
+aa() { asciinema auth "$@"; }
+ae() { ~/go/bin/asciinema-edit "$@"; }
 
 # =============================================================================
 # YouTube Download
