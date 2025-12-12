@@ -1,0 +1,128 @@
+-- ============================================================================
+-- POWER USER KEYBINDINGS
+-- ============================================================================
+-- Session management, themes, zen mode, etc.
+
+local wezterm = require 'wezterm'
+local act = wezterm.action
+local helpers = require 'helpers'
+local theme = require 'theme'
+
+local M = {}
+
+function M.get_keys(resurrect, default_color_scheme)
+  return {
+    -- SESSION PERSISTENCE
+    {
+      mods = "LEADER",
+      key = "s",
+      action = wezterm.action_callback(function(win, pane)
+        resurrect.save_state(resurrect.workspace_state.get_workspace_state())
+        win:toast_notification('WezTerm', 'Workspace saved', nil, 1000)
+      end),
+    },
+
+    -- QUICK SELECT
+    { mods = "LEADER", key = "Space", action = act.QuickSelect },
+
+    -- THEME SWITCHER
+    {
+      mods = "CMD|SHIFT",
+      key = "t",
+      action = wezterm.action_callback(function(window, pane)
+        local choices = {}
+        for _, t in ipairs(theme.high_contrast_themes) do
+          table.insert(choices, { id = t.id, label = t.name .. ' - ' .. t.desc })
+        end
+        window:perform_action(
+          act.InputSelector({
+            title = wezterm.format({
+              { Foreground = { Color = theme.colors.cyan } },
+              { Attribute = { Intensity = "Bold" } },
+              { Text = "  Select Theme" },
+            }),
+            description = wezterm.format({
+              { Foreground = { Color = theme.colors.fg_dim } },
+              { Text = "High contrast themes for better readability" },
+            }),
+            fuzzy_description = wezterm.format({
+              { Foreground = { Color = theme.colors.pink } },
+              { Attribute = { Intensity = "Bold" } },
+              { Text = " Search: " },
+            }),
+            choices = choices,
+            fuzzy = true,
+            action = wezterm.action_callback(function(inner_window, inner_pane, id, label)
+              if id then
+                wezterm.GLOBAL.user_selected_theme = id
+                local overrides = inner_window:get_config_overrides() or {}
+                overrides.color_scheme = id
+                inner_window:set_config_overrides(overrides)
+                inner_window:toast_notification('WezTerm', 'Theme: ' .. id, nil, 2000)
+              end
+            end),
+          }),
+          pane
+        )
+      end),
+    },
+
+    -- QUICK THEME CYCLE
+    {
+      mods = "LEADER",
+      key = "t",
+      action = wezterm.action_callback(function(window, pane)
+        local overrides = window:get_config_overrides() or {}
+        local current = overrides.color_scheme or default_color_scheme
+        local current_idx = 1
+        for i, t in ipairs(theme.high_contrast_themes) do
+          if t.id == current then
+            current_idx = i
+            break
+          end
+        end
+        local next_idx = (current_idx % #theme.high_contrast_themes) + 1
+        local next_theme = theme.high_contrast_themes[next_idx]
+        wezterm.GLOBAL.user_selected_theme = next_theme.id
+        overrides.color_scheme = next_theme.id
+        window:set_config_overrides(overrides)
+        window:toast_notification('WezTerm', 'Theme: ' .. next_theme.name, nil, 2000)
+      end),
+    },
+
+    -- ZEN MODE
+    {
+      mods = "LEADER",
+      key = "z",
+      action = wezterm.action_callback(function(window, pane)
+        local overrides = window:get_config_overrides() or {}
+        if overrides.enable_tab_bar == false then
+          overrides.enable_tab_bar = true
+          overrides.window_padding = { left = 10, right = 10, top = 10, bottom = 10 }
+          window:toast_notification('WezTerm', 'Zen Mode OFF', nil, 1000)
+        else
+          overrides.enable_tab_bar = false
+          overrides.window_padding = { left = 0, right = 0, top = 0, bottom = 0 }
+          window:toast_notification('WezTerm', 'Zen Mode ON', nil, 1000)
+        end
+        window:set_config_overrides(overrides)
+      end),
+    },
+
+    -- SMART SCROLLBACK CLEAR
+    {
+      mods = "CMD",
+      key = "k",
+      action = wezterm.action_callback(function(window, pane)
+        if helpers.is_vim(pane) then
+          window:perform_action(act.SendKey({ key = 'k', mods = 'CMD' }), pane)
+        else
+          window:perform_action(act.ClearScrollback 'ScrollbackOnly', pane)
+          window:perform_action(act.SendKey({ key = 'L', mods = 'CTRL' }), pane)
+        end
+      end),
+    },
+  }
+end
+
+return M

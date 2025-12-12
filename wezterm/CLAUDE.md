@@ -2,23 +2,102 @@
 
 A guide to WezTerm workspaces, pane management, and productivity tricks for users coming from iTerm2.
 
+## Modular Config Structure
+
+The config is split into logical modules for maintainability:
+
+```
+~/.config/wezterm/
+├── wezterm.lua          # Main entry point (imports modules)
+├── helpers.lua          # Utility functions (is_vim, is_micro, cwd helpers)
+├── theme.lua            # Color definitions and theme list
+├── layouts.lua          # Zellij-style layouts and smart pane management
+├── appearance.lua       # Visual config (fonts, colors, window settings)
+├── pickers.lua          # Fuzzy pickers (Quick Open, themes)
+├── events.lua           # Event handlers (tab titles, status bar)
+├── keys/
+│   ├── init.lua         # Key aggregator
+│   ├── micro.lua        # Micro editor Cmd→Ctrl mappings
+│   ├── navigation.lua   # Pane/tab/workspace navigation
+│   ├── layouts.lua      # Layout and splitting keybindings
+│   └── power.lua        # Themes, zen mode, session management
+└── wezterm.lua.backup   # Original monolithic config (for reference)
+```
+
+**Key modules:**
+- `helpers.lua` - `is_vim()`, `is_micro()`, `short_cwd()`, `scheme_for_cwd()`
+- `layouts.lua` - Layout modes (tiled/vertical/horizontal/main-*), smart_new_pane(), layout templates
+- `theme.lua` - Hardcore theme colors, high contrast theme list
+- `pickers.lua` - `show_quick_open_picker()` for Cmd+P/Cmd+N
+
 ## Quick Reference
 
 | Key | Action |
 |-----|--------|
-| `Cmd+D` | Split pane right |
+| `Cmd+D` | Smart split (uses current layout mode) |
 | `Cmd+Shift+D` | Split pane down |
 | `Cmd+W` | Close current pane (closes tab if last pane) |
-| `Cmd+T` | New tab |
-| `Cmd+P` | Fuzzy tab picker |
+| `Cmd+T` | New tab with zoxide picker |
+| `Cmd+N` | Quick Open picker (zoxide dirs, switch/create) |
+| `Cmd+P` | Quick Open picker (same as Cmd+N) |
 | `Cmd+Shift+S` | Fuzzy workspace picker |
 | `Cmd+O` | Smart workspace switcher (zoxide) |
 | `Cmd+E` | Pane selector (number overlay) |
 | `Cmd+Shift+E` | Swap panes |
 | `Cmd+K` | Command palette |
 | `Cmd+L` | Launcher |
-| `Ctrl+B` + `z` | Toggle pane zoom |
+| `Cmd+Shift+T` | Theme picker |
+| `Cmd+Shift+L` | Layout template picker |
+| `Cmd+Shift+F` | Toggle fullscreen |
+| `Cmd+1-9` | Switch to pane by number |
+| `Ctrl+B` + `z` | Toggle pane zoom / Zen mode |
 | `Ctrl+B` + `h/j/k/l` | Navigate panes (vim-style) |
+| `Ctrl+B` + `t` | Cycle themes |
+| `Ctrl+B` + `s` | Save workspace (resurrect) |
+| `Alt+n` | Smart new pane (Zellij-style) |
+| `Alt+[/]` | Cycle layout modes |
+| `Alt+Space` | Layout mode picker |
+| `Alt+h/j/k/l` | Navigate panes (Zellij-style) |
+| `Alt+Shift+h/j/k/l` | Resize panes |
+| `Alt+f` | Toggle pane zoom |
+| `Alt+x` | Close pane (no confirm) |
+
+## Zellij-Style Layout System
+
+The config includes a Zellij-inspired auto-layout system in `layouts.lua`:
+
+### Layout Modes
+- **tiled** - Grid layout, splits larger dimension (default)
+- **vertical** - All panes stacked top-to-bottom
+- **horizontal** - All panes side by side
+- **main-vertical** - Main pane left (60%), stack right (40%)
+- **main-horizontal** - Main pane top (60%), stack bottom (40%)
+
+### How It Works
+1. Each tab has a layout mode stored in `wezterm.GLOBAL.layout_modes`
+2. `Alt+n` or `Cmd+D` creates panes using the current mode's logic
+3. `Alt+[` and `Alt+]` cycle through modes
+4. Status bar shows current mode (when in non-default)
+
+### Static Layout Templates
+Access via `Cmd+Shift+L` or `Leader+Shift+<key>`:
+- `dev` - Editor + terminal stack (60/40)
+- `editor` - Full editor + bottom terminal
+- `three_col` - Three equal columns
+- `quad` - Four equal panes
+- `stacked` - Three horizontal rows
+- `side_by_side` - Two vertical columns
+- `focus` - Main pane + small sidebar
+- `monitor` - htop + logs (auto-starts htop)
+
+## Supported Terminal Editors
+
+WezTerm is configured to work seamlessly with these terminal editors:
+
+### micro
+- Cmd+key mappings translate to Ctrl+key when micro is running (in `keys/micro.lua`)
+- Cmd+S → save, Cmd+Q → quit, Cmd+Z → undo, Cmd+C/V/X → copy/paste/cut
+- The leader key is Ctrl+B to avoid conflicts with micro's Ctrl+Q quit
 
 ## Core Concepts
 
@@ -149,13 +228,11 @@ local plugin = wezterm.plugin.require("https://github.com/user/plugin-name.wezte
 plugin.apply_to_config(config)
 ```
 
-### Recommended Plugins
+### Installed Plugins
 
-1. **[smart_workspace_switcher](https://github.com/MLFlexer/smart_workspace_switcher.wezterm)** - Zoxide-powered workspace management
+1. **[smart_workspace_switcher](https://github.com/MLFlexer/smart_workspace_switcher.wezterm)** - Zoxide-powered workspace management (`Cmd+O`)
 
-2. **[tabline.wez](https://github.com/michaelbrusegard/tabline.wez)** - Enhanced tab bar
-
-3. **[wezterm-session-manager](https://github.com/danielcober/wezterm-session-manager)** - Save/restore sessions
+2. **[resurrect](https://github.com/MLFlexer/resurrect.wezterm)** - Session persistence (`Leader+s` to save)
 
 ## Tips & Tricks
 
@@ -180,21 +257,13 @@ With the smart workspace switcher + zoxide, you can:
 
 `Cmd+K` opens the command palette - search for any WezTerm action.
 
-### 5. Multiple Configs
+### 5. Hot Reloading
 
-WezTerm supports config hot-reloading. Edit `~/.config/wezterm/wezterm.lua` and changes apply immediately.
+WezTerm supports config hot-reloading. Edit any `.lua` file in `~/.config/wezterm/` and changes apply immediately.
 
-### 6. Custom Tab Titles
+### 6. Zen Mode
 
-Set tab title based on current directory or process:
-
-```lua
-wezterm.on('format-tab-title', function(tab)
-  local pane = tab.active_pane
-  local title = pane.current_working_dir and pane.current_working_dir.file_path or pane.title
-  return { { Text = ' ' .. title .. ' ' } }
-end)
-```
+`Leader+z` toggles Zen mode - hides tab bar and removes padding for distraction-free work.
 
 ## Troubleshooting
 
@@ -268,9 +337,58 @@ If you have custom ZLE bindings in zsh, check for `bindkey " "` that might be mo
 
 WezTerm downloads plugins on first use. Check your network connection and the plugin URL.
 
-## Full Config Example
+## Theme System
 
-See: `~/.config/wezterm/wezterm.lua`
+### Available Themes (High Contrast)
+Defined in `theme.lua`, accessible via `Cmd+Shift+T`:
+- Hardcore (default) - Maximum contrast
+- Solarized Dark Higher Contrast
+- Dracula
+- Catppuccin Mocha
+- GruvboxDark
+- Tokyo Night
+- Selenized Dark (Gogh)
+- Snazzy
+
+### Dynamic Theming
+- `scheme_for_cwd()` in `helpers.lua` can map directories to color schemes
+- User-selected themes persist in `wezterm.GLOBAL.user_selected_theme`
+- The `update-status` event respects user selection over auto-theming
+
+## Quick Open Picker (Cmd+P / Cmd+N)
+
+The custom picker in `pickers.lua`:
+- Shows zoxide frecent directories
+- `●` green = tab already open (switches to it)
+- `○` yellow = no tab (opens new)
+- Type a non-matching path to create new directory
+- Sorts open tabs by most recently focused
+
+## Common Development Tasks
+
+### Adding a New Keybinding
+1. Identify the category: micro, navigation, layouts, or power
+2. Edit the appropriate file in `keys/`
+3. Add to the `get_keys()` return table
+4. Test with `wezterm show-keys | grep YOUR_KEY`
+
+### Adding a New Layout Template
+1. Edit `layouts.lua`
+2. Add function to `M.templates` table
+3. Add metadata to `M.layout_list`
+4. Access via `Cmd+Shift+L` picker or add hotkey in `keys/layouts.lua`
+
+### Debugging
+```bash
+# Validate config loads
+wezterm show-keys 2>&1 | head -5
+
+# Check for Lua errors
+WEZTERM_LOG=config=debug wezterm show-keys 2>&1 | grep -i error
+
+# Open debug overlay in WezTerm
+Ctrl+Shift+L
+```
 
 ## Resources
 

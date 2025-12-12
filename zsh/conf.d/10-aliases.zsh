@@ -62,7 +62,10 @@ _handle_md() {
 
 #### Editor shortcuts (override EDITOR_CMD in local.zsh)
 : "${EDITOR_CMD:=cursor}"
+export EDITOR="cursor"
+export VISUAL="cursor"
 alias zd="zed"
+alias m="micro"
 alias s='source $ZDOTDIR/.zshrc'
 
 # Pipe to markdown file and open in VS Code
@@ -74,7 +77,7 @@ codemd() {
   mkdir -p "$tmpdir"
   local file="$tmpdir/${name}_${timestamp}.md"
   touch "$file"
-  code-insiders "$file"
+  cursor "$file"
 }
 
 v(){
@@ -114,10 +117,12 @@ done
 unset _suffix _model
 
 # Session management (model-agnostic)
-cocon() { copilot --allow-all-tools --continue; }
-icocon() { copilot --allow-all-tools --continue; }
+cocon() { copilot --allow-all-tools --continue "$@"; }
+icocon() { copilot --allow-all-tools --continue --interactive "$@"; }
 cores() { copilot --allow-all-tools --resume "$@"; }
-icores() { copilot --allow-all-tools --resume "$@"; }
+icores() { copilot --allow-all-tools --resume --interactive "$@"; }
+
+cotest() { copilot --allow-all-tools -p "Write tests for: $@" --agent testing-specialist; }
 
 #### Package management
 alias pup="pnpm dlx npm-check-updates -i -p pnpm"

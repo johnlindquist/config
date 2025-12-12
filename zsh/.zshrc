@@ -105,13 +105,21 @@ _handle_md() {
   local input="$1"
   shift
 
-  # Resolve input: URLs pass through, files check current dir then PATH
+  # Resolve input: URLs pass through, files check multiple locations
+  # Priority: 1) as-is, 2) ./.mdflow/, 3) ~/.mdflow/, 4) PATH
   local resolved=""
   if [[ "$input" =~ ^https?:// ]]; then
     # URL - pass through as-is
     resolved="$input"
   elif [[ -f "$input" ]]; then
+    # Found as-is (absolute or relative path)
     resolved="$input"
+  elif [[ -f ".mdflow/$input" ]]; then
+    # Found in project .mdflow/ directory
+    resolved=".mdflow/$input"
+  elif [[ -f "$HOME/.mdflow/$input" ]]; then
+    # Found in user ~/.mdflow/ directory
+    resolved="$HOME/.mdflow/$input"
   else
     # Search PATH for the .md file
     local dir
@@ -124,7 +132,7 @@ _handle_md() {
   fi
 
   if [[ -z "$resolved" ]]; then
-    echo "File not found: $input (checked current dir and PATH)"
+    echo "File not found: $input (checked cwd, .mdflow/, ~/.mdflow/, and PATH)"
     return 1
   fi
 

@@ -1460,7 +1460,7 @@
                                 [:-p [:launch "Pieces"]] ; Launch+P (E Colemak) -> Launch Pieces
                                 [:-g [:launch "Google Chrome"]] ; Launch+G (T Colemak) -> Launch Chrome
                                 [:-t [:launch "WezTerm"]] ; Launch+T (F Colemak) -> Launch iTerm
-                                [:-c [:launch "Visual Studio Code - Insiders"]] ; Launch+C -> Launch Cursor
+                                [:-c [:launch "Cursor"]] ; Launch+C -> Launch Cursor
                                 [:-k "launchctl kickstart -k org.pqrs.karabiner.karabiner_console_user_server"] ; Launch+K (E Colemak) -> Restart Karabiner
                                 [:-y [:launch "YouTube Music"]] ; Launch+Y (O Colemak) -> Launch YouTube Music
                                 [:-r [:wezterm "cd ~/research && x --append-system-prompt='Research the users query then write the result to a markdown file ./<shortened-slugified-query>.md'"]] ; Launch+R -> WezTerm research mode
