@@ -68,5 +68,5 @@ zsh/.zcompdump*
 container-use/
 gcloud/
 cursor/
-karabiner/automatic_backups
+karabiner/automatic_backups/
 *.mdb
