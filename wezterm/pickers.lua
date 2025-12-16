@@ -327,21 +327,32 @@ function M.show_copy_path_picker(window, pane, start_path)
     local home = os.getenv('HOME')
     local display_path = dir_path:gsub('^' .. home, '~')
 
-    -- Add "copy this directory" option at top
+    -- Add navigation options at top
+    local parent_path = dir_path:match('(.+)/[^/]+$') or '/'
+    if dir_path ~= '/' then
+      table.insert(choices, {
+        id = 'DIR:' .. parent_path,
+        label = wezterm.format({
+          { Foreground = { Color = theme.colors.yellow } },
+          { Attribute = { Intensity = 'Bold' } },
+          { Text = '󰁞  .. (go up)' },
+        })
+      })
+    end
+
     table.insert(choices, {
       id = 'COPY:' .. dir_path,
       label = wezterm.format({
         { Foreground = { Color = theme.colors.green } },
-        { Attribute = { Intensity = 'Bold' } },
-        { Text = '  [Copy this path: ' .. display_path .. ']' },
+        { Text = '  [Copy: ' .. display_path .. ']' },
       })
     })
 
     for _, entry in ipairs(entries) do
+      -- Skip . and .. since we handle parent above
+      if entry == '.' or entry == '..' then goto continue end
+
       local full_path = dir_path .. '/' .. entry
-      if entry == '..' then
-        full_path = dir_path:match('(.+)/[^/]+$') or '/'
-      end
 
       -- Check if directory
       local is_dir = false
@@ -350,11 +361,6 @@ function M.show_copy_path_picker(window, pane, start_path)
 
       local icon = is_dir and ' ' or ' '
       local color = is_dir and theme.colors.cyan or theme.colors.fg
-
-      if entry == '..' then
-        icon = '󰁞 '
-        color = theme.colors.yellow
-      end
 
       local label = wezterm.format({
         { Foreground = { Color = color } },
@@ -365,6 +371,8 @@ function M.show_copy_path_picker(window, pane, start_path)
         id = (is_dir and 'DIR:' or 'FILE:') .. full_path,
         label = label
       })
+
+      ::continue::
     end
 
     window:perform_action(
@@ -378,7 +386,7 @@ function M.show_copy_path_picker(window, pane, start_path)
           { Foreground = { Color = theme.colors.pink } },
           { Text = '󰈞 Filter: ' },
           { Foreground = { Color = theme.colors.fg_dim } },
-          { Text = '(Enter on file to copy path)' },
+          { Text = '(Enter=navigate/copy)' },
         }),
         choices = choices,
         fuzzy = true,
