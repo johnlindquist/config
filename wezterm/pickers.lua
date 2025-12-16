@@ -10,6 +10,105 @@ local layouts = require 'layouts'
 
 local M = {}
 
+-- Keyboard shortcuts data
+local shortcuts = {
+  -- Navigation
+  { key = "⌘P/N", desc = "Quick Open", cat = "nav" },
+  { key = "⌘O", desc = "Workspace switcher (zoxide)", cat = "nav" },
+  { key = "⌘T", desc = "New tab with directory picker", cat = "nav" },
+  { key = "⌘W", desc = "Close current pane", cat = "nav" },
+  { key = "⌘1-9", desc = "Jump to pane by number", cat = "nav" },
+  { key = "⌘F", desc = "Search in scrollback", cat = "nav" },
+  -- Panes
+  { key = "⌘D", desc = "Smart split (layout-aware)", cat = "pane" },
+  { key = "⌘⇧D", desc = "Split pane down", cat = "pane" },
+  { key = "⌘E", desc = "Pane selector (number overlay)", cat = "pane" },
+  { key = "⌘⇧E", desc = "Swap panes", cat = "pane" },
+  { key = "⌥hjkl", desc = "Navigate panes (vim-style)", cat = "pane" },
+  { key = "⌥⇧hjkl", desc = "Resize panes", cat = "pane" },
+  { key = "⌥f", desc = "Toggle pane zoom", cat = "pane" },
+  { key = "⌥n", desc = "New pane (auto-layout)", cat = "pane" },
+  { key = "⌥x", desc = "Close pane (no confirm)", cat = "pane" },
+  -- Layouts
+  { key = "⌘⇧L", desc = "Layout template picker", cat = "layout" },
+  { key = "⌥Space", desc = "Layout mode picker", cat = "layout" },
+  { key = "⌥[]", desc = "Cycle layout modes", cat = "layout" },
+  { key = "⌥r", desc = "Rotate panes", cat = "layout" },
+  { key = "⌥=", desc = "Reset zoom", cat = "layout" },
+  -- Power
+  { key = "⌘/", desc = "Show this shortcuts help", cat = "power" },
+  { key = "⌘⇧T", desc = "Theme picker", cat = "power" },
+  { key = "⌘K", desc = "Command palette", cat = "power" },
+  { key = "⌘⇧F", desc = "Toggle fullscreen", cat = "power" },
+  { key = "⌘⇧N", desc = "New window", cat = "power" },
+  -- Leader (Ctrl+B)
+  { key = "^B z", desc = "Zen mode (hide tabs)", cat = "leader" },
+  { key = "^B s", desc = "Save session (resurrect)", cat = "leader" },
+  { key = "^B t", desc = "Cycle themes", cat = "leader" },
+  { key = "^B r", desc = "Enter resize mode", cat = "leader" },
+  { key = "^B [", desc = "Enter copy mode (vim)", cat = "leader" },
+  { key = "^B -", desc = "Split vertical", cat = "leader" },
+  { key = "^B |", desc = "Split horizontal", cat = "leader" },
+  { key = "^B c", desc = "New tab", cat = "leader" },
+  { key = "^B n/p", desc = "Next/prev tab", cat = "leader" },
+}
+
+
+-- Show keyboard shortcuts help picker (standalone)
+function M.show_shortcuts_picker(window, pane)
+  local c = theme.colors
+  local choices = {}
+
+  local cat_colors = {
+    nav = c.cyan,
+    pane = c.green,
+    layout = c.orange,
+    power = c.pink,
+    leader = c.purple,
+  }
+  local cat_names = {
+    nav = "NAV",
+    pane = "PANE",
+    layout = "LAYOUT",
+    power = "POWER",
+    leader = "LEADER",
+  }
+
+  for _, s in ipairs(shortcuts) do
+    local label = wezterm.format({
+      { Foreground = { Color = c.yellow } },
+      { Attribute = { Intensity = "Bold" } },
+      { Text = string.format("%-10s", s.key) },
+      { Attribute = { Intensity = "Normal" } },
+      { Foreground = { Color = c.fg } },
+      { Text = " " .. s.desc .. "  " },
+      { Foreground = { Color = cat_colors[s.cat] or c.fg_dim } },
+      { Text = "[" .. (cat_names[s.cat] or s.cat) .. "]" },
+    })
+    table.insert(choices, { id = "shortcut:" .. s.key, label = label })
+  end
+
+  window:perform_action(
+    act.InputSelector({
+      title = wezterm.format({
+        { Foreground = { Color = c.cyan } },
+        { Attribute = { Intensity = "Bold" } },
+        { Text = "  Keyboard Shortcuts" },
+      }),
+      choices = choices,
+      fuzzy = true,
+      fuzzy_description = wezterm.format({
+        { Foreground = { Color = c.pink } },
+        { Text = "󰈞 Filter: " },
+      }),
+      action = wezterm.action_callback(function(_, _, _, _)
+        -- Selecting a shortcut just dismisses the picker
+      end),
+    }),
+    pane
+  )
+end
+
 -- Show the zoxide-powered Quick Open picker
 function M.show_quick_open_picker(window, pane)
   local home = os.getenv("HOME") or ""
@@ -18,8 +117,6 @@ function M.show_quick_open_picker(window, pane)
   local green = theme.colors.green
   local yellow = theme.colors.yellow
   local aqua = theme.colors.cyan
-  local gray = theme.colors.fg_dim
-  local orange = theme.colors.orange
 
   -- Build a map of directories that have open tabs
   local open_dirs = {}
@@ -120,24 +217,13 @@ function M.show_quick_open_picker(window, pane)
         { Attribute = { Intensity = "Bold" } },
         { Text = "󰍉  Quick Open" },
       }),
-      description = wezterm.format({
-        { Foreground = { Color = green } },
-        { Text = "●" },
-        { Foreground = { Color = gray } },
-        { Text = " switch  " },
-        { Foreground = { Color = yellow } },
-        { Text = "○" },
-        { Foreground = { Color = gray } },
-        { Text = " open  " },
-        { Foreground = { Color = orange } },
-        { Text = "+" },
-        { Foreground = { Color = gray } },
-        { Text = " create new" },
-      }),
       fuzzy_description = wezterm.format({
         { Foreground = { Color = theme.colors.pink } },
         { Attribute = { Intensity = "Bold" } },
         { Text = "󰈞 Search: " },
+        { Attribute = { Intensity = "Normal" } },
+        { Foreground = { Color = theme.colors.fg_dim } },
+        { Text = "(⌘/ for shortcuts)" },
       }),
       choices = choices,
       fuzzy = true,
@@ -171,10 +257,8 @@ function M.show_quick_open_picker(window, pane)
           local mkdir_success, _, mkdir_err = wezterm.run_child_process({ 'mkdir', '-p', target_path })
           if not mkdir_success then
             wezterm.log_error("Failed to create directory: " .. tostring(mkdir_err))
-            inner_window:toast_notification('WezTerm', 'Failed to create: ' .. target_path, nil, 3000)
             return
           end
-          inner_window:toast_notification('WezTerm', 'Created: ' .. target_path:gsub(home, "~"), nil, 2000)
         end
 
         inner_window:mux_window():spawn_tab({ cwd = target_path })

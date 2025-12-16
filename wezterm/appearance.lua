@@ -38,9 +38,6 @@ function M.apply(config)
     brightness = 0.3,
   }
 
-  -- FOCUS FOLLOWS MOUSE (useful for drag-and-drop)
-  config.pane_focus_follows_mouse = true
-
   -- PANE SPLIT LINE AND TAB BAR STYLING
   config.colors = {
     split = theme.colors.pink,

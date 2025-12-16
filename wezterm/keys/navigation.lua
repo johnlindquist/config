@@ -54,10 +54,6 @@ function M.get_keys(workspace_switcher)
         pickers.show_quick_open_picker(window, pane)
       end),
     },
-    { mods = "CMD|SHIFT", key = "n", action = act.SpawnWindow },
-    { mods = "CMD|SHIFT", key = "f", action = act.ToggleFullScreen },
-
-    -- SMART TAB/DIRECTORY PICKER
     {
       mods = "CMD",
       key = "p",
@@ -65,6 +61,8 @@ function M.get_keys(workspace_switcher)
         pickers.show_quick_open_picker(window, pane)
       end),
     },
+    { mods = "CMD|SHIFT", key = "n", action = act.SpawnWindow },
+    { mods = "CMD|SHIFT", key = "f", action = act.ToggleFullScreen },
 
     -- WORKSPACE AND PANE NAVIGATION
     { mods = "CMD|SHIFT", key = "s", action = act.ShowLauncherArgs { flags = "FUZZY|WORKSPACES" } },

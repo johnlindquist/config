@@ -43,7 +43,6 @@ function M.get_keys()
         for _, m in ipairs(layouts.LAYOUT_MODES) do
           if m.id == new_mode then mode_name = m.name .. ' - ' .. m.desc break end
         end
-        window:toast_notification('WezTerm', 'Layout: ' .. mode_name, nil, 2000)
       end),
     },
     {
@@ -58,7 +57,6 @@ function M.get_keys()
         for _, m in ipairs(layouts.LAYOUT_MODES) do
           if m.id == new_mode then mode_name = m.name .. ' - ' .. m.desc break end
         end
-        window:toast_notification('WezTerm', 'Layout: ' .. mode_name, nil, 2000)
       end),
     },
     {
@@ -77,7 +75,6 @@ function M.get_keys()
           if id then
             local tab = window:active_tab()
             layouts.set_layout_mode(tab, id)
-            window:toast_notification('WezTerm', 'Layout: ' .. label, nil, 2000)
           end
         end),
       }),

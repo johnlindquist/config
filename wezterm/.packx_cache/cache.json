@@ -2,32 +2,32 @@
   "version": 2,
   "entries": {
     "appearance.lua": {
-      "mtime": 1765485219681,
+      "mtime": 1765658772467,
       "size": 2262,
       "contentHash": "ade9622f7fc42f88ce5452600566d498e4be3faecb10ad3025c2ae436a9bb3ab",
       "isBinary": false,
       "tokens": 603
     },
     "keys/layouts.lua": {
-      "mtime": 1765485373295,
-      "size": 5747,
-      "contentHash": "31d81d9692813a33b47a714bb6faddeb080d1ccd40d5b9f50709e717acfd4cf4",
+      "mtime": 1765559008263,
+      "size": 5504,
+      "contentHash": "4ae4648e40cb7b44a4babf501e7d47e918112b192856da6c3d6c28d56bde5cce",
       "isBinary": false,
-      "tokens": 1455
+      "tokens": 1384
     },
     "keys/navigation.lua": {
-      "mtime": 1765485350290,
-      "size": 5369,
-      "contentHash": "5c0740295ca8fe3f24f3604da8cc907ae3997d7b2b4c16804a4208b0354c86ad",
+      "mtime": 1765658808995,
+      "size": 5334,
+      "contentHash": "eb5b87cfc02832871233a053d5242397adcfee469058684366962d9e711a150c",
       "isBinary": false,
-      "tokens": 1527
+      "tokens": 1517
     },
     "keys/power.lua": {
-      "mtime": 1765485392609,
-      "size": 4472,
-      "contentHash": "d19bbcbd30fc15d99f656b0e807c2bcf9235a3886d13a3c49209256ffce7c5c3",
+      "mtime": 1765603555417,
+      "size": 4322,
+      "contentHash": "e541149a1f443c7a301ceaa2ede9ca03b44e080167c083dd5c64df7fbc1e3b26",
       "isBinary": false,
-      "tokens": 1026
+      "tokens": 976
     },
     "helpers.lua": {
       "mtime": 1765485151491,
@@ -44,11 +44,11 @@
       "tokens": 463
     },
     "keys/micro.lua": {
-      "mtime": 1765485326171,
-      "size": 3498,
-      "contentHash": "85e89ea0150207fd4c4b1291ed208a7b2432945fa9ec4bdca75cd1a5c8d6b3ea",
+      "mtime": 1765551441879,
+      "size": 3949,
+      "contentHash": "b35c9e8239a2915a65370d4ada421b75dac4abba8168fa2e2b3a018ef41a9fc8",
       "isBinary": false,
-      "tokens": 870
+      "tokens": 978
     },
     "layouts.lua": {
       "mtime": 1765485204629,
@@ -58,18 +58,18 @@
       "tokens": 2549
     },
     "pickers.lua": {
-      "mtime": 1765485244026,
-      "size": 5163,
-      "contentHash": "df8efe7ab5f8110e2fc757feaedb1c0ecb011285c18a1103d0fbd69b8894ee6a",
+      "mtime": 1765658818403,
+      "size": 9212,
+      "contentHash": "7a7e29648260cedaf64de18710ba5ea8049eb325d1bbe1aaa50db7b2b9255909",
       "isBinary": false,
-      "tokens": 1264
+      "tokens": 2596
     },
     "events.lua": {
-      "mtime": 1765485423772,
-      "size": 4170,
-      "contentHash": "cdc06033b407259706930e7cca9db50310e4fe07852e10a5bb28ae1d54d0b028",
+      "mtime": 1765602907559,
+      "size": 7357,
+      "contentHash": "38270a7ad244b1da42fffecc080b0acc4c78e619f21411c7a2631b48c267135e",
       "isBinary": false,
-      "tokens": 1018
+      "tokens": 1836
     },
     "theme.lua": {
       "mtime": 1765485164796,

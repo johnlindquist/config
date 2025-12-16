@@ -25,8 +25,9 @@ function M.setup()
       dir_name = cwd.file_path:match("([^/]+)$") or "~"
     end
 
-    -- Check for Claude alert on this tab
-    local alert = wezterm.GLOBAL.claude_alerts[tab.tab_id]
+    -- Check for Claude alert on this tab (use string key for GLOBAL table)
+    local tab_id_str = tostring(tab.tab_id)
+    local alert = wezterm.GLOBAL.claude_alerts[tab_id_str]
     local indicator = ""
     local alert_bg = nil
 
@@ -44,7 +45,7 @@ function M.setup()
         end
       else
         -- Alert expired, clear it
-        wezterm.GLOBAL.claude_alerts[tab.tab_id] = nil
+        wezterm.GLOBAL.claude_alerts[tab_id_str] = nil
       end
     end
 
@@ -67,7 +68,7 @@ function M.setup()
 
     if tab.is_active then
       -- Clear alert when tab becomes active
-      wezterm.GLOBAL.claude_alerts[tab.tab_id] = nil
+      wezterm.GLOBAL.claude_alerts[tab_id_str] = nil
       return {
         { Background = { Color = theme.colors.bg_selection } },
         { Foreground = { Color = theme.colors.fg_bright } },
@@ -166,25 +167,56 @@ function M.setup()
     if name == 'claude_alert' then
       local tab = pane:tab()
       if tab then
-        wezterm.GLOBAL.claude_alerts[tab:tab_id()] = {
+        local tab_id = tostring(tab:tab_id())
+        wezterm.GLOBAL.claude_alerts[tab_id] = {
           time = os.time(),
           type = value,  -- 'stop' or 'notification'
         }
-        wezterm.log_info('Claude alert received: ' .. value .. ' for tab ' .. tab:tab_id())
+        wezterm.log_info('Claude alert received: ' .. value .. ' for tab ' .. tab_id)
       end
+    end
+
+    -- CLAUDE PANE STATE HANDLER - Changes background when Claude is waiting
+    if name == 'claude_pane_state' then
+      wezterm.log_info('Claude pane state received: ' .. tostring(value))
+      local overrides = window:get_config_overrides() or {}
+
+      if value == 'waiting' then
+        -- Apply a tinted color scheme or custom colors for waiting state
+        overrides.colors = overrides.colors or {}
+        overrides.colors.background = '#1a0808'  -- Dark red tint
+        wezterm.log_info('Setting waiting background: #1a0808')
+      else
+        -- Reset to default (remove custom background)
+        if overrides.colors then
+          overrides.colors.background = nil
+          if next(overrides.colors) == nil then
+            overrides.colors = nil
+          end
+        end
+        wezterm.log_info('Resetting to default background')
+      end
+
+      window:set_config_overrides(overrides)
     end
   end)
 
   -- BELL HANDLER - Also triggers tab alert
   wezterm.on('bell', function(window, pane)
     local tab = pane:tab()
-    if tab and not tab:is_active() then
-      -- Only set alert if not already set (don't override claude_alert with bell)
-      if not wezterm.GLOBAL.claude_alerts[tab:tab_id()] then
-        wezterm.GLOBAL.claude_alerts[tab:tab_id()] = {
-          time = os.time(),
-          type = 'bell',
-        }
+    if tab then
+      local tab_id = tostring(tab:tab_id())
+      local active_tab = window:active_tab()
+      local is_active = active_tab and tostring(active_tab:tab_id()) == tab_id
+
+      if not is_active then
+        -- Only set alert if not already set (don't override claude_alert with bell)
+        if not wezterm.GLOBAL.claude_alerts[tab_id] then
+          wezterm.GLOBAL.claude_alerts[tab_id] = {
+            time = os.time(),
+            type = 'bell',
+          }
+        end
       end
     end
   end)

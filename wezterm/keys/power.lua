@@ -7,18 +7,27 @@ local wezterm = require 'wezterm'
 local act = wezterm.action
 local helpers = require 'helpers'
 local theme = require 'theme'
+local pickers = require 'pickers'
 
 local M = {}
 
 function M.get_keys(resurrect, default_color_scheme)
   return {
+    -- KEYBOARD SHORTCUTS HELP
+    {
+      mods = "CMD",
+      key = "/",
+      action = wezterm.action_callback(function(window, pane)
+        pickers.show_shortcuts_picker(window, pane)
+      end),
+    },
+
     -- SESSION PERSISTENCE
     {
       mods = "LEADER",
       key = "s",
       action = wezterm.action_callback(function(win, pane)
         resurrect.save_state(resurrect.workspace_state.get_workspace_state())
-        win:toast_notification('WezTerm', 'Workspace saved', nil, 1000)
       end),
     },
 
@@ -58,7 +67,6 @@ function M.get_keys(resurrect, default_color_scheme)
                 local overrides = inner_window:get_config_overrides() or {}
                 overrides.color_scheme = id
                 inner_window:set_config_overrides(overrides)
-                inner_window:toast_notification('WezTerm', 'Theme: ' .. id, nil, 2000)
               end
             end),
           }),
@@ -86,7 +94,6 @@ function M.get_keys(resurrect, default_color_scheme)
         wezterm.GLOBAL.user_selected_theme = next_theme.id
         overrides.color_scheme = next_theme.id
         window:set_config_overrides(overrides)
-        window:toast_notification('WezTerm', 'Theme: ' .. next_theme.name, nil, 2000)
       end),
     },
 
@@ -99,11 +106,9 @@ function M.get_keys(resurrect, default_color_scheme)
         if overrides.enable_tab_bar == false then
           overrides.enable_tab_bar = true
           overrides.window_padding = { left = 10, right = 10, top = 10, bottom = 10 }
-          window:toast_notification('WezTerm', 'Zen Mode OFF', nil, 1000)
         else
           overrides.enable_tab_bar = false
           overrides.window_padding = { left = 0, right = 0, top = 0, bottom = 0 }
-          window:toast_notification('WezTerm', 'Zen Mode ON', nil, 1000)
         end
         window:set_config_overrides(overrides)
       end),
