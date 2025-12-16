@@ -44,6 +44,7 @@ local shortcuts = {
   { key = "⌘⇧K", desc = "Clear scrollback", cat = "power" },
   { key = "⌘⇧F", desc = "Toggle fullscreen", cat = "power" },
   { key = "⌘⇧N", desc = "New window", cat = "power" },
+  { key = "trigger", desc = "App launcher (via trigger)", cat = "power" },
   -- Leader (Ctrl+B)
   { key = "^B z", desc = "Zen mode (hide tabs)", cat = "leader" },
   { key = "^B s", desc = "Save session (resurrect)", cat = "leader" },
@@ -283,6 +284,70 @@ function M.show_quick_open_picker(window, pane, action_mode)
           else
             inner_window:mux_window():spawn_tab({ cwd = target_path })
           end
+        end
+      end),
+    }),
+    pane
+  )
+end
+
+-- Show app launcher picker (lists all installed macOS apps)
+function M.show_app_launcher(window, pane)
+  -- Get list of apps from /Applications and ~/Applications
+  local apps = {}
+  local seen = {}
+
+  local function scan_dir(dir)
+    local success, stdout = wezterm.run_child_process({
+      'find', dir, '-maxdepth', '2', '-name', '*.app', '-type', 'd'
+    })
+    if success and stdout then
+      for app_path in stdout:gmatch('[^\n]+') do
+        local app_name = app_path:match('([^/]+)%.app$')
+        if app_name and not seen[app_name:lower()] then
+          seen[app_name:lower()] = true
+          table.insert(apps, { name = app_name, path = app_path })
+        end
+      end
+    end
+  end
+
+  scan_dir('/Applications')
+  scan_dir('/System/Applications')
+  scan_dir(os.getenv('HOME') .. '/Applications')
+
+  -- Sort alphabetically
+  table.sort(apps, function(a, b) return a.name:lower() < b.name:lower() end)
+
+  -- Build choices
+  local choices = {}
+  for _, app in ipairs(apps) do
+    local label = wezterm.format({
+      { Foreground = { Color = theme.colors.cyan } },
+      { Text = " " },
+      { Foreground = { Color = theme.colors.fg } },
+      { Text = app.name },
+    })
+    table.insert(choices, { id = app.path, label = label })
+  end
+
+  window:perform_action(
+    act.InputSelector({
+      title = wezterm.format({
+        { Foreground = { Color = theme.colors.green } },
+        { Attribute = { Intensity = "Bold" } },
+        { Text = "  App Launcher" },
+      }),
+      fuzzy_description = wezterm.format({
+        { Foreground = { Color = theme.colors.pink } },
+        { Attribute = { Intensity = "Bold" } },
+        { Text = "󰈞 Search: " },
+      }),
+      choices = choices,
+      fuzzy = true,
+      action = wezterm.action_callback(function(inner_window, inner_pane, id, label)
+        if id then
+          wezterm.background_child_process({ 'open', '-a', id })
         end
       end),
     }),

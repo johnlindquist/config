@@ -13,6 +13,7 @@
 #   themes            - Open the theme picker
 #   layouts           - Open the layout picker
 #   zen               - Toggle zen mode
+#   app_launcher      - Open the app launcher (all installed apps)
 
 ACTION="$1"
 TRIGGER_FILE="/tmp/wezterm.trigger"
