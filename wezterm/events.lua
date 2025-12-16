@@ -7,8 +7,135 @@ local wezterm = require 'wezterm'
 local helpers = require 'helpers'
 local theme = require 'theme'
 local layouts = require 'layouts'
+local pickers = require 'pickers'
+local act = wezterm.action
 
 local M = {}
+
+-- ============================================================================
+-- EXTERNAL TRIGGER SYSTEM (Approach A)
+-- ============================================================================
+-- Allows external scripts (Karabiner, yabai, etc.) to trigger WezTerm actions
+-- by writing to /tmp/wezterm.trigger
+
+local TRIGGER_FILE = "/tmp/wezterm.trigger"
+
+local function read_trigger()
+  local f = io.open(TRIGGER_FILE, "r")
+  if not f then return nil end
+  local content = f:read("*a")
+  f:close()
+  if not content then return nil end
+  -- Trim whitespace
+  content = content:gsub("^%s+", ""):gsub("%s+$", "")
+  if content == "" then return nil end
+  return content
+end
+
+local function consume_trigger()
+  local action = read_trigger()
+  if action then
+    os.remove(TRIGGER_FILE)
+  end
+  return action
+end
+
+-- Process external triggers (called from update-status when window is focused)
+local function process_trigger(window, pane)
+  if not window:is_focused() then return end
+
+  local trigger = consume_trigger()
+  if not trigger then return end
+
+  -- Debounce: prevent re-triggering within 1 second
+  wezterm.GLOBAL._last_trigger = wezterm.GLOBAL._last_trigger or { v = nil, t = 0 }
+  local now = os.time()
+  if wezterm.GLOBAL._last_trigger.v == trigger and (now - wezterm.GLOBAL._last_trigger.t) < 1 then
+    return
+  end
+  wezterm.GLOBAL._last_trigger = { v = trigger, t = now }
+
+  wezterm.log_info("Processing trigger: " .. trigger)
+
+  -- Parse trigger (format: "action" or "action:arg")
+  local action, arg = trigger:match("^([^:]+):?(.*)$")
+
+  if action == "quick_open" then
+    pickers.show_quick_open_picker(window, pane)
+
+  elseif action == "quick_open_cursor" then
+    pickers.show_quick_open_picker(window, pane, 'cursor')
+
+  elseif action == "workspaces" then
+    window:perform_action(act.ShowLauncherArgs { flags = "FUZZY|WORKSPACES" }, pane)
+
+  elseif action == "command_palette" then
+    window:perform_action(act.ActivateCommandPalette, pane)
+
+  elseif action == "launcher" then
+    window:perform_action(act.ShowLauncher, pane)
+
+  elseif action == "shortcuts" then
+    pickers.show_shortcuts_picker(window, pane)
+
+  elseif action == "themes" then
+    -- Trigger theme picker (same as CMD+SHIFT+T)
+    local choices = {}
+    for _, t in ipairs(theme.high_contrast_themes) do
+      table.insert(choices, { id = t.id, label = t.name .. ' - ' .. t.desc })
+    end
+    window:perform_action(
+      act.InputSelector({
+        title = "Select Theme",
+        choices = choices,
+        fuzzy = true,
+        action = wezterm.action_callback(function(inner_window, inner_pane, id, label)
+          if id then
+            wezterm.GLOBAL.user_selected_theme = id
+            local overrides = inner_window:get_config_overrides() or {}
+            overrides.color_scheme = id
+            inner_window:set_config_overrides(overrides)
+          end
+        end),
+      }),
+      pane
+    )
+
+  elseif action == "layouts" then
+    -- Trigger layout picker (same as CMD+SHIFT+L)
+    local choices = {}
+    for _, layout in ipairs(layouts.layout_list) do
+      table.insert(choices, { id = layout.id, label = layout.name .. ' - ' .. layout.desc })
+    end
+    window:perform_action(
+      act.InputSelector({
+        title = "Select Layout",
+        choices = choices,
+        action = wezterm.action_callback(function(inner_window, inner_pane, id, label)
+          if id then
+            layouts.apply_layout(inner_window, id)
+          end
+        end),
+      }),
+      pane
+    )
+
+  elseif action == "zen" then
+    -- Toggle zen mode
+    local overrides = window:get_config_overrides() or {}
+    if overrides.enable_tab_bar == false then
+      overrides.enable_tab_bar = true
+      overrides.window_padding = { left = 10, right = 10, top = 10, bottom = 10 }
+    else
+      overrides.enable_tab_bar = false
+      overrides.window_padding = { left = 0, right = 0, top = 0, bottom = 0 }
+    end
+    window:set_config_overrides(overrides)
+
+  else
+    wezterm.log_warn("Unknown trigger action: " .. action)
+  end
+end
 
 function M.setup()
   -- Initialize global state
@@ -92,6 +219,9 @@ function M.setup()
 
   -- STATUS BAR
   wezterm.on("update-status", function(window, pane)
+    -- Check for external triggers (from Karabiner, yabai, etc.)
+    process_trigger(window, pane)
+
     -- Track directory focus time
     local cwd = pane:get_current_working_dir()
     if cwd and cwd.file_path then
