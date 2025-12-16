@@ -7,16 +7,17 @@ local wezterm = require 'wezterm'
 local act = wezterm.action
 local theme = require 'theme'
 local layouts = require 'layouts'
+local helpers = require 'helpers'
 
 local M = {}
 
--- Keyboard shortcuts data
+-- Keyboard shortcuts data (updated to reflect actual bindings)
 local shortcuts = {
   -- Navigation
-  { key = "⌘P/N", desc = "Quick Open", cat = "nav" },
+  { key = "⌘P/N", desc = "Quick Open picker", cat = "nav" },
   { key = "⌘O", desc = "Workspace switcher (zoxide)", cat = "nav" },
-  { key = "⌘T", desc = "New tab with directory picker", cat = "nav" },
-  { key = "⌘W", desc = "Close current pane", cat = "nav" },
+  { key = "⌘T", desc = "New tab (pick dir first)", cat = "nav" },
+  { key = "⌘W", desc = "Smart close (context-aware)", cat = "nav" },
   { key = "⌘1-9", desc = "Jump to pane by number", cat = "nav" },
   { key = "⌘F", desc = "Search in scrollback", cat = "nav" },
   -- Panes
@@ -32,19 +33,22 @@ local shortcuts = {
   -- Layouts
   { key = "⌘⇧L", desc = "Layout template picker", cat = "layout" },
   { key = "⌥Space", desc = "Layout mode picker", cat = "layout" },
-  { key = "⌥[]", desc = "Cycle layout modes", cat = "layout" },
+  { key = "⌥[]", desc = "Cycle layout modes (toast)", cat = "layout" },
   { key = "⌥r", desc = "Rotate panes", cat = "layout" },
   { key = "⌥=", desc = "Reset zoom", cat = "layout" },
   -- Power
   { key = "⌘/", desc = "Show this shortcuts help", cat = "power" },
   { key = "⌘⇧T", desc = "Theme picker", cat = "power" },
   { key = "⌘K", desc = "Command palette", cat = "power" },
+  { key = "⌘⇧K", desc = "Clear scrollback", cat = "power" },
   { key = "⌘⇧F", desc = "Toggle fullscreen", cat = "power" },
   { key = "⌘⇧N", desc = "New window", cat = "power" },
   -- Leader (Ctrl+B)
   { key = "^B z", desc = "Zen mode (hide tabs)", cat = "leader" },
   { key = "^B s", desc = "Save session (resurrect)", cat = "leader" },
   { key = "^B t", desc = "Cycle themes", cat = "leader" },
+  { key = "^B ⇧T", desc = "Restore auto-theme", cat = "leader" },
+  { key = "^B ,", desc = "Rename tab", cat = "leader" },
   { key = "^B r", desc = "Enter resize mode", cat = "leader" },
   { key = "^B [", desc = "Enter copy mode (vim)", cat = "leader" },
   { key = "^B -", desc = "Split vertical", cat = "leader" },
@@ -131,7 +135,7 @@ function M.show_quick_open_picker(window, pane)
   end
 
   -- Get zoxide directories
-  local success, stdout, stderr = wezterm.run_child_process({ '/opt/homebrew/bin/zoxide', 'query', '-l' })
+  local success, stdout, stderr = wezterm.run_child_process({ helpers.zoxide_path, 'query', '-l' })
   if not success then
     wezterm.log_error("zoxide failed: " .. tostring(stderr))
     return

@@ -13,6 +13,11 @@ local M = {}
 -- ============================================================================
 local DEFAULT_LAYOUT_MODE = 'tiled'
 
+-- Tunable: ratio threshold for smart split direction in 'tiled' mode
+-- If (cols / rows) > this ratio, split right; otherwise split bottom
+-- Adjust this value to match your font/terminal dimensions
+M.SMART_SPLIT_RATIO = 2.0
+
 M.LAYOUT_MODES = {
   { id = 'tiled',           name = 'Tiled',           desc = 'Grid layout (Zellij default)' },
   { id = 'vertical',        name = 'Vertical',        desc = 'All panes stacked vertically' },
@@ -97,8 +102,8 @@ end
 
 local function get_smart_split_direction(pane, mode, pane_count)
   local dims = pane:get_dimensions()
-  local width = dims.cols
-  local height = dims.viewport_rows * 2.2
+  local cols = dims.cols
+  local rows = dims.viewport_rows
 
   if mode == 'vertical' then
     return 'Bottom'
@@ -109,7 +114,9 @@ local function get_smart_split_direction(pane, mode, pane_count)
   elseif mode == 'main-horizontal' then
     return pane_count == 1 and 'Bottom' or 'Right'
   else
-    return (width > height) and 'Right' or 'Bottom'
+    -- Tiled mode: use tunable ratio (cols/rows vs threshold)
+    local ratio = cols / rows
+    return (ratio > M.SMART_SPLIT_RATIO) and 'Right' or 'Bottom'
   end
 end
 

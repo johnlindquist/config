@@ -97,6 +97,18 @@ function M.get_keys(resurrect, default_color_scheme)
       end),
     },
 
+    -- RESTORE AUTO-THEME (clear user selection, return to CWD-based theming)
+    {
+      mods = "LEADER|SHIFT",
+      key = "t",
+      action = wezterm.action_callback(function(window, pane)
+        wezterm.GLOBAL.user_selected_theme = nil
+        local overrides = window:get_config_overrides() or {}
+        overrides.color_scheme = nil
+        window:set_config_overrides(overrides)
+      end),
+    },
+
     -- ZEN MODE
     {
       mods = "LEADER",
@@ -114,9 +126,9 @@ function M.get_keys(resurrect, default_color_scheme)
       end),
     },
 
-    -- SMART SCROLLBACK CLEAR
+    -- SMART SCROLLBACK CLEAR (CMD+SHIFT+K to avoid conflict with Command Palette)
     {
-      mods = "CMD",
+      mods = "CMD|SHIFT",
       key = "k",
       action = wezterm.action_callback(function(window, pane)
         if helpers.is_vim(pane) then

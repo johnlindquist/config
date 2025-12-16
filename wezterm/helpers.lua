@@ -7,6 +7,9 @@ local wezterm = require 'wezterm'
 
 local M = {}
 
+-- Centralized zoxide path (avoids hardcoding in multiple places)
+M.zoxide_path = os.getenv("ZOXIDE_BIN") or "/opt/homebrew/bin/zoxide"
+
 -- Detect if the current pane is running Neovim/Vim
 function M.is_vim(pane)
   local process_info = pane:get_foreground_process_info()

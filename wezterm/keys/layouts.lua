@@ -43,6 +43,7 @@ function M.get_keys()
         for _, m in ipairs(layouts.LAYOUT_MODES) do
           if m.id == new_mode then mode_name = m.name .. ' - ' .. m.desc break end
         end
+        window:toast_notification('Layout', mode_name, nil, 1500)
       end),
     },
     {
@@ -57,6 +58,7 @@ function M.get_keys()
         for _, m in ipairs(layouts.LAYOUT_MODES) do
           if m.id == new_mode then mode_name = m.name .. ' - ' .. m.desc break end
         end
+        window:toast_notification('Layout', mode_name, nil, 1500)
       end),
     },
     {
@@ -112,7 +114,7 @@ function M.get_keys()
         window:perform_action(act.CloseCurrentPane { confirm = false }, pane)
       end),
     },
-    { mods = "LEADER", key = "z", action = act.TogglePaneZoomState },
+    -- Note: LEADER+z is Zen mode (in power.lua), use ALT+f for pane zoom
 
     -- STATIC LAYOUT TEMPLATES
     {

@@ -98,16 +98,17 @@ function M.setup()
       layouts.record_dir_focus(cwd.file_path)
     end
 
-    -- Dynamic color scheme based on cwd
+    -- Dynamic color scheme based on cwd (MERGE into existing overrides, don't replace!)
     if not wezterm.GLOBAL.user_selected_theme then
       local scheme = helpers.scheme_for_cwd(pane)
-      local current_overrides = window:get_config_overrides() or {}
-      local current_scheme = current_overrides.color_scheme
+      local overrides = window:get_config_overrides() or {}
 
-      if scheme and scheme ~= current_scheme then
-        window:set_config_overrides({ color_scheme = scheme })
-      elseif not scheme and current_scheme then
-        window:set_config_overrides({})
+      if scheme and scheme ~= overrides.color_scheme then
+        overrides.color_scheme = scheme
+        window:set_config_overrides(overrides)
+      elseif not scheme and overrides.color_scheme then
+        overrides.color_scheme = nil
+        window:set_config_overrides(overrides)
       end
     end
 

@@ -10,39 +10,64 @@ local pickers = require 'pickers'
 local M = {}
 
 function M.get_keys(workspace_switcher)
-  return {
-    -- CLOSE PANE
-    { mods = "CMD", key = "w", action = act.CloseCurrentPane { confirm = false } },
+  local helpers = require 'helpers'
 
-    -- NEW TAB WITH ZOXIDE PICKER
+  return {
+    -- SMART CLOSE: confirm if editor running, close tab if last pane
+    {
+      mods = "CMD",
+      key = "w",
+      action = wezterm.action_callback(function(window, pane)
+        local tab = window:active_tab()
+        local pane_count = #tab:panes()
+
+        -- If running an editor, require confirmation
+        if helpers.is_editor(pane) then
+          window:perform_action(act.CloseCurrentPane { confirm = true }, pane)
+        elseif pane_count == 1 then
+          -- Last pane in tab: close the tab
+          window:perform_action(act.CloseCurrentTab { confirm = false }, pane)
+        else
+          -- Multiple panes: close just this pane
+          window:perform_action(act.CloseCurrentPane { confirm = false }, pane)
+        end
+      end),
+    },
+
+    -- NEW TAB WITH ZOXIDE PICKER (only spawns tab after directory is selected)
     {
       mods = "CMD",
       key = "t",
       action = wezterm.action_callback(function(window, pane)
-        local tab, new_pane, _ = window:mux_window():spawn_tab({})
-        wezterm.time.call_after(0.001, function()
-          local success, stdout = wezterm.run_child_process({ '/opt/homebrew/bin/zoxide', 'query', '-l' })
-          if not success then return end
-          local choices = {}
-          for line in stdout:gmatch('[^\n]+') do
-            local home = os.getenv("HOME") or ""
-            local display = line:gsub("^" .. home, "~")
-            table.insert(choices, { id = line, label = display })
-          end
-          window:perform_action(
-            act.InputSelector {
-              title = 'Select directory for new tab',
-              choices = choices,
-              fuzzy = true,
-              action = wezterm.action_callback(function(win, _, id, label)
-                if id then
-                  new_pane:send_text('cd ' .. wezterm.shell_quote_arg(id) .. ' && clear\n')
-                end
-              end),
-            },
-            new_pane
-          )
-        end)
+        local helpers = require 'helpers'
+        local success, stdout = wezterm.run_child_process({ helpers.zoxide_path, 'query', '-l' })
+        if not success then
+          -- Fallback: just spawn a plain tab
+          window:mux_window():spawn_tab({})
+          return
+        end
+
+        local choices = {}
+        local home = os.getenv("HOME") or ""
+        for line in stdout:gmatch('[^\n]+') do
+          local display = line:gsub("^" .. home, "~")
+          table.insert(choices, { id = line, label = display })
+        end
+
+        window:perform_action(
+          act.InputSelector {
+            title = 'New Tab: Select Directory',
+            choices = choices,
+            fuzzy = true,
+            action = wezterm.action_callback(function(win, _, id, label)
+              if id then
+                win:mux_window():spawn_tab({ cwd = id })
+              end
+              -- If user cancels (id is nil), no tab is spawned - this is the fix!
+            end),
+          },
+          pane
+        )
       end),
     },
 
@@ -85,6 +110,19 @@ function M.get_keys(workspace_switcher)
     { mods = "LEADER", key = "c", action = act.SpawnTab "CurrentPaneDomain" },
     { mods = "LEADER", key = "n", action = act.ActivateTabRelative(1) },
     { mods = "LEADER", key = "p", action = act.ActivateTabRelative(-1) },
+    -- RENAME TAB
+    {
+      mods = "LEADER",
+      key = ",",
+      action = act.PromptInputLine {
+        description = "Rename tab:",
+        action = wezterm.action_callback(function(window, pane, line)
+          if line and line ~= "" then
+            window:active_tab():set_title(line)
+          end
+        end),
+      },
+    },
     { mods = "LEADER", key = "1", action = act.ActivateTab(0) },
     { mods = "LEADER", key = "2", action = act.ActivateTab(1) },
     { mods = "LEADER", key = "3", action = act.ActivateTab(2) },
