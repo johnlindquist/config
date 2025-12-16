@@ -15,6 +15,7 @@ local M = {}
 local shortcuts = {
   -- Navigation
   { key = "⌘P/N", desc = "Quick Open picker", cat = "nav" },
+  { key = "⌘⇧P", desc = "Open in Cursor editor", cat = "nav" },
   { key = "⌘O", desc = "Workspace switcher (zoxide)", cat = "nav" },
   { key = "⌘T", desc = "New tab (pick dir first)", cat = "nav" },
   { key = "⌘W", desc = "Smart close (context-aware)", cat = "nav" },
@@ -114,7 +115,8 @@ function M.show_shortcuts_picker(window, pane)
 end
 
 -- Show the zoxide-powered Quick Open picker
-function M.show_quick_open_picker(window, pane)
+-- action_mode: 'tab' (default) opens in new tab, 'cursor' opens in Cursor editor
+function M.show_quick_open_picker(window, pane, action_mode)
   local home = os.getenv("HOME") or ""
   local tabs = window:mux_window():tabs()
 
@@ -214,58 +216,74 @@ function M.show_quick_open_picker(window, pane)
     table.insert(choices, 1, { id = dev_path, label = label })
   end
 
+  -- Determine title and hint based on mode
+  action_mode = action_mode or 'tab'
+  local is_cursor_mode = action_mode == 'cursor'
+
+  local title = wezterm.format({
+    { Foreground = { Color = is_cursor_mode and theme.colors.purple or theme.colors.cyan } },
+    { Attribute = { Intensity = "Bold" } },
+    { Text = is_cursor_mode and "  Open in Cursor" or "󰍉  Quick Open" },
+  })
+
+  local hint = is_cursor_mode and "(opens in Cursor)" or "(⌘⇧P for Cursor)"
+
   window:perform_action(
     act.InputSelector({
-      title = wezterm.format({
-        { Foreground = { Color = theme.colors.cyan } },
-        { Attribute = { Intensity = "Bold" } },
-        { Text = "󰍉  Quick Open" },
-      }),
+      title = title,
       fuzzy_description = wezterm.format({
         { Foreground = { Color = theme.colors.pink } },
         { Attribute = { Intensity = "Bold" } },
         { Text = "󰈞 Search: " },
         { Attribute = { Intensity = "Normal" } },
         { Foreground = { Color = theme.colors.fg_dim } },
-        { Text = "(⌘/ for shortcuts)" },
+        { Text = hint },
       }),
       choices = choices,
       fuzzy = true,
       action = wezterm.action_callback(function(inner_window, inner_pane, id, label)
         if id == nil and label == nil then return end
 
+        -- Resolve target path from id or user input
+        local target_path
         if id then
-          local existing = open_dirs[id:lower()]
+          target_path = id
+        else
+          local user_input = label
+          if not user_input or user_input == "" then return end
+
+          if user_input:match("^/") then
+            target_path = user_input
+          elseif user_input:match("^~") then
+            target_path = user_input:gsub("^~", home)
+          else
+            target_path = home .. "/dev/" .. user_input
+          end
+
+          -- Create directory if it doesn't exist
+          local check_success, _, _ = wezterm.run_child_process({ 'test', '-d', target_path })
+          if not check_success then
+            local mkdir_success, _, mkdir_err = wezterm.run_child_process({ 'mkdir', '-p', target_path })
+            if not mkdir_success then
+              wezterm.log_error("Failed to create directory: " .. tostring(mkdir_err))
+              return
+            end
+          end
+        end
+
+        -- Execute action based on mode
+        if is_cursor_mode then
+          -- Open in Cursor editor
+          wezterm.background_child_process({ '/usr/local/bin/cursor', target_path })
+        else
+          -- Default: open/switch tab
+          local existing = open_dirs[target_path:lower()]
           if existing then
             existing.tab:activate()
           else
-            inner_window:mux_window():spawn_tab({ cwd = id })
-          end
-          return
-        end
-
-        local user_input = label
-        if not user_input or user_input == "" then return end
-
-        local target_path
-        if user_input:match("^/") then
-          target_path = user_input
-        elseif user_input:match("^~") then
-          target_path = user_input:gsub("^~", home)
-        else
-          target_path = home .. "/dev/" .. user_input
-        end
-
-        local check_success, _, _ = wezterm.run_child_process({ 'test', '-d', target_path })
-        if not check_success then
-          local mkdir_success, _, mkdir_err = wezterm.run_child_process({ 'mkdir', '-p', target_path })
-          if not mkdir_success then
-            wezterm.log_error("Failed to create directory: " .. tostring(mkdir_err))
-            return
+            inner_window:mux_window():spawn_tab({ cwd = target_path })
           end
         end
-
-        inner_window:mux_window():spawn_tab({ cwd = target_path })
       end),
     }),
     pane

@@ -86,6 +86,14 @@ function M.get_keys(workspace_switcher)
         pickers.show_quick_open_picker(window, pane)
       end),
     },
+    -- OPEN IN CURSOR (same picker, but opens in Cursor editor)
+    {
+      mods = "CMD|SHIFT",
+      key = "p",
+      action = wezterm.action_callback(function(window, pane)
+        pickers.show_quick_open_picker(window, pane, 'cursor')
+      end),
+    },
     { mods = "CMD|SHIFT", key = "n", action = act.SpawnWindow },
     { mods = "CMD|SHIFT", key = "f", action = act.ToggleFullScreen },
 
