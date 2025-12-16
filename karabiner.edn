@@ -239,6 +239,7 @@
                        :focus "~/.kit/kar focus \"%s\""
                        :launch "/bin/bash /Users/johnlindquist/.config/scripts/launch_focus_app.sh \"%s\""
                        :wezterm "/Users/johnlindquist/.config/scripts/wezterm_run.sh \"%s\""
+                       :wez-trigger "/Users/johnlindquist/.config/scripts/wezterm_trigger.sh \"%s\""
                        :open-chrome "osascript -e 'tell application \"Google Chrome\"\nactivate\nopen location \"%s\"\nend tell'"
                        ;; Inside your :templates map in karabiner.edn
 
@@ -671,7 +672,8 @@
 
                        {:des   "WezTerm"
                         :rules [:wezterm ; Apply only when WezTerm is frontmost
-                                [:left_command :left_command nil {:alone :go_to_file}]]}
+                                [:left_command :left_command nil {:alone :go_to_file}]
+                                [:left_control :left_control nil {:alone :command_palette}]]}
 
                        {:des   "VS Code / Cursor"
                         :rules [:code ; Apply only when :code apps are frontmost
@@ -1250,7 +1252,7 @@
                                 [:-i [:paste "👀"]] ; Z+I (L Colemak) -> Eyes
                                 [:-j [:paste "😂"]] ; Z+J (N Colemak) -> Laughing Crying
                                 [:-l [:paste "❤️"]] ; Z+L (U Colemak) -> Love
-                                [:-m [:paste "🤯"]] ; Z+M -> Mind Blown
+                                [:-m {:key :m :modi :hyper}] ; Z+M -> Mind Blown
                                 [:-n :emoji_picker] ; Z+N (J Colemak) -> Emoji Picker
                                 [:-o [:paste "💩"]] ; Z+O (Semicolon Colemak) -> Poop
                                 [:-p [:paste "🎉"]] ; Z+P (R Colemak) -> Party Popper
@@ -1459,7 +1461,7 @@
                                 [:-f [:launch "Finder"]] ; Launch+F (E Colemak) -> Launch Finder
                                 [:-p [:launch "Pieces"]] ; Launch+P (E Colemak) -> Launch Pieces
                                 [:-g [:launch "Google Chrome"]] ; Launch+G (T Colemak) -> Launch Chrome
-                                [:-t [:launch "WezTerm"]] ; Launch+T (F Colemak) -> Launch iTerm
+                                [:-t [:wez-trigger "quick_open"]] ; Launch+T -> Focus WezTerm + Quick Open picker
                                 [:-c [:launch "Cursor"]] ; Launch+C -> Launch Cursor
                                 [:-k "launchctl kickstart -k org.pqrs.karabiner.karabiner_console_user_server"] ; Launch+K (E Colemak) -> Restart Karabiner
                                 [:-y [:launch "YouTube Music"]] ; Launch+Y (O Colemak) -> Launch YouTube Music
