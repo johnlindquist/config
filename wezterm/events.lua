@@ -40,10 +40,8 @@ local function consume_trigger()
   return action
 end
 
--- Process external triggers (called from update-status when window is focused)
+-- Process external triggers (called on focus change for instant response)
 local function process_trigger(window, pane)
-  if not window:is_focused() then return end
-
   local trigger = consume_trigger()
   if not trigger then return end
 
@@ -142,6 +140,13 @@ function M.setup()
   wezterm.GLOBAL.user_selected_theme = wezterm.GLOBAL.user_selected_theme or nil
   wezterm.GLOBAL.claude_alerts = wezterm.GLOBAL.claude_alerts or {}
 
+  -- INSTANT TRIGGER PROCESSING on focus (much faster than update-status polling)
+  wezterm.on('window-focus-changed', function(window, pane, focused)
+    if focused then
+      process_trigger(window, pane)
+    end
+  end)
+
   -- CUSTOM TAB TITLES
   wezterm.on('format-tab-title', function(tab, tabs, panes, config, hover, max_width)
     local pane = tab.active_pane
@@ -219,9 +224,6 @@ function M.setup()
 
   -- STATUS BAR
   wezterm.on("update-status", function(window, pane)
-    -- Check for external triggers (from Karabiner, yabai, etc.)
-    process_trigger(window, pane)
-
     -- Track directory focus time
     local cwd = pane:get_current_working_dir()
     if cwd and cwd.file_path then

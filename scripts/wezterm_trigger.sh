@@ -1,5 +1,5 @@
 #!/bin/bash
-# wezterm_trigger.sh - Focus WezTerm and trigger an action via the file-based trigger system
+# wezterm_trigger.sh - Focus WezTerm and trigger an action (FAST version)
 #
 # Usage: wezterm_trigger.sh <action>
 #
@@ -13,25 +13,14 @@
 #   themes            - Open the theme picker
 #   layouts           - Open the layout picker
 #   zen               - Toggle zen mode
-#
-# Example Karabiner integration:
-#   [:launch+t [:!launch "wezterm_trigger.sh" "quick_open"]]
 
 ACTION="$1"
 TRIGGER_FILE="/tmp/wezterm.trigger"
 
-if [[ -z "$ACTION" ]]; then
-  echo "Usage: $0 <action>" >&2
-  echo "Actions: quick_open, quick_open_cursor, workspaces, command_palette, launcher, shortcuts, themes, layouts, zen" >&2
-  exit 1
-fi
+[[ -z "$ACTION" ]] && exit 1
 
-# Write the trigger file BEFORE activating WezTerm
-# This ensures the trigger is ready when WezTerm's update-status fires
+# Write trigger FIRST (before focus, so it's ready when window-focus-changed fires)
 printf "%s" "$ACTION" > "$TRIGGER_FILE"
 
-# Activate WezTerm (brings to front)
-osascript -e 'tell application "WezTerm" to activate'
-
-# The trigger will be processed by WezTerm's update-status event handler
-# within ~1 second (the default status_update_interval)
+# Use open -a (faster than osascript)
+open -a WezTerm
