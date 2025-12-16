@@ -86,6 +86,9 @@ local function process_trigger(window, pane)
   elseif action == "app_launcher" then
     pickers.show_app_launcher(window, pane)
 
+  elseif action == "copy_path" then
+    pickers.show_copy_path_picker(window, pane)
+
   elseif action == "themes" then
     -- Trigger theme picker (same as CMD+SHIFT+T)
     local choices = {}

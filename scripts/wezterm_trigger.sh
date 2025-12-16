@@ -14,6 +14,7 @@
 #   layouts           - Open the layout picker
 #   zen               - Toggle zen mode
 #   app_launcher      - Open the app launcher (all installed apps)
+#   copy_path         - Browse directories from ~ and copy selected path
 
 ACTION="$1"
 TRIGGER_FILE="/tmp/wezterm.trigger"
