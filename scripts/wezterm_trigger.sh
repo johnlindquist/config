@@ -15,6 +15,7 @@
 #   zen               - Toggle zen mode
 #   app_launcher      - Open the app launcher (all installed apps)
 #   copy_path         - Browse directories from ~ and copy selected path
+#   notepad           - Open ~/dev/notes/notes.md in micro, auto-commit on exit
 
 ACTION="$1"
 TRIGGER_FILE="/tmp/wezterm.trigger"
