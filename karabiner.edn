@@ -1455,14 +1455,29 @@
                                 [:1 :open_1password] ; Launch+1 -> Open 1Password
                                 [:2 :autofill_1password] ; Launch+1 -> Open 1Password
                                 [:spacebar :!Tdown_arrow] ; Launch+Space -> Ctrl+Down Arrow
-                                [:-a [:launch "Activity Monitor"]] ; Launch+A -> Launch Activity Monitor
+                                ;; [:-a [:launch "Activity Monitor"]] ; Launch+A -> Launch Activity Monitor
                                 [:-v [:launch "Visual Studio Code - Insiders"]] ; Launch+V -> Launch Cursor Nightly
                                 [:-d [:launch "Discord"]] ; Launch+D (G Colemak) -> Launch Discord
                                 [:-f [:launch "Finder"]] ; Launch+F (E Colemak) -> Launch Finder
                                 [:-p [:launch "Pieces"]] ; Launch+P (E Colemak) -> Launch Pieces
                                 [:-g [:launch "Google Chrome"]] ; Launch+G (T Colemak) -> Launch Chrome
-                                [:-t [:wez-trigger "quick_open"]] ; Launch+T -> Focus WezTerm + Quick Open picker
-                                [:-c [:launch "Cursor"]] ; Launch+C -> Launch Cursor
+                                ;;   Available triggers:
+                                ;;   | Trigger           | Action                              |
+                                ;;   |-------------------|-------------------------------------|
+                                ;;   | quick_open        | Quick Open picker (Cmd+P)           |
+                                ;;   | quick_open_cursor | Open in Cursor picker (Cmd+Shift+P) |
+                                ;;   | workspaces        | Workspace picker                    |
+                                ;;   | command_palette   | Command palette                     |
+                                ;;   | launcher          | Launcher menu                       |
+                                ;;   | shortcuts         | Keyboard shortcuts help             |
+                                ;;   | themes            | Theme picker                        |
+                                ;;   | layouts           | Layout template picker              |
+                                ;;   | zen               | Toggle zen mode                     |
+                                [:-a [:wez-trigger "app_launcher"]] ; Launch+A -> App launcher
+                                [:-t [:wez-trigger "quick_open"]] ; Launch+T -> Quick Open picker
+                                [:-c [:wez-trigger "quick_open_cursor"]] ; Launch+C -> Open in Cursor
+                                [:-n [:wez-trigger "notepad"]] ; Launch+N -> Notepad (auto-commits)
+                                ;; [:-c [:launch "Cursor"]] ; Launch+C -> Launch Cursor
                                 [:-k "launchctl kickstart -k org.pqrs.karabiner.karabiner_console_user_server"] ; Launch+K (E Colemak) -> Restart Karabiner
                                 [:-y [:launch "YouTube Music"]] ; Launch+Y (O Colemak) -> Launch YouTube Music
                                 [:-r [:wezterm "cd ~/research && x --append-system-prompt='Research the users query then write the result to a markdown file ./<shortened-slugified-query>.md'"]] ; Launch+R -> WezTerm research mode
