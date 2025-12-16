@@ -38,6 +38,9 @@ function M.apply(config)
     brightness = 0.3,
   }
 
+  -- Faster status updates for trigger system (default is 1000ms)
+  config.status_update_interval = 250
+
   -- PANE SPLIT LINE AND TAB BAR STYLING
   config.colors = {
     split = theme.colors.pink,

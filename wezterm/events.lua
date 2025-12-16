@@ -42,8 +42,15 @@ end
 
 -- Process external triggers (called on focus change for instant response)
 local function process_trigger(window, pane)
+  -- Check if trigger file exists first (avoid unnecessary IO)
+  local f = io.open(TRIGGER_FILE, "r")
+  if not f then return end
+  f:close()
+
   local trigger = consume_trigger()
   if not trigger then return end
+
+  wezterm.log_info("TRIGGER: Processing '" .. trigger .. "'")
 
   -- Debounce: prevent re-triggering within 1 second
   wezterm.GLOBAL._last_trigger = wezterm.GLOBAL._last_trigger or { v = nil, t = 0 }
@@ -224,6 +231,11 @@ function M.setup()
 
   -- STATUS BAR
   wezterm.on("update-status", function(window, pane)
+    -- Fallback trigger check (for when WezTerm is already focused)
+    if window:is_focused() then
+      process_trigger(window, pane)
+    end
+
     -- Track directory focus time
     local cwd = pane:get_current_working_dir()
     if cwd and cwd.file_path then
