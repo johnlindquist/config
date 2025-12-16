@@ -87,14 +87,22 @@ local function process_trigger(window, pane)
     pickers.show_app_launcher(window, pane)
 
   elseif action == "copy_path" then
-    pickers.show_copy_path_picker(window, pane)
-
-  elseif action == "notepad" then
-    -- Open notes in micro, auto-commit on exit
+    -- Use fzf-based script for natural arrow key navigation
     local home = os.getenv('HOME')
     window:perform_action(
       act.SpawnCommandInNewTab {
-        args = { home .. '/.config/scripts/wezterm_notepad.sh' },
+        args = { '/bin/bash', '-c', home .. '/.config/scripts/wezterm_copy_path.sh' },
+        cwd = home,
+      },
+      pane
+    )
+
+  elseif action == "notepad" then
+    -- Open notes in micro, auto-commit on exit (needs interactive shell)
+    local home = os.getenv('HOME')
+    window:perform_action(
+      act.SpawnCommandInNewTab {
+        args = { '/bin/bash', '-c', home .. '/.config/scripts/wezterm_notepad.sh' },
         cwd = home .. '/dev/notes',
       },
       pane
