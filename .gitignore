@@ -63,8 +63,13 @@ zsh/.zcompdump*
 # IDE settings
 .idea/
 .vscode/
-# SpecStory explanation file
-.specstory/.what-is-this.md
+# AI conversation history (personal)
+.specstory/history/
+zed/conversations/
+
+# Machine-specific settings
+.claude/settings.local.json
+.repomix/bundles.json
 container-use/
 gcloud/
 cursor/
@@ -84,3 +89,18 @@ repomix-output.*
 # Test/scratch files
 a.scpt
 testing.scpt
+focus-tab.scpt
+open-tab.scpt
+focus-tab-explanation.md
+gist-comment.md
+
+# Install receipts and tool state
+*-receipt.json
+flutter/tool_state
+
+# Backup files
+*.backup
+*_backup.json
+
+# Session data
+ubs/session.md
