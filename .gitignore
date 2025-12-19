@@ -73,3 +73,14 @@ karabiner/automatic_backups/
 raycast/
 .packx_cache/
 .beads/
+
+# Generated outputs and caches
+nanobanana-output/
+swiftpm/
+repomix-output.*
+*-packed.mdc
+*.tar.gz
+
+# Test/scratch files
+a.scpt
+testing.scpt
