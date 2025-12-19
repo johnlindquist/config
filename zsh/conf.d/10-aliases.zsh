@@ -14,7 +14,7 @@ alias -s md='_handle_md'
 _handle_md() {
   local input="$1"
   shift
-  
+
   # Resolve input: URLs pass through, files check current dir then PATH
   local resolved=""
   if [[ "$input" =~ ^https?:// ]]; then
@@ -32,12 +32,12 @@ _handle_md() {
       fi
     done
   fi
-  
+
   if [[ -z "$resolved" ]]; then
     echo "File not found: $input (checked current dir and PATH)"
     return 1
   fi
-  
+
   # Pass resolved file/URL and any remaining args (--model, --silent, etc.) to handler
   # if md exists, use it, otherwise, offer to install markdown-agent
   if command -v md &>/dev/null; then
@@ -61,9 +61,9 @@ _handle_md() {
 }
 
 #### Editor shortcuts (override EDITOR_CMD in local.zsh)
-: "${EDITOR_CMD:=cursor}"
-export EDITOR="cursor"
-export VISUAL="cursor"
+: "${EDITOR_CMD:=zed}"
+export EDITOR="zed"
+export VISUAL="zed"
 alias zd="zed"
 alias m="micro"
 alias s='source $ZDOTDIR/.zshrc'
@@ -305,6 +305,94 @@ cf() { pbcopy < "$1"; }
 # MCP inspector
 mcpi() { bunx @modelcontextprotocol/inspector@latest "$@"; }
 
+# AI-enhanced file finder using Gemini Flash
+# Usage: f "recently edited files with claude in the name"
+#        f "typescript files containing useState hook"
+#        f "large json files modified today"
+f() {
+  [[ -z "$1" ]] && { echo "Usage: f <natural language search query>"; return 1; }
+  command -v gemini &>/dev/null || { echo "gemini CLI required"; return 1; }
+
+  local query="$*"
+  local prompt='You are a file search expert. Generate shell commands to find files matching this query: "'"$query"'"
+
+RULES:
+1. Output ONLY executable shell commands, one per line
+2. Use rg (ripgrep) for content search: rg -l "pattern" --type ts
+3. Use find for attributes: find . -name "*.ts" -mtime -1
+4. Use fd if available: fd -e ts -t f
+5. ALWAYS exclude: node_modules, .git, dist, build, .next, vendor, __pycache__, .venv
+6. For rg, add: --glob "!node_modules" --glob "!.git" --glob "!dist"
+7. For find, add: -not -path "*/node_modules/*" -not -path "*/.git/*"
+8. Combine criteria with pipes when needed
+9. For "recent" use -mtime -7 (week) or -mmin -60 (hour) or sort by mtime
+10. Limit results: | head -50
+
+EXAMPLES:
+Query: "recently edited typescript files"
+find . -type f -name "*.ts" -mtime -7 -not -path "*/node_modules/*" -not -path "*/.git/*" | head -50
+
+Query: "files containing useState"
+rg -l "useState" --type ts --glob "!node_modules" --glob "!.git" | head -50
+
+Query: "large json files"
+find . -type f -name "*.json" -size +100k -not -path "*/node_modules/*" -not -path "*/.git/*" | head -50
+
+Output ONLY the commands, no explanations, no markdown code blocks.'
+
+  # Get commands from gemini (filter out CLI noise)
+  local commands=$(gemini -m flash "$prompt" 2>&1 | \
+    grep -v "^\[" | grep -v "^Loading" | grep -v "^Server" | \
+    grep -v "^Warning" | grep -v "^Loaded" | grep -v "^$" | \
+    grep -E "^(find|fd|rg|ls|stat) ")
+
+  [[ -z "$commands" ]] && { echo "No search commands generated"; return 1; }
+
+  echo "🔍 Search strategy:" >&2
+  echo "$commands" | while read -r cmd; do
+    echo "   $cmd" >&2
+  done
+  echo "" >&2
+
+  # Execute first valid command (most commands are redundant)
+  local cmd=$(echo "$commands" | head -1)
+  eval "$cmd" 2>/dev/null
+}
+
+# Smart file finder with parallel AI search + fzf + Zed
+# Uses two AI strategies in parallel: semantic + programmatic
+# Usage: fs "dropbox zoom workshop"   # AI parallel search → ranked → fzf → zed
+#        fs "*.ts"                    # instant glob (no AI)
+#        fs -l "query"               # list only, no fzf
+#        fs -f "query"               # fast mode (programmatic only)
+fs() {
+  [[ -z "$1" ]] && { echo "Usage: fs [-l] [-f] <query>"; return 1; }
+  command -v bun &>/dev/null || { echo "bun required"; return 1; }
+  ~/.config/scripts/smart-find.ts "$@"
+}
+
+# Output file:line for a function definition
+funcwhere() {
+  [[ -z "$1" ]] && { echo "Usage: funcwhere <function_name>"; return 1; }
+  local func="$1"
+
+  [[ $(whence -w "$func" 2>/dev/null) != *function* ]] && {
+    echo "'$func' is not a function" >&2
+    return 1
+  }
+
+  local file="${functions_source[$func]}"
+  [[ -z "$file" || ! -f "$file" ]] && {
+    echo "Can't find source file for '$func'" >&2
+    return 1
+  }
+
+  local line=$(grep -n -m1 -E "^\s*(function\s+)?${func}\s*\(|eval\s+[\"']${func}\s*\(" "$file" | cut -d: -f1)
+  [[ -z "$line" ]] && line=1
+
+  echo "$file:$line"
+}
+
 # Edit a shell function in cursor at its definition
 funced() {
   [[ -z "$1" ]] && { echo "Usage: funced <function_name>"; return 1; }
@@ -329,7 +417,15 @@ funced() {
   local line=$(grep -n -m1 -E "^\s*(function\s+)?${func}\s*\(|eval\s+[\"']${func}\s*\(" "$file" | cut -d: -f1)
   [[ -z "$line" ]] && line=1
 
-  "$EDITOR_CMD" -g "$file:$line"
+  # Use editor-appropriate syntax for line navigation
+  local editor_name="${EDITOR_CMD:t}"
+  case "$editor_name" in
+    zed)    "$EDITOR_CMD" "$file:$line" ;;
+    cursor|code|code-insiders) "$EDITOR_CMD" -g "$file:$line" ;;
+    micro)  "$EDITOR_CMD" "+$line" "$file" ;;
+    vim|nvim) "$EDITOR_CMD" "+$line" "$file" ;;
+    *)      "$EDITOR_CMD" "$file:$line" ;;  # Try zed-style as default
+  esac
 }
 
 # =============================================================================
@@ -633,9 +729,9 @@ bindkey " " _space_trigger
 rec() {
   local name="$1"
   [[ -z "$name" ]] && { echo "Usage: rec <name>"; return 1; }
-  
+
   [[ ! -d slides ]] && { echo "No slides/ directory found"; return 1; }
-  
+
   # Find highest numbered file in slides/
   local highest=0
   local file
@@ -647,17 +743,17 @@ rec() {
     [[ -z "$num" ]] && num=0
     [[ $num -gt $highest ]] && highest=$num
   done
-  
+
   # Increment to next number and pad with zero
   local next_num=$((highest + 1))
   local padded_num=$(printf "%02d" $next_num)
-  
+
   # Slugify the name (lowercase, replace spaces with underscores, remove special chars)
   local slug=$(echo "$name" | tr '[:upper:]' '[:lower:]' | tr ' ' '_' | sed 's/[^a-z0-9_-]//g')
-  
+
   # Build output filename
   local output_file="slides/${padded_num}_${slug}_demo.cast"
-  
+
   echo "🎬 Recording to: $output_file"
   asciinema rec -q "$output_file"
   echo "✅ Recorded: $output_file"
@@ -666,15 +762,15 @@ rec() {
 ar() {
   local num="$1"
   [[ -z "$num" ]] && { echo "Usage: ar <number>"; return 1; }
-  
+
   # Find markdown file matching the number pattern
   local md_file=$(ls slides/${num}_*.md 2>/dev/null | head -1)
   [[ -z "$md_file" ]] && { echo "No markdown file found matching: slides/${num}_*.md"; return 1; }
-  
+
   # Extract base name without extension
   local base_name="${md_file##*/}"  # Remove path
   base_name="${base_name%.md}"       # Remove .md extension
-  
+
   # Record with matching cast filename
   asciinema rec -q "slides/${base_name}_demo.cast"
   echo "✅ Recorded: slides/${base_name}_demo.cast"

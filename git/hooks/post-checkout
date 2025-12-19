@@ -1,0 +1,43 @@
+#!/bin/sh
+# Global post-checkout hook with beads auto-detection
+# Syncs beads database after branch checkout if .beads/ exists
+
+# Only run on branch checkouts ($3 = 1)
+if [ "$3" != "1" ]; then
+    exit 0
+fi
+
+# Skip during rebase
+if [ -d .git/rebase-merge ] || [ -d .git/rebase-apply ]; then
+    exit 0
+fi
+
+# --- Beads integration ---
+if [ -d .beads ]; then
+    if command -v bd >/dev/null 2>&1; then
+        # Worktree detection
+        GIT_DIR=$(git rev-parse --git-dir 2>/dev/null)
+        GIT_COMMON_DIR=$(git rev-parse --git-common-dir 2>/dev/null)
+        if [ -n "$GIT_DIR" ] && [ -n "$GIT_COMMON_DIR" ]; then
+            GIT_DIR_ABS=$(cd "$GIT_DIR" 2>/dev/null && pwd || echo "$GIT_DIR")
+            GIT_COMMON_DIR_ABS=$(cd "$GIT_COMMON_DIR" 2>/dev/null && pwd || echo "$GIT_COMMON_DIR")
+            if [ "$GIT_DIR_ABS" != "$GIT_COMMON_DIR_ABS" ]; then
+                echo "Note: In git worktree - consider: export BEADS_NO_DAEMON=1" >&2
+            fi
+        fi
+
+        if ls .beads/*.jsonl >/dev/null 2>&1; then
+            if ! output=$(bd sync --import-only --no-git-history 2>&1); then
+                echo "Warning: Failed to sync bd changes after checkout" >&2
+                echo "$output" >&2
+            fi
+            bd doctor --check-health 2>/dev/null || true
+        fi
+    fi
+fi
+
+# --- Chain to local hook if exists ---
+LOCAL_HOOK="$(git rev-parse --git-dir 2>/dev/null)/hooks/post-checkout.local"
+[ -x "$LOCAL_HOOK" ] && exec "$LOCAL_HOOK" "$@"
+
+exit 0

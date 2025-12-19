@@ -265,7 +265,91 @@ WezTerm supports config hot-reloading. Edit any `.lua` file in `~/.config/wezter
 
 `Leader+z` toggles Zen mode - hides tab bar and removes padding for distraction-free work.
 
+## External Trigger System
+
+The config includes a file-based trigger system that allows external tools (Karabiner, yabai, etc.) to invoke WezTerm actions without keystroke emulation.
+
+### How It Works
+
+1. External script writes action name to `/tmp/wezterm.trigger`
+2. Script focuses WezTerm via `open -a WezTerm`
+3. WezTerm's `window-focus-changed` event reads and consumes the trigger
+4. Action is executed (picker opens, command runs, etc.)
+
+### Available Triggers
+
+| Trigger | Action |
+|---------|--------|
+| `quick_open` | Open Quick Open picker (Cmd+P equivalent) |
+| `quick_open_cursor` | Open Quick Open in Cursor mode |
+| `workspaces` | Open workspace picker |
+| `command_palette` | Open command palette |
+| `launcher` | Open launcher |
+| `shortcuts` | Show keyboard shortcuts |
+| `app_launcher` | Show all installed macOS apps |
+| `copy_path` | Browse directories with fzf, copy path to clipboard |
+| `notepad` | Open ~/dev/notes/notes.md in micro, auto-commit on exit |
+| `themes` | Open theme picker |
+| `layouts` | Open layout picker |
+| `zen` | Toggle zen mode |
+
+### Usage
+
+```bash
+# Trigger script location
+~/.config/scripts/wezterm_trigger.sh <action>
+
+# Examples
+~/.config/scripts/wezterm_trigger.sh notepad
+~/.config/scripts/wezterm_trigger.sh copy_path
+~/.config/scripts/wezterm_trigger.sh app_launcher
+```
+
+### Karabiner Integration
+
+Add to `karabiner.edn`:
+```edn
+:templates {
+  :wez-trigger "/Users/YOUR_USERNAME/.config/scripts/wezterm_trigger.sh \"%s\""
+}
+
+;; Then use in rules:
+[:!Oa [:wez-trigger "app_launcher"]]  ;; Opt+A → App launcher
+[:!On [:wez-trigger "notepad"]]        ;; Opt+N → Notepad
+```
+
+### Helper Scripts
+
+- `wezterm_trigger.sh` - Main trigger dispatcher
+- `wezterm_copy_path.sh` - fzf-based directory browser (←/→ for navigation)
+- `wezterm_notepad.sh` - Opens micro editor, auto-commits on exit
+
 ## Troubleshooting
+
+### Spawned Commands Can't Find Homebrew Tools (fzf, micro, etc.)
+
+**Symptom:** Trigger opens a tab that immediately flashes and closes.
+
+**Cause:** When WezTerm is launched via GUI automation (Karabiner, `open -a`), spawned processes don't inherit your shell's PATH. Tools in `/opt/homebrew/bin` aren't found.
+
+**Solution:** The config sets `set_environment_variables` in `wezterm.lua` to ensure Homebrew paths are available:
+
+```lua
+config.set_environment_variables = {
+  PATH = table.concat({
+    "/opt/homebrew/bin",
+    "/opt/homebrew/sbin",
+    "/usr/local/bin",
+    os.getenv("PATH") or "",
+  }, ":"),
+}
+```
+
+**Debugging:** Run the script directly in WezTerm to see errors:
+```bash
+~/.config/scripts/wezterm_copy_path.sh
+# If it prints "command not found", PATH is the issue
+```
 
 ### Config Not Loading / Wrong Config
 

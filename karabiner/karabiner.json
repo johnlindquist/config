@@ -371,6 +371,97 @@
           "type" : "basic"
         } ]
       }, {
+        "description" : "Raycast Options",
+        "manipulators" : [ {
+          "from" : {
+            "modifiers" : {
+              "mandatory" : [ "option" ]
+            },
+            "key_code" : "s"
+          },
+          "to" : [ {
+            "shell_command" : "open -g \"raycast://ai-commands/improve-writing-flash\""
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "modifiers" : {
+              "mandatory" : [ "option" ]
+            },
+            "key_code" : "h"
+          },
+          "to" : [ {
+            "shell_command" : "open -g \"raycast://extensions/raycast/raycast-ai/ai-chat?context=%7B%22preset%22:%226375022D-2B06-4DB4-A82E-8B0C96459304%22%7D\""
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "modifiers" : {
+              "mandatory" : [ "option" ]
+            },
+            "key_code" : "a"
+          },
+          "to" : [ {
+            "shell_command" : "open -g \"raycast://extensions/raycast/raycast-ai/ai-chat\""
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "modifiers" : {
+              "mandatory" : [ "option" ]
+            },
+            "key_code" : "w"
+          },
+          "to" : [ {
+            "shell_command" : "open -g \"raycast://extensions/johnlindquist/wezterm-panes/list-panes\""
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "modifiers" : {
+              "mandatory" : [ "option" ]
+            },
+            "key_code" : "e"
+          },
+          "to" : [ {
+            "shell_command" : "open -g \"raycast://extensions/file-search/search-files\""
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "modifiers" : {
+              "mandatory" : [ "option" ]
+            },
+            "key_code" : "z"
+          },
+          "to" : [ {
+            "shell_command" : "open -g \"raycast://extensions/johnlindquist/recent-zed-projects/index\""
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "modifiers" : {
+              "mandatory" : [ "option" ]
+            },
+            "key_code" : "m"
+          },
+          "to" : [ {
+            "shell_command" : "open -g \"raycast://extensions/johnlindquist/copy-page-as-markdown/copy-page-as-markdown\""
+          } ],
+          "type" : "basic"
+        }, {
+          "from" : {
+            "modifiers" : {
+              "mandatory" : [ "option" ]
+            },
+            "key_code" : "f"
+          },
+          "to" : [ {
+            "shell_command" : "open -g \"raycast://extensions/Codely/google-chrome/search-tab\""
+          } ],
+          "type" : "basic"
+        } ]
+      }, {
         "description" : "Global Ctrl+F-keys → fn+F-keys (media/hardware controls)",
         "manipulators" : [ {
           "from" : {
@@ -1697,6 +1788,22 @@
           },
           "to" : [ {
             "key_code" : "left_command"
+          } ],
+          "conditions" : [ {
+            "type" : "frontmost_application_if",
+            "bundle_identifiers" : [ "com.github.wez.wezterm" ]
+          } ],
+          "type" : "basic"
+        }, {
+          "to_if_alone" : [ {
+            "modifiers" : [ "command", "shift" ],
+            "key_code" : "p"
+          } ],
+          "from" : {
+            "key_code" : "left_control"
+          },
+          "to" : [ {
+            "key_code" : "left_control"
           } ],
           "conditions" : [ {
             "type" : "frontmost_application_if",
@@ -11219,7 +11326,8 @@
             "key_code" : "m"
           },
           "to" : [ {
-            "shell_command" : "osascript -e '\n                               set the clipboard to \"🤯\"\n                               tell application \"System Events\"\n                                   keystroke \"v\" using command down\n                               end tell\n                               '"
+            "modifiers" : [ "command", "shift", "control", "option" ],
+            "key_code" : "m"
           } ],
           "conditions" : [ {
             "name" : "emoji-mode",
@@ -11238,7 +11346,8 @@
               "value" : 1
             }
           }, {
-            "shell_command" : "osascript -e '\n                               set the clipboard to \"🤯\"\n                               tell application \"System Events\"\n                                   keystroke \"v\" using command down\n                               end tell\n                               '"
+            "modifiers" : [ "command", "shift", "control", "option" ],
+            "key_code" : "m"
           } ],
           "from" : {
             "simultaneous" : [ {
@@ -17434,51 +17543,6 @@
           }
         }, {
           "from" : {
-            "key_code" : "a"
-          },
-          "to" : [ {
-            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/launch_focus_app.sh \"Activity Monitor\""
-          } ],
-          "conditions" : [ {
-            "name" : "launch-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "type" : "basic",
-          "parameters" : {
-            "basic.simultaneous_threshold_milliseconds" : 140
-          },
-          "to" : [ {
-            "set_variable" : {
-              "name" : "launch-mode",
-              "value" : 1
-            }
-          }, {
-            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/launch_focus_app.sh \"Activity Monitor\""
-          } ],
-          "from" : {
-            "simultaneous" : [ {
-              "key_code" : "u"
-            }, {
-              "key_code" : "a"
-            } ],
-            "simultaneous_options" : {
-              "detect_key_down_uninterruptedly" : true,
-              "key_down_order" : "strict",
-              "key_up_order" : "strict_inverse",
-              "key_up_when" : "any",
-              "to_after_key_up" : [ {
-                "set_variable" : {
-                  "name" : "launch-mode",
-                  "value" : 0
-                }
-              } ]
-            }
-          }
-        }, {
-          "from" : {
             "key_code" : "v"
           },
           "to" : [ {
@@ -17614,51 +17678,6 @@
           }
         }, {
           "from" : {
-            "key_code" : "r"
-          },
-          "to" : [ {
-            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/launch_focus_app.sh \"Pieces\""
-          } ],
-          "conditions" : [ {
-            "name" : "launch-mode",
-            "value" : 1,
-            "type" : "variable_if"
-          } ],
-          "type" : "basic"
-        }, {
-          "type" : "basic",
-          "parameters" : {
-            "basic.simultaneous_threshold_milliseconds" : 140
-          },
-          "to" : [ {
-            "set_variable" : {
-              "name" : "launch-mode",
-              "value" : 1
-            }
-          }, {
-            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/launch_focus_app.sh \"Pieces\""
-          } ],
-          "from" : {
-            "simultaneous" : [ {
-              "key_code" : "u"
-            }, {
-              "key_code" : "r"
-            } ],
-            "simultaneous_options" : {
-              "detect_key_down_uninterruptedly" : true,
-              "key_down_order" : "strict",
-              "key_up_order" : "strict_inverse",
-              "key_up_when" : "any",
-              "to_after_key_up" : [ {
-                "set_variable" : {
-                  "name" : "launch-mode",
-                  "value" : 0
-                }
-              } ]
-            }
-          }
-        }, {
-          "from" : {
             "key_code" : "t"
           },
           "to" : [ {
@@ -17688,6 +17707,96 @@
               "key_code" : "u"
             }, {
               "key_code" : "t"
+            } ],
+            "simultaneous_options" : {
+              "detect_key_down_uninterruptedly" : true,
+              "key_down_order" : "strict",
+              "key_up_order" : "strict_inverse",
+              "key_up_when" : "any",
+              "to_after_key_up" : [ {
+                "set_variable" : {
+                  "name" : "launch-mode",
+                  "value" : 0
+                }
+              } ]
+            }
+          }
+        }, {
+          "from" : {
+            "key_code" : "a"
+          },
+          "to" : [ {
+            "shell_command" : "/Users/johnlindquist/.config/scripts/wezterm_trigger.sh \"app_launcher\""
+          } ],
+          "conditions" : [ {
+            "name" : "launch-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "type" : "basic",
+          "parameters" : {
+            "basic.simultaneous_threshold_milliseconds" : 140
+          },
+          "to" : [ {
+            "set_variable" : {
+              "name" : "launch-mode",
+              "value" : 1
+            }
+          }, {
+            "shell_command" : "/Users/johnlindquist/.config/scripts/wezterm_trigger.sh \"app_launcher\""
+          } ],
+          "from" : {
+            "simultaneous" : [ {
+              "key_code" : "u"
+            }, {
+              "key_code" : "a"
+            } ],
+            "simultaneous_options" : {
+              "detect_key_down_uninterruptedly" : true,
+              "key_down_order" : "strict",
+              "key_up_order" : "strict_inverse",
+              "key_up_when" : "any",
+              "to_after_key_up" : [ {
+                "set_variable" : {
+                  "name" : "launch-mode",
+                  "value" : 0
+                }
+              } ]
+            }
+          }
+        }, {
+          "from" : {
+            "key_code" : "w"
+          },
+          "to" : [ {
+            "shell_command" : "/Users/johnlindquist/.config/scripts/wezterm_trigger.sh \"quick_open\""
+          } ],
+          "conditions" : [ {
+            "name" : "launch-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "type" : "basic",
+          "parameters" : {
+            "basic.simultaneous_threshold_milliseconds" : 140
+          },
+          "to" : [ {
+            "set_variable" : {
+              "name" : "launch-mode",
+              "value" : 1
+            }
+          }, {
+            "shell_command" : "/Users/johnlindquist/.config/scripts/wezterm_trigger.sh \"quick_open\""
+          } ],
+          "from" : {
+            "simultaneous" : [ {
+              "key_code" : "u"
+            }, {
+              "key_code" : "w"
             } ],
             "simultaneous_options" : {
               "detect_key_down_uninterruptedly" : true,
@@ -17752,7 +17861,7 @@
             "key_code" : "c"
           },
           "to" : [ {
-            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/launch_focus_app.sh \"Visual Studio Code - Insiders\""
+            "shell_command" : "/Users/johnlindquist/.config/scripts/wezterm_trigger.sh \"quick_open_cursor\""
           } ],
           "conditions" : [ {
             "name" : "launch-mode",
@@ -17771,13 +17880,103 @@
               "value" : 1
             }
           }, {
-            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/launch_focus_app.sh \"Visual Studio Code - Insiders\""
+            "shell_command" : "/Users/johnlindquist/.config/scripts/wezterm_trigger.sh \"quick_open_cursor\""
           } ],
           "from" : {
             "simultaneous" : [ {
               "key_code" : "u"
             }, {
               "key_code" : "c"
+            } ],
+            "simultaneous_options" : {
+              "detect_key_down_uninterruptedly" : true,
+              "key_down_order" : "strict",
+              "key_up_order" : "strict_inverse",
+              "key_up_when" : "any",
+              "to_after_key_up" : [ {
+                "set_variable" : {
+                  "name" : "launch-mode",
+                  "value" : 0
+                }
+              } ]
+            }
+          }
+        }, {
+          "from" : {
+            "key_code" : "j"
+          },
+          "to" : [ {
+            "shell_command" : "/Users/johnlindquist/.config/scripts/wezterm_trigger.sh \"notepad\""
+          } ],
+          "conditions" : [ {
+            "name" : "launch-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "type" : "basic",
+          "parameters" : {
+            "basic.simultaneous_threshold_milliseconds" : 140
+          },
+          "to" : [ {
+            "set_variable" : {
+              "name" : "launch-mode",
+              "value" : 1
+            }
+          }, {
+            "shell_command" : "/Users/johnlindquist/.config/scripts/wezterm_trigger.sh \"notepad\""
+          } ],
+          "from" : {
+            "simultaneous" : [ {
+              "key_code" : "u"
+            }, {
+              "key_code" : "j"
+            } ],
+            "simultaneous_options" : {
+              "detect_key_down_uninterruptedly" : true,
+              "key_down_order" : "strict",
+              "key_up_order" : "strict_inverse",
+              "key_up_when" : "any",
+              "to_after_key_up" : [ {
+                "set_variable" : {
+                  "name" : "launch-mode",
+                  "value" : 0
+                }
+              } ]
+            }
+          }
+        }, {
+          "from" : {
+            "key_code" : "r"
+          },
+          "to" : [ {
+            "shell_command" : "/Users/johnlindquist/.config/scripts/wezterm_trigger.sh \"copy_path\""
+          } ],
+          "conditions" : [ {
+            "name" : "launch-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "type" : "basic",
+          "parameters" : {
+            "basic.simultaneous_threshold_milliseconds" : 140
+          },
+          "to" : [ {
+            "set_variable" : {
+              "name" : "launch-mode",
+              "value" : 1
+            }
+          }, {
+            "shell_command" : "/Users/johnlindquist/.config/scripts/wezterm_trigger.sh \"copy_path\""
+          } ],
+          "from" : {
+            "simultaneous" : [ {
+              "key_code" : "u"
+            }, {
+              "key_code" : "r"
             } ],
             "simultaneous_options" : {
               "detect_key_down_uninterruptedly" : true,
@@ -18093,6 +18292,51 @@
               "key_code" : "u"
             }, {
               "key_code" : "x"
+            } ],
+            "simultaneous_options" : {
+              "detect_key_down_uninterruptedly" : true,
+              "key_down_order" : "strict",
+              "key_up_order" : "strict_inverse",
+              "key_up_when" : "any",
+              "to_after_key_up" : [ {
+                "set_variable" : {
+                  "name" : "launch-mode",
+                  "value" : 0
+                }
+              } ]
+            }
+          }
+        }, {
+          "from" : {
+            "key_code" : "left_shift"
+          },
+          "to" : [ {
+            "shell_command" : "open -g \"raycast://extensions/Codely/google-chrome/search-tab\""
+          } ],
+          "conditions" : [ {
+            "name" : "launch-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "type" : "basic",
+          "parameters" : {
+            "basic.simultaneous_threshold_milliseconds" : 140
+          },
+          "to" : [ {
+            "set_variable" : {
+              "name" : "launch-mode",
+              "value" : 1
+            }
+          }, {
+            "shell_command" : "open -g \"raycast://extensions/Codely/google-chrome/search-tab\""
+          } ],
+          "from" : {
+            "simultaneous" : [ {
+              "key_code" : "u"
+            }, {
+              "key_code" : "left_shift"
             } ],
             "simultaneous_options" : {
               "detect_key_down_uninterruptedly" : true,

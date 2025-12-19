@@ -1,0 +1,28 @@
+#!/bin/sh
+# Global post-merge hook with beads auto-detection
+# Automatically syncs beads database after pull/merge if .beads/ exists
+
+# Skip during rebase
+if [ -d .git/rebase-merge ] || [ -d .git/rebase-apply ]; then
+    exit 0
+fi
+
+# --- Beads integration ---
+if [ -d .beads ]; then
+    if command -v bd >/dev/null 2>&1; then
+        if ls .beads/*.jsonl >/dev/null 2>&1; then
+            if ! output=$(bd sync --import-only --no-git-history 2>&1); then
+                echo "Warning: Failed to sync bd changes after merge" >&2
+                echo "$output" >&2
+                echo "Run 'bd doctor --fix' to diagnose and repair" >&2
+            fi
+            bd doctor --check-health 2>/dev/null || true
+        fi
+    fi
+fi
+
+# --- Chain to local hook if exists ---
+LOCAL_HOOK="$(git rev-parse --git-dir 2>/dev/null)/hooks/post-merge.local"
+[ -x "$LOCAL_HOOK" ] && exec "$LOCAL_HOOK" "$@"
+
+exit 0

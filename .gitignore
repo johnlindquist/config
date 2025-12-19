@@ -62,7 +62,7 @@ zsh/.zcompdump*
 
 # IDE settings
 .idea/
-.vscode/ 
+.vscode/
 # SpecStory explanation file
 .specstory/.what-is-this.md
 container-use/
@@ -70,3 +70,6 @@ gcloud/
 cursor/
 karabiner/automatic_backups/
 *.mdb
+raycast/
+.packx_cache/
+.beads/

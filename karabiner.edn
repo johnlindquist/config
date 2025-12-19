@@ -343,8 +343,13 @@
                        :fix_floats "/bin/bash /Users/johnlindquist/.config/scripts/fix_floats.sh"
 
                        :wait "osascript -e 'delay %s'"
-                       :chatgpt_voice "shortcuts run gpt-voice"}
- ;;
+                       :chatgpt_voice "shortcuts run gpt-voice"
+                       :raycast "open -g \"raycast://extensions/%s\""
+                       :ai-command "open -g \"raycast://ai-commands/%s\""
+                       ;;
+                       }
+
+;;
 
  ;; --- APPLICATION IDENTIFIERS ---
  ;; Used for application-specific rules (`:condi`)
@@ -466,6 +471,25 @@
                                 ;; [:fn :equal_sign]
                                 [:left_option :left_option nil {:alone   {:key :semicolon :modi :left_command}
                                                                 :afterup :reset-all-modes}]]}
+                        {:des "Raycast Options"
+                          :rules [
+                            ;; Need to figure out "froms" when adding modifiers
+
+                            [{:key :s :modi :option} [:ai-command "improve-writing-flash"]]
+                            [{:key :h :modi :option} [:raycast "raycast/raycast-ai/ai-chat?context=%7B%22preset%22:%226375022D-2B06-4DB4-A82E-8B0C96459304%22%7D"]]
+
+
+                            [{:key :a :modi :option} [:raycast "raycast/raycast-ai/ai-chat"]]
+                            [{:key :w :modi :option} [:raycast "johnlindquist/wezterm-panes/list-panes"]]
+                            [{:key :e :modi :option} [:raycast "file-search/search-files"]]
+                            [{:key :z :modi :option} [:raycast "johnlindquist/recent-zed-projects/index"]]
+                            [{:key :m :modi :option} [:raycast "johnlindquist/copy-page-as-markdown/copy-page-as-markdown"]]
+                            [{:key :f :modi :option} [:raycast "Codely/google-chrome/search-tab"]]
+                            ]
+
+                          }
+
+
 
                        {:des   "Global Ctrl+F-keys → fn+F-keys (media/hardware controls)"
                         :rules [[:!Tf1 {:key :f1 :modi :fn}]   ; brightness down
@@ -1217,7 +1241,6 @@
                                 [:-t :open_next_editor] ; K+T (F Colemak) -> Next Editor/Tab (Cmd+Opt+Right)
                                 [:-d :focus_prev_editor_group]]} ; K+D (G Colemak) -> Focus Prev Group (Opt+Shift+F16)
 
-
                        {:des   "Snippet Mode (Quote + Key)"
                         :rules [:snippet-mode
                                 ;; Code snippets via Quote + Key
@@ -1459,7 +1482,7 @@
                                 [:-v [:launch "Visual Studio Code - Insiders"]] ; Launch+V -> Launch Cursor Nightly
                                 [:-d [:launch "Discord"]] ; Launch+D (G Colemak) -> Launch Discord
                                 [:-f [:launch "Finder"]] ; Launch+F (E Colemak) -> Launch Finder
-                                [:-p [:launch "Pieces"]] ; Launch+P (E Colemak) -> Launch Pieces
+                                ;; [:-p [:launch "Pieces"]] ; Launch+P (E Colemak) -> Launch Pieces
                                 [:-g [:launch "Google Chrome"]] ; Launch+G (T Colemak) -> Launch Chrome
                                 ;;   Available triggers:
                                 ;;   | Trigger           | Action                              |
@@ -1474,10 +1497,13 @@
                                 ;;   | layouts           | Layout template picker              |
                                 ;;   | zen               | Toggle zen mode                     |
                                 [:-a [:wez-trigger "app_launcher"]] ; Launch+A -> App launcher
-                                [:-t [:wez-trigger "quick_open"]] ; Launch+T -> Quick Open picker
+                                [:-w [:wez-trigger "quick_open"]] ; Launch+T -> Quick Open picker
+                                [:-t [:launch "WezTerm"]] ; Launch+T -> Quick Open picker
                                 [:-c [:wez-trigger "quick_open_cursor"]] ; Launch+C -> Open in Cursor
                                 [:-n [:wez-trigger "notepad"]] ; Launch+N -> Notepad (auto-commits)
-                                ;; [:-c [:launch "Cursor"]] ; Launch+C -> Launch Cursor
+                                [:-p [:wez-trigger "copy_path"]] ; Launch+N -> Notepad (auto-commits)
+
+;; [:-c [:launch "Cursor"]] ; Launch+C -> Launch Cursor
                                 [:-k "launchctl kickstart -k org.pqrs.karabiner.karabiner_console_user_server"] ; Launch+K (E Colemak) -> Restart Karabiner
                                 [:-y [:launch "YouTube Music"]] ; Launch+Y (O Colemak) -> Launch YouTube Music
                                 [:-r [:wezterm "cd ~/research && x --append-system-prompt='Research the users query then write the result to a markdown file ./<shortened-slugified-query>.md'"]] ; Launch+R -> WezTerm research mode
@@ -1485,7 +1511,10 @@
                                 ;; [:-w [:launch "Windsurf"]] ; Launch+W -> Launch Windsurf
                                 [:-z [:launch "Zed"]] ; Launch+Z -> Launch Zoom
                                 [:-w [:launch "zoom.us"]] ; Launch+Z -> Launch Zoom
-                                [:-x [:wezterm "devx"]]]} ; Launch+X -> Open WezTerm, select project with fzf, then run "x"
+                                [:-x [:wezterm "devx"]]
+                                [:left_shift [:raycast "Codely/google-chrome/search-tab"]]
+                                ;;
+]} ; Launch+X -> Open WezTerm, select project with fzf, then run "x"
 
                        ;; --- Global Layout Remapping ---
                        {:des   "Colemak Remapping (Qwerty Input -> Colemak Output)"

@@ -1,0 +1,57 @@
+#!/bin/sh
+# Global pre-push hook with beads auto-detection
+# Prevents pushing stale JSONL if .beads/ exists
+
+# --- Beads integration ---
+if [ -d .beads ]; then
+    # Flush pending changes
+    if command -v bd >/dev/null 2>&1; then
+        bd sync --flush-only >/dev/null 2>&1 || true
+    fi
+
+    # Collect JSONL files
+    FILES=""
+    for f in .beads/beads.jsonl .beads/issues.jsonl .beads/deletions.jsonl; do
+        if git ls-files --error-unmatch "$f" >/dev/null 2>&1 || [ -f "$f" ]; then
+            FILES="$FILES $f"
+        fi
+    done
+
+    # Check for uncommitted changes
+    if [ -n "$FILES" ]; then
+        # shellcheck disable=SC2086
+        if [ -n "$(git status --porcelain -- $FILES 2>/dev/null)" ]; then
+            echo "❌ Error: Uncommitted beads changes detected" >&2
+            echo "" >&2
+            if command -v bd >/dev/null 2>&1 && [ -t 0 ]; then
+                echo "Would you like to run 'bd sync' now? [y/N]" >&2
+                read -r response
+                case "$response" in
+                    [yY][eE][sS]|[yY])
+                        if bd sync; then
+                            echo "✓ Sync complete. Continuing with push..." >&2
+                            # Fall through to local hook
+                        else
+                            echo "❌ Sync failed. Push aborted." >&2
+                            exit 1
+                        fi
+                        ;;
+                    *)
+                        echo "Push aborted. Run 'bd sync' manually." >&2
+                        exit 1
+                        ;;
+                esac
+            else
+                echo "Run 'bd sync' to commit these changes:" >&2
+                echo "  bd sync && git push" >&2
+                exit 1
+            fi
+        fi
+    fi
+fi
+
+# --- Chain to local hook if exists ---
+LOCAL_HOOK="$(git rev-parse --git-dir 2>/dev/null)/hooks/pre-push.local"
+[ -x "$LOCAL_HOOK" ] && exec "$LOCAL_HOOK" "$@"
+
+exit 0

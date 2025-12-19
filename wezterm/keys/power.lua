@@ -139,6 +139,17 @@ function M.get_keys(resurrect, default_color_scheme)
         end
       end),
     },
+
+    -- OPEN ZED AT CURRENT DIRECTORY
+    {
+      mods = "CMD",
+      key = "z",
+      action = wezterm.action_callback(function(window, pane)
+        local cwd = pane:get_current_working_dir()
+        local path = cwd and cwd.file_path or os.getenv("HOME")
+        wezterm.background_child_process({ "/usr/local/bin/zed", path })
+      end),
+    },
   }
 end
 

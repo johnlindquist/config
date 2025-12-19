@@ -18,6 +18,19 @@
 local wezterm = require 'wezterm'
 local config = wezterm.config_builder()
 
+-- ============================================================================
+-- ENVIRONMENT (ensure Homebrew tools available in spawned processes)
+-- ============================================================================
+local path = os.getenv("PATH") or ""
+config.set_environment_variables = {
+  PATH = table.concat({
+    "/opt/homebrew/bin",
+    "/opt/homebrew/sbin",
+    "/usr/local/bin",
+    path,
+  }, ":"),
+}
+
 -- Load modules
 local appearance = require 'appearance'
 local events = require 'events'

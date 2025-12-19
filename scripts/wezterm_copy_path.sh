@@ -1,57 +1,96 @@
 #!/bin/bash
 # wezterm_copy_path.sh - Browse directories with fzf, copy selected path
-# Navigation: ←/→ or Ctrl+H/L to go up/into directories, Enter to copy
+# Navigation: ←: up | →: into dir | Enter: copy | ⌥.: toggle hidden | Tab/⇧Tab: list
 
 DIR="${1:-$HOME}"
+SHOW_HIDDEN=0
+
+get_entries() {
+  local dir="$1"
+  local show_hidden="$2"
+
+  cd "$dir" || return
+
+  # Parent directory option (if not root)
+  [[ "$dir" != "/" ]] && echo ".. (go up)"
+
+  if [[ "$show_hidden" == "1" ]]; then
+    # Show all including hidden
+    find . -maxdepth 1 -type d ! -name '.' | sed 's|^\./||' | sort | while read -r d; do echo "$d/"; done
+    find . -maxdepth 1 -type f | sed 's|^\./||' | sort
+  else
+    # Hide dotfiles/dotdirs
+    find . -maxdepth 1 -type d ! -name '.' ! -name '.*' | sed 's|^\./||' | sort | while read -r d; do echo "$d/"; done
+    find . -maxdepth 1 -type f ! -name '.*' | sed 's|^\./||' | sort
+  fi
+}
 
 while true; do
-  # Get entries, sorted (directories first, then files)
-  ENTRIES=$(cd "$DIR" && {
-    # Parent directory option (if not root)
-    [[ "$DIR" != "/" ]] && echo ".. (go up)"
-    # Directories first (with / suffix for visibility)
-    find . -maxdepth 1 -type d ! -name '.' | sed 's|^\./||' | sort | while read d; do echo "$d/"; done
-    # Then files
-    find . -maxdepth 1 -type f | sed 's|^\./||' | sort
-  })
-
-  # Show current path and let user select
   DISPLAY_DIR="${DIR/#$HOME/~}"
-  SELECTION=$(echo "$ENTRIES" | fzf \
-    --header="📁 $DISPLAY_DIR | ←/Ctrl+H: up | →/Ctrl+L: into | Enter: copy" \
+  HIDDEN_INDICATOR=$([[ "$SHOW_HIDDEN" == "1" ]] && echo "👁 " || echo "")
+
+  ENTRIES=$(get_entries "$DIR" "$SHOW_HIDDEN")
+
+  # Use --expect to capture which key was pressed
+  RESULT=$(echo "$ENTRIES" | fzf \
+    --header="${HIDDEN_INDICATOR}📁 $DISPLAY_DIR | ←: up | →: into | Enter: copy | ⌥.: hidden" \
     --preview="[[ -d '$DIR/{}' ]] && ls -la '$DIR/{}' 2>/dev/null | head -20 || head -50 '$DIR/{}' 2>/dev/null" \
     --preview-window=right:50%:wrap \
-    --bind='left:abort+execute(echo "GO_UP")' \
-    --bind='ctrl-h:abort+execute(echo "GO_UP")' \
-    --bind='right:accept' \
-    --bind='ctrl-l:accept' \
+    --expect=left,right,ctrl-h,ctrl-l,alt-. \
+    --bind='tab:down' \
+    --bind='shift-tab:up' \
     --height=80% \
     --reverse \
     --no-mouse)
 
-  # Handle exit/cancel
-  [[ -z "$SELECTION" ]] && exit 0
+  # Parse result: first line is the key pressed, second line is selection
+  KEY=$(echo "$RESULT" | head -1)
+  SELECTION=$(echo "$RESULT" | tail -1)
 
-  # Handle "go up"
-  if [[ "$SELECTION" == ".. (go up)" || "$SELECTION" == "GO_UP" ]]; then
-    DIR=$(dirname "$DIR")
-    continue
-  fi
+  # Handle escape/cancel (both empty)
+  [[ -z "$KEY" && -z "$SELECTION" ]] && exit 0
 
-  # Remove trailing slash for processing
-  SELECTION="${SELECTION%/}"
-  FULL_PATH="$DIR/$SELECTION"
+  # Remove trailing slash for path operations
+  SELECTION_CLEAN="${SELECTION%/}"
+  FULL_PATH="$DIR/$SELECTION_CLEAN"
 
-  # If directory, navigate into it
-  if [[ -d "$FULL_PATH" ]]; then
-    DIR="$FULL_PATH"
-    continue
-  fi
+  # Handle special keys
+  case "$KEY" in
+    left|ctrl-h)
+      # Go up one directory
+      [[ "$DIR" != "/" ]] && DIR=$(dirname "$DIR")
+      continue
+      ;;
+    right|ctrl-l)
+      # Only enter if it's a directory (ignore for files)
+      if [[ "$SELECTION" == ".. (go up)" ]]; then
+        [[ "$DIR" != "/" ]] && DIR=$(dirname "$DIR")
+      elif [[ -d "$FULL_PATH" ]]; then
+        DIR="$FULL_PATH"
+      fi
+      # If it's a file, do nothing - just loop again
+      continue
+      ;;
+    alt-.)
+      # Toggle hidden files
+      SHOW_HIDDEN=$((1 - SHOW_HIDDEN))
+      continue
+      ;;
+  esac
 
-  # If file (or explicit selection), copy path to clipboard
-  if [[ -e "$FULL_PATH" ]]; then
-    echo -n "$FULL_PATH" | pbcopy
-    echo "Copied: $FULL_PATH"
-    exit 0
+  # Enter was pressed (KEY is empty but SELECTION exists)
+  if [[ -n "$SELECTION" ]]; then
+    # Handle "go up" selection
+    if [[ "$SELECTION" == ".. (go up)" ]]; then
+      DIR=$(dirname "$DIR")
+      continue
+    fi
+
+    # Copy the path (works for both files and directories)
+    if [[ -e "$FULL_PATH" ]]; then
+      echo -n "$FULL_PATH" | pbcopy
+      echo "Copied: $FULL_PATH"
+      exit 0
+    fi
   fi
 done

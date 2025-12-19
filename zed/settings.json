@@ -7,6 +7,10 @@
 // custom settings, run `zed: open default settings` from the
 // command palette (cmd-shift-p / ctrl-shift-p)
 {
+  "cursor_shape": "bar",
+  "autosave": "on_focus_change",
+  "format_on_save": "off",
+  "buffer_font_family": "JetBrains Mono",
   "agent": {
     "default_model": {
       "provider": "zed.dev",
@@ -18,6 +22,6 @@
   "theme": {
     "mode": "system",
     "light": "One Light",
-    "dark": "Material Dark"
+    "dark": "Github Dark Tritanopia"
   }
 }

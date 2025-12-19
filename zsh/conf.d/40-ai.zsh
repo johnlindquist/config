@@ -2,6 +2,9 @@
 # AI/Claude/Gemini Helpers
 # =========================
 
+# Claude Code: source shell config for functions/aliases in Bash tool
+export CLAUDE_ENV_FILE="$HOME/.claude/shell-init.sh"
+
 #### Google/Web Search
 google() {
   [[ $# -eq 0 ]] && { echo "Usage: google \"search query\""; return 1; }
@@ -289,7 +292,7 @@ cmdp() { { eval "$1"; echo "$2"; } | claude --print; }
 
 # Codex helpers
 dopex() { codex --dangerously-bypass-approvals-and-sandbox -c model_reasoning_effort=high "$@"; }
-upai() { bun i -g @openai/codex@latest @anthropic-ai/claude-code@latest @google/gemini-cli@latest @github/copilot@latest; }
+upai() { bun i -g @openai/codex@latest @anthropic-ai/claude-code@latest @github/copilot@latest; npm i -g @google/gemini-cli@latest; }
 
 codex_continue() {
   local latest
@@ -325,7 +328,6 @@ h() { claude --model haiku "$@"; }
 
 unalias x 2>/dev/null
 x() { claude --dangerously-skip-permissions "$@"; }
-
 dex() { codex --dangerously-bypass-approvals-and-sandbox "$@"; }
 xcon() { claude --dangerously-skip-permissions --continue "$@"; }
 xres() { claude --dangerously-skip-permissions --resume "$@"; }
