@@ -104,3 +104,23 @@ flutter/tool_state
 
 # Session data
 ubs/session.md
+
+# Editor history
+micro/buffers/
+
+# Machine-specific mappings
+scripts/display_id_mapping.txt
+
+# Test/debug scripts
+scripts/hello.sh
+
+# Service state files
+inngest/state
+builder/dev-tools.json
+
+# 1Password device/account data
+op/config
+op/plugins/used_items/
+
+# Orphaned/misplaced files
+.config/
