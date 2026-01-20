@@ -144,3 +144,11 @@ Cargo.lock
 # Session files
 **/sessions/
 **/.zsh_sessions/
+
+# SQLite runtime files
+*.db-shm
+*.db-wal
+*.db-journal
+
+# Bundled/generated skill files
+**/.swarm-bundled-skill.json
