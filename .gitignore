@@ -136,3 +136,7 @@ cron/
 
 # Empty/unused
 iterm2/
+
+# Rust build artifacts
+**/target/
+Cargo.lock
