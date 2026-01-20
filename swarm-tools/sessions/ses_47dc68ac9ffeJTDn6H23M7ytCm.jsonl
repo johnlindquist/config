@@ -1,1 +1,0 @@
-{"session_id":"ses_47dc68ac9ffeJTDn6H23M7ytCm","epic_id":"cell--9bnr5-mjxu4tcxstt","timestamp":"2026-01-03T05:01:26.544Z","event_type":"DECISION","decision_type":"worker_spawned","payload":{"bead_id":"cell--9bnr5-mjxu4tcxstt","files":["src/app_navigation.rs","src/render_script_list.rs"],"worker_model":"anthropic/claude-sonnet-4-5"}}

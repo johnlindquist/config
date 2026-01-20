@@ -140,3 +140,7 @@ iterm2/
 # Rust build artifacts
 **/target/
 Cargo.lock
+
+# Session files
+**/sessions/
+**/.zsh_sessions/

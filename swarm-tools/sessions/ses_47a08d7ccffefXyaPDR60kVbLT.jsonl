@@ -1,2 +1,0 @@
-{"session_id":"ses_47a08d7ccffefXyaPDR60kVbLT","epic_id":"epic-menu-reset-fix","timestamp":"2026-01-03T22:27:42.215Z","event_type":"DECISION","decision_type":"worker_spawned","payload":{"bead_id":"fix-window-action-reset-001","files":["src/render_builtins.rs"],"worker_model":"anthropic/claude-sonnet-4-5"}}
-{"session_id":"ses_47a08d7ccffefXyaPDR60kVbLT","epic_id":"fix-window-action-reset-001","timestamp":"2026-01-03T22:31:08.895Z","event_type":"DECISION","decision_type":"review_completed","payload":{"task_id":"fix-window-action-reset-001","status":"approved","retry_count":0}}
