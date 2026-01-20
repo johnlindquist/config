@@ -13,11 +13,12 @@ function M.apply(config)
     config.color_scheme = 'Hardcore'
 
     -- FONT CONFIGURATION
-    config.font = wezterm.font 'JetBrains Mono'
+    -- config.font = wezterm.font 'JetBrains Mono'
+    config.font = wezterm.font 'GeistMono'
     config.font_size = 13.0
 
     -- WINDOW DECORATIONS
-    config.window_decorations = "RESIZE"
+    config.window_decorations = "TITLE | RESIZE"
 
     -- BACKGROUND OPACITY
     config.window_background_opacity = 0.95
@@ -42,8 +43,8 @@ function M.apply(config)
         brightness = 0.3,
     }
 
-    -- Faster status updates for trigger system (default is 1000ms)
-    config.status_update_interval = 250
+    -- Use default status update interval (1000ms)
+    -- Triggers are handled by window-focus-changed, not polling
 
     -- PANE SPLIT LINE AND TAB BAR STYLING
     config.colors = {
@@ -77,6 +78,10 @@ function M.apply(config)
 
     -- CURSOR CONFIGURATION
     config.default_cursor_style = 'SteadyBar'
+
+    -- OPTION KEY AS META
+    config.send_composed_key_when_left_alt_is_pressed = false
+    config.send_composed_key_when_right_alt_is_pressed = false
 
     -- VISUAL BELL
     config.audible_bell = "Disabled"

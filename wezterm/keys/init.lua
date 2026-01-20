@@ -15,7 +15,7 @@ local M = {}
 
 function M.apply(config, workspace_switcher, resurrect)
   -- Leader key configuration
-  config.leader = { key = 'b', mods = 'CTRL', timeout_milliseconds = 2000 }
+  config.leader = { key = 'l', mods = 'ALT', timeout_milliseconds = 2000 }
 
   -- Aggregate all keys
   config.keys = {}

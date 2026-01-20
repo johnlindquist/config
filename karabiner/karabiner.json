@@ -371,97 +371,6 @@
           "type" : "basic"
         } ]
       }, {
-        "description" : "Raycast Options",
-        "manipulators" : [ {
-          "from" : {
-            "modifiers" : {
-              "mandatory" : [ "option" ]
-            },
-            "key_code" : "s"
-          },
-          "to" : [ {
-            "shell_command" : "open -g \"raycast://ai-commands/improve-writing-flash\""
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
-            "modifiers" : {
-              "mandatory" : [ "option" ]
-            },
-            "key_code" : "h"
-          },
-          "to" : [ {
-            "shell_command" : "open -g \"raycast://extensions/raycast/raycast-ai/ai-chat?context=%7B%22preset%22:%226375022D-2B06-4DB4-A82E-8B0C96459304%22%7D\""
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
-            "modifiers" : {
-              "mandatory" : [ "option" ]
-            },
-            "key_code" : "a"
-          },
-          "to" : [ {
-            "shell_command" : "open -g \"raycast://extensions/raycast/raycast-ai/ai-chat\""
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
-            "modifiers" : {
-              "mandatory" : [ "option" ]
-            },
-            "key_code" : "w"
-          },
-          "to" : [ {
-            "shell_command" : "open -g \"raycast://extensions/johnlindquist/wezterm-panes/list-panes\""
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
-            "modifiers" : {
-              "mandatory" : [ "option" ]
-            },
-            "key_code" : "e"
-          },
-          "to" : [ {
-            "shell_command" : "open -g \"raycast://extensions/file-search/search-files\""
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
-            "modifiers" : {
-              "mandatory" : [ "option" ]
-            },
-            "key_code" : "z"
-          },
-          "to" : [ {
-            "shell_command" : "open -g \"raycast://extensions/johnlindquist/recent-zed-projects/index\""
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
-            "modifiers" : {
-              "mandatory" : [ "option" ]
-            },
-            "key_code" : "m"
-          },
-          "to" : [ {
-            "shell_command" : "open -g \"raycast://extensions/johnlindquist/copy-page-as-markdown/copy-page-as-markdown\""
-          } ],
-          "type" : "basic"
-        }, {
-          "from" : {
-            "modifiers" : {
-              "mandatory" : [ "option" ]
-            },
-            "key_code" : "f"
-          },
-          "to" : [ {
-            "shell_command" : "open -g \"raycast://extensions/Codely/google-chrome/search-tab\""
-          } ],
-          "type" : "basic"
-        } ]
-      }, {
         "description" : "Global Ctrl+F-keys → fn+F-keys (media/hardware controls)",
         "manipulators" : [ {
           "from" : {
@@ -4017,7 +3926,7 @@
             "key_code" : "f"
           },
           "to" : [ {
-            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/launch_focus_app.sh \"Google Tasks\""
+            "shell_command" : "/Users/johnlindquist/.local/bin/launch-focus \"Google Tasks\""
           } ],
           "conditions" : [ {
             "name" : "tab-mode",
@@ -4030,7 +3939,7 @@
             "key_code" : "n"
           },
           "to" : [ {
-            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/launch_focus_app.sh \"Google Keep\""
+            "shell_command" : "/Users/johnlindquist/.local/bin/launch-focus \"Google Keep\""
           } ],
           "conditions" : [ {
             "name" : "tab-mode",
@@ -4043,7 +3952,7 @@
             "key_code" : "m"
           },
           "to" : [ {
-            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/launch_focus_app.sh \"/Users/johnlindquist/Applications/Chrome Apps.localized/Messages.app\""
+            "shell_command" : "/Users/johnlindquist/.local/bin/launch-focus \"/Users/johnlindquist/Applications/Chrome Apps.localized/Messages.app\""
           } ],
           "conditions" : [ {
             "name" : "tab-mode",
@@ -4917,6 +4826,53 @@
               "key_code" : "q"
             }, {
               "key_code" : "d"
+            } ],
+            "simultaneous_options" : {
+              "detect_key_down_uninterruptedly" : true,
+              "key_down_order" : "strict",
+              "key_up_order" : "strict_inverse",
+              "key_up_when" : "any",
+              "to_after_key_up" : [ {
+                "set_variable" : {
+                  "name" : "quick-mode",
+                  "value" : 0
+                }
+              } ]
+            }
+          }
+        }, {
+          "from" : {
+            "key_code" : "j"
+          },
+          "to" : [ {
+            "key_code" : "g",
+            "modifiers" : [ "left_control", "left_option" ]
+          } ],
+          "conditions" : [ {
+            "name" : "quick-mode",
+            "value" : 1,
+            "type" : "variable_if"
+          } ],
+          "type" : "basic"
+        }, {
+          "type" : "basic",
+          "parameters" : {
+            "basic.simultaneous_threshold_milliseconds" : 140
+          },
+          "to" : [ {
+            "set_variable" : {
+              "name" : "quick-mode",
+              "value" : 1
+            }
+          }, {
+            "key_code" : "g",
+            "modifiers" : [ "left_control", "left_option" ]
+          } ],
+          "from" : {
+            "simultaneous" : [ {
+              "key_code" : "q"
+            }, {
+              "key_code" : "j"
             } ],
             "simultaneous_options" : {
               "detect_key_down_uninterruptedly" : true,
@@ -11009,8 +10965,7 @@
             "key_code" : "k"
           },
           "to" : [ {
-            "modifiers" : [ "command", "control" ],
-            "key_code" : "spacebar"
+            "shell_command" : "open -g \"raycast://extensions/raycast/emoji-symbols/search-emoji-symbols\""
           } ],
           "conditions" : [ {
             "name" : "emoji-mode",
@@ -11029,8 +10984,7 @@
               "value" : 1
             }
           }, {
-            "modifiers" : [ "command", "control" ],
-            "key_code" : "spacebar"
+            "shell_command" : "open -g \"raycast://extensions/raycast/emoji-symbols/search-emoji-symbols\""
           } ],
           "from" : {
             "simultaneous" : [ {
@@ -13428,7 +13382,7 @@
             "key_code" : "d"
           },
           "to" : [ {
-            "shell_command" : "/usr/local/bin/cursor ~/.kit"
+            "shell_command" : "/usr/local/bin/zed ~/.scriptkit"
           } ],
           "conditions" : [ {
             "name" : "kit-mode",
@@ -13447,7 +13401,7 @@
               "value" : 1
             }
           }, {
-            "shell_command" : "/usr/local/bin/cursor ~/.kit"
+            "shell_command" : "/usr/local/bin/zed ~/.scriptkit"
           } ],
           "from" : {
             "simultaneous" : [ {
@@ -17546,7 +17500,7 @@
             "key_code" : "v"
           },
           "to" : [ {
-            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/launch_focus_app.sh \"Visual Studio Code - Insiders\""
+            "shell_command" : "/Users/johnlindquist/.local/bin/launch-focus \"Visual Studio Code - Insiders\""
           } ],
           "conditions" : [ {
             "name" : "launch-mode",
@@ -17565,7 +17519,7 @@
               "value" : 1
             }
           }, {
-            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/launch_focus_app.sh \"Visual Studio Code - Insiders\""
+            "shell_command" : "/Users/johnlindquist/.local/bin/launch-focus \"Visual Studio Code - Insiders\""
           } ],
           "from" : {
             "simultaneous" : [ {
@@ -17591,7 +17545,7 @@
             "key_code" : "g"
           },
           "to" : [ {
-            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/launch_focus_app.sh \"Discord\""
+            "shell_command" : "/Users/johnlindquist/.local/bin/launch-focus \"Discord\""
           } ],
           "conditions" : [ {
             "name" : "launch-mode",
@@ -17610,7 +17564,7 @@
               "value" : 1
             }
           }, {
-            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/launch_focus_app.sh \"Discord\""
+            "shell_command" : "/Users/johnlindquist/.local/bin/launch-focus \"Discord\""
           } ],
           "from" : {
             "simultaneous" : [ {
@@ -17636,7 +17590,7 @@
             "key_code" : "e"
           },
           "to" : [ {
-            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/launch_focus_app.sh \"Finder\""
+            "shell_command" : "/Users/johnlindquist/.local/bin/launch-focus \"Finder\""
           } ],
           "conditions" : [ {
             "name" : "launch-mode",
@@ -17655,7 +17609,7 @@
               "value" : 1
             }
           }, {
-            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/launch_focus_app.sh \"Finder\""
+            "shell_command" : "/Users/johnlindquist/.local/bin/launch-focus \"Finder\""
           } ],
           "from" : {
             "simultaneous" : [ {
@@ -17681,7 +17635,7 @@
             "key_code" : "t"
           },
           "to" : [ {
-            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/launch_focus_app.sh \"Google Chrome\""
+            "shell_command" : "/Users/johnlindquist/.local/bin/launch-focus \"Google Chrome\""
           } ],
           "conditions" : [ {
             "name" : "launch-mode",
@@ -17700,7 +17654,7 @@
               "value" : 1
             }
           }, {
-            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/launch_focus_app.sh \"Google Chrome\""
+            "shell_command" : "/Users/johnlindquist/.local/bin/launch-focus \"Google Chrome\""
           } ],
           "from" : {
             "simultaneous" : [ {
@@ -17816,7 +17770,7 @@
             "key_code" : "f"
           },
           "to" : [ {
-            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/launch_focus_app.sh \"WezTerm\""
+            "shell_command" : "/Users/johnlindquist/.local/bin/launch-focus \"WezTerm\""
           } ],
           "conditions" : [ {
             "name" : "launch-mode",
@@ -17835,7 +17789,7 @@
               "value" : 1
             }
           }, {
-            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/launch_focus_app.sh \"WezTerm\""
+            "shell_command" : "/Users/johnlindquist/.local/bin/launch-focus \"WezTerm\""
           } ],
           "from" : {
             "simultaneous" : [ {
@@ -17861,7 +17815,7 @@
             "key_code" : "c"
           },
           "to" : [ {
-            "shell_command" : "/Users/johnlindquist/.config/scripts/wezterm_trigger.sh \"quick_open_cursor\""
+            "shell_command" : "/Users/johnlindquist/.local/bin/launch-focus \"Conductor\""
           } ],
           "conditions" : [ {
             "name" : "launch-mode",
@@ -17880,7 +17834,7 @@
               "value" : 1
             }
           }, {
-            "shell_command" : "/Users/johnlindquist/.config/scripts/wezterm_trigger.sh \"quick_open_cursor\""
+            "shell_command" : "/Users/johnlindquist/.local/bin/launch-focus \"Conductor\""
           } ],
           "from" : {
             "simultaneous" : [ {
@@ -18041,7 +17995,7 @@
             "key_code" : "o"
           },
           "to" : [ {
-            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/launch_focus_app.sh \"YouTube Music\""
+            "shell_command" : "/Users/johnlindquist/.local/bin/launch-focus \"YouTube Music\""
           } ],
           "conditions" : [ {
             "name" : "launch-mode",
@@ -18060,7 +18014,7 @@
               "value" : 1
             }
           }, {
-            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/launch_focus_app.sh \"YouTube Music\""
+            "shell_command" : "/Users/johnlindquist/.local/bin/launch-focus \"YouTube Music\""
           } ],
           "from" : {
             "simultaneous" : [ {
@@ -18131,7 +18085,7 @@
             "key_code" : "d"
           },
           "to" : [ {
-            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/launch_focus_app.sh \"Slack\""
+            "shell_command" : "/Users/johnlindquist/.local/bin/launch-focus \"Slack\""
           } ],
           "conditions" : [ {
             "name" : "launch-mode",
@@ -18150,7 +18104,7 @@
               "value" : 1
             }
           }, {
-            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/launch_focus_app.sh \"Slack\""
+            "shell_command" : "/Users/johnlindquist/.local/bin/launch-focus \"Slack\""
           } ],
           "from" : {
             "simultaneous" : [ {
@@ -18176,7 +18130,7 @@
             "key_code" : "z"
           },
           "to" : [ {
-            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/launch_focus_app.sh \"Zed\""
+            "shell_command" : "/Users/johnlindquist/.local/bin/launch-focus \"Zed\""
           } ],
           "conditions" : [ {
             "name" : "launch-mode",
@@ -18195,7 +18149,7 @@
               "value" : 1
             }
           }, {
-            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/launch_focus_app.sh \"Zed\""
+            "shell_command" : "/Users/johnlindquist/.local/bin/launch-focus \"Zed\""
           } ],
           "from" : {
             "simultaneous" : [ {
@@ -18221,7 +18175,7 @@
             "key_code" : "w"
           },
           "to" : [ {
-            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/launch_focus_app.sh \"zoom.us\""
+            "shell_command" : "/Users/johnlindquist/.local/bin/launch-focus \"zoom.us\""
           } ],
           "conditions" : [ {
             "name" : "launch-mode",
@@ -18240,7 +18194,7 @@
               "value" : 1
             }
           }, {
-            "shell_command" : "/bin/bash /Users/johnlindquist/.config/scripts/launch_focus_app.sh \"zoom.us\""
+            "shell_command" : "/Users/johnlindquist/.local/bin/launch-focus \"zoom.us\""
           } ],
           "from" : {
             "simultaneous" : [ {

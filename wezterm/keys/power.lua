@@ -109,7 +109,7 @@ function M.get_keys(resurrect, default_color_scheme)
       end),
     },
 
-    -- ZEN MODE
+    -- ZEN MODE (Leader+z)
     {
       mods = "LEADER",
       key = "z",
@@ -121,6 +121,39 @@ function M.get_keys(resurrect, default_color_scheme)
         else
           overrides.enable_tab_bar = false
           overrides.window_padding = { left = 0, right = 0, top = 0, bottom = 0 }
+        end
+        window:set_config_overrides(overrides)
+      end),
+    },
+
+    -- ZEN MODE / PRESENTER MODE (Cmd+Shift+P)
+    {
+      mods = "CMD|SHIFT",
+      key = "p",
+      action = wezterm.action_callback(function(window, pane)
+        local overrides = window:get_config_overrides() or {}
+        if overrides.enable_tab_bar == false then
+          overrides.enable_tab_bar = true
+          overrides.window_padding = { left = 10, right = 10, top = 10, bottom = 10 }
+        else
+          overrides.enable_tab_bar = false
+          overrides.window_padding = { left = 0, right = 0, top = 0, bottom = 0 }
+        end
+        window:set_config_overrides(overrides)
+      end),
+    },
+
+    -- RECORDING MODE (hide tab bar + status bar for demos/lessons)
+    {
+      mods = "CMD|SHIFT",
+      key = "r",
+      action = wezterm.action_callback(function(window, pane)
+        wezterm.GLOBAL.recording_mode = not wezterm.GLOBAL.recording_mode
+        local overrides = window:get_config_overrides() or {}
+        if wezterm.GLOBAL.recording_mode then
+          overrides.enable_tab_bar = false
+        else
+          overrides.enable_tab_bar = true
         end
         window:set_config_overrides(overrides)
       end),
@@ -148,6 +181,26 @@ function M.get_keys(resurrect, default_color_scheme)
         local cwd = pane:get_current_working_dir()
         local path = cwd and cwd.file_path or os.getenv("HOME")
         wezterm.background_child_process({ "/usr/local/bin/zed", path })
+      end),
+    },
+
+    -- QUICK COMMAND PANES (uses BSP layout like Cmd+T)
+    -- Cmd+X: Open new pane and run 'x' alias
+    {
+      mods = "CMD",
+      key = "x",
+      action = wezterm.action_callback(function(window, pane)
+        local layouts = require 'layouts'
+        layouts.smart_new_pane(window, pane, { args = { "/bin/zsh", "-ic", "x; exec zsh" } })
+      end),
+    },
+    -- Cmd+Y: Open new pane and run 'ocy' alias
+    {
+      mods = "CMD",
+      key = "y",
+      action = wezterm.action_callback(function(window, pane)
+        local layouts = require 'layouts'
+        layouts.smart_new_pane(window, pane, { args = { "/bin/zsh", "-ic", "ocy; exec zsh" } })
       end),
     },
   }

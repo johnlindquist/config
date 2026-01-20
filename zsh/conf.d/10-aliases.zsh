@@ -7,6 +7,7 @@
 #### Better defaults (requires: brew install bat eza trash)
 command -v bat &>/dev/null && alias cat='bat --no-pager'
 command -v eza &>/dev/null && alias ls='eza'
+command -v eza &>/dev/null && alias lt='eza -l --sort=modified'  # oldest first, newest at bottom
 command -v trash &>/dev/null && alias rm='trash'
 command -v bun &>/dev/null && alias -s ts='bun'
 

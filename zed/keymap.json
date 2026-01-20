@@ -17,5 +17,11 @@
     "bindings": {
       // "j k": "vim::NormalBefore"
     }
+  },
+  {
+    "context": "Pane",
+    "bindings": {
+      "cmd-k w": "workspace::CloseAllItemsAndPanes"
+    }
   }
 ]

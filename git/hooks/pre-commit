@@ -24,6 +24,72 @@ if [[ -f "$(git rev-parse --git-dir 2>/dev/null)/hooks/anti-slop-disable" ]]; th
 fi
 
 # ============================================================
+# SMART PROJECT DETECTION
+# ============================================================
+# Skip anti-slop for "non-project" repos (pure docs, notes, configs)
+# Force enable with: ANTI_SLOP_FORCE=1 git commit
+
+is_real_project() {
+    # Project markers that indicate this is a "real" code project
+    local PROJECT_MARKERS=(
+        "package.json"
+        "package-lock.json"
+        "yarn.lock"
+        "pnpm-lock.yaml"
+        "bun.lockb"
+        "Cargo.toml"
+        "Cargo.lock"
+        "go.mod"
+        "go.sum"
+        "pyproject.toml"
+        "setup.py"
+        "requirements.txt"
+        "Pipfile"
+        "poetry.lock"
+        "composer.json"
+        "Gemfile"
+        "Gemfile.lock"
+        "pom.xml"
+        "build.gradle"
+        "build.gradle.kts"
+        "CMakeLists.txt"
+        "Makefile"
+        "meson.build"
+        "setup.cfg"
+        ".beads"
+        "Dockerfile"
+        "docker-compose.yml"
+        "docker-compose.yaml"
+        ".github/workflows"
+    )
+
+    for marker in "${PROJECT_MARKERS[@]}"; do
+        if [[ -e "$marker" ]]; then
+            return 0  # Is a real project
+        fi
+    done
+
+    return 1  # Not a real project
+}
+
+has_code_files_in_repo() {
+    # Check if repo contains ANY code files (not just staged)
+    local CODE_PATTERN='.*\.(js|jsx|ts|tsx|py|go|rs|java|kt|swift|c|cpp|h|hpp|rb|php|cs|scala|sh|bash|zsh|vue|svelte|astro)$'
+    if git ls-files | grep -qE "$CODE_PATTERN" 2>/dev/null; then
+        return 0  # Has code files
+    fi
+    return 1  # No code files
+}
+
+# Smart skip logic (can be forced with ANTI_SLOP_FORCE=1)
+if [[ "${ANTI_SLOP_FORCE:-0}" != "1" ]]; then
+    if ! is_real_project && ! has_code_files_in_repo; then
+        # Completely skip for non-project repos
+        exit 0
+    fi
+fi
+
+# ============================================================
 # LOCAL PROJECT HOOK (runs first for fast failures)
 # ============================================================
 

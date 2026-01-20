@@ -2,6 +2,10 @@
 # AI/Claude/Gemini Helpers
 # =========================
 
+# OpenCode aliases
+alias oc='opencode'
+alias ocy='OPENCODE_PERMISSION='\''{"edit":"allow","bash":"allow","webfetch":"allow","doom_loop":"allow","external_directory":"allow"}'\'' opencode'
+
 # Claude Code: source shell config for functions/aliases in Bash tool
 export CLAUDE_ENV_FILE="$HOME/.claude/shell-init.sh"
 

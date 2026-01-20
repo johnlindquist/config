@@ -171,6 +171,7 @@ function M.setup()
   -- Initialize global state
   wezterm.GLOBAL.user_selected_theme = wezterm.GLOBAL.user_selected_theme or nil
   wezterm.GLOBAL.claude_alerts = wezterm.GLOBAL.claude_alerts or {}
+  wezterm.GLOBAL.recording_mode = wezterm.GLOBAL.recording_mode or false
 
   -- INSTANT TRIGGER PROCESSING on focus (much faster than update-status polling)
   wezterm.on('window-focus-changed', function(window, pane, focused)
@@ -256,11 +257,6 @@ function M.setup()
 
   -- STATUS BAR
   wezterm.on("update-status", function(window, pane)
-    -- Fallback trigger check (for when WezTerm is already focused)
-    if window:is_focused() then
-      process_trigger(window, pane)
-    end
-
     -- Track directory focus time
     local cwd = pane:get_current_working_dir()
     if cwd and cwd.file_path then
@@ -279,6 +275,13 @@ function M.setup()
         overrides.color_scheme = nil
         window:set_config_overrides(overrides)
       end
+    end
+
+    -- Recording mode: hide all status bar content
+    if wezterm.GLOBAL.recording_mode then
+      window:set_left_status("")
+      window:set_right_status("")
+      return
     end
 
     -- Disable left status bar
@@ -304,8 +307,7 @@ function M.setup()
       table.insert(cells, { Attribute = { Intensity = "Normal" } })
     end
 
-    -- Current working directory
-    local cwd = pane:get_current_working_dir()
+    -- Current working directory (reuse cwd from above)
     if cwd then
       local home = os.getenv("HOME") or ""
       local path = cwd.file_path:gsub(home, "~")

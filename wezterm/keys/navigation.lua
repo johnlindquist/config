@@ -34,40 +34,13 @@ function M.get_keys(workspace_switcher)
       end),
     },
 
-    -- NEW TAB WITH ZOXIDE PICKER (only spawns tab after directory is selected)
+    -- SMART SPLIT (uses current layout mode)
     {
       mods = "CMD",
       key = "t",
       action = wezterm.action_callback(function(window, pane)
-        local helpers = require 'helpers'
-        local success, stdout = wezterm.run_child_process({ helpers.zoxide_path, 'query', '-l' })
-        if not success then
-          -- Fallback: just spawn a plain tab
-          window:mux_window():spawn_tab({})
-          return
-        end
-
-        local choices = {}
-        local home = os.getenv("HOME") or ""
-        for line in stdout:gmatch('[^\n]+') do
-          local display = line:gsub("^" .. home, "~")
-          table.insert(choices, { id = line, label = display })
-        end
-
-        window:perform_action(
-          act.InputSelector {
-            title = 'New Tab: Select Directory',
-            choices = choices,
-            fuzzy = true,
-            action = wezterm.action_callback(function(win, _, id, label)
-              if id then
-                win:mux_window():spawn_tab({ cwd = id })
-              end
-              -- If user cancels (id is nil), no tab is spawned - this is the fix!
-            end),
-          },
-          pane
-        )
+        local layouts = require 'layouts'
+        layouts.smart_new_pane(window, pane)
       end),
     },
 
@@ -86,14 +59,6 @@ function M.get_keys(workspace_switcher)
         pickers.show_quick_open_picker(window, pane)
       end),
     },
-    -- OPEN IN CURSOR (same picker, but opens in Cursor editor)
-    {
-      mods = "CMD|SHIFT",
-      key = "p",
-      action = wezterm.action_callback(function(window, pane)
-        pickers.show_quick_open_picker(window, pane, 'cursor')
-      end),
-    },
     { mods = "CMD|SHIFT", key = "n", action = act.SpawnWindow },
     { mods = "CMD|SHIFT", key = "f", action = act.ToggleFullScreen },
 
@@ -104,7 +69,6 @@ function M.get_keys(workspace_switcher)
     { mods = "CMD|SHIFT", key = "e", action = act.PaneSelect { alphabet = "1234567890", mode = "SwapWithActive" } },
 
     -- COMMAND PALETTE AND LAUNCHER
-    { mods = "CMD", key = "k", action = act.ActivateCommandPalette },
     { mods = "CMD", key = "l", action = act.ShowLauncher },
 
     -- PANE NAVIGATION (LEADER KEY)
@@ -163,6 +127,12 @@ function M.get_keys(workspace_switcher)
 
     -- SEARCH
     { mods = "CMD", key = "f", action = act.Search { CaseInSensitiveString = '' } },
+
+    -- PASSTHROUGH READLINE KEYS (disable WezTerm defaults)
+    -- Ctrl+K: kill-line in shell (was: ClearScrollback)
+    { mods = "CTRL", key = "k", action = act.DisableDefaultAssignment },
+    -- Ctrl+X: readline prefix (was: ActivateCopyMode)
+    { mods = "CTRL", key = "x", action = act.DisableDefaultAssignment },
   }
 end
 

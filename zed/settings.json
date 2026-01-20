@@ -7,6 +7,12 @@
 // custom settings, run `zed: open default settings` from the
 // command palette (cmd-shift-p / ctrl-shift-p)
 {
+  "git_panel": {
+    "tree_view": false
+  },
+  "file_finder": {
+    "include_ignored": "indexed"
+  },
   "cursor_shape": "bar",
   "autosave": "on_focus_change",
   "format_on_save": "off",

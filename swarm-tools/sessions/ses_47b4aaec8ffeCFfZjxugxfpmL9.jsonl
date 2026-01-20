@@ -1,0 +1,1 @@
+{"session_id":"ses_47b4aaec8ffeCFfZjxugxfpmL9","epic_id":"epic-cmd-config","timestamp":"2026-01-03T16:49:25.137Z","event_type":"DECISION","decision_type":"worker_spawned","payload":{"bead_id":"task-1-ts-types","files":["scripts/config-schema.ts"],"worker_model":"anthropic/claude-sonnet-4-5"}}

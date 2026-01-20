@@ -14,14 +14,10 @@ function M.get_keys()
     -- PANE SPLITTING
     { mods = "LEADER", key = "-", action = act.SplitVertical { domain = "CurrentPaneDomain" } },
     { mods = "LEADER", key = "|", action = act.SplitHorizontal { domain = "CurrentPaneDomain" } },
-    {
-      mods = "CMD",
-      key = "d",
-      action = wezterm.action_callback(function(window, pane)
-        layouts.smart_new_pane(window, pane)
-      end),
-    },
-    { mods = "CMD|SHIFT", key = "d", action = act.SplitVertical { domain = "CurrentPaneDomain" } },
+    -- Next pane (cycle through panes)
+    { mods = "CMD", key = "d", action = act.ActivatePaneDirection "Next" },
+    -- Previous pane (cycle back through panes)
+    { mods = "CMD|SHIFT", key = "d", action = act.ActivatePaneDirection "Prev" },
 
     -- ZELLIJ-STYLE AUTO-LAYOUT
     {
@@ -88,7 +84,19 @@ function M.get_keys()
         window:perform_action(act.RotatePanes "Clockwise", pane)
       end),
     },
+    -- PANE ZOOM (toggle focus on current pane, hiding others)
+    { mods = "ALT", key = "f", action = act.TogglePaneZoomState },
     { mods = "ALT", key = "=", action = act.SetPaneZoomState(false) },
+
+    -- REBALANCE PANES (equalize all pane sizes) - Cmd+Shift+B for "balance"
+    {
+      mods = "CMD|SHIFT",
+      key = "b",
+      action = wezterm.action_callback(function(window, pane)
+        layouts.rebalance_panes(window, pane)
+        window:toast_notification('Layout', 'Panes rebalanced', nil, 1500)
+      end),
+    },
     {
       mods = "ALT",
       key = "Enter",
@@ -102,19 +110,11 @@ function M.get_keys()
     },
     {
       mods = "ALT",
-      key = "f",
-      action = wezterm.action_callback(function(window, pane)
-        window:perform_action(act.TogglePaneZoomState, pane)
-      end),
-    },
-    {
-      mods = "ALT",
       key = "x",
       action = wezterm.action_callback(function(window, pane)
         window:perform_action(act.CloseCurrentPane { confirm = false }, pane)
       end),
     },
-    -- Note: LEADER+z is Zen mode (in power.lua), use ALT+f for pane zoom
 
     -- STATIC LAYOUT TEMPLATES
     {

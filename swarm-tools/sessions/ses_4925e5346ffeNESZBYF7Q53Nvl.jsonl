@@ -1,0 +1,2 @@
+{"session_id":"ses_4925e5346ffeNESZBYF7Q53Nvl","epic_id":"cell--9bnr5-mjs4eqg62nm","timestamp":"2025-12-30T05:02:29.499Z","event_type":"DECISION","decision_type":"worker_spawned","payload":{"bead_id":"cell--9bnr5-mjs4eqg62nm","files":["src/main.rs"],"worker_model":"anthropic/claude-sonnet-4-5"}}
+{"session_id":"ses_4925e5346ffeNESZBYF7Q53Nvl","epic_id":"cell--9bnr5-mjs4eqg62nm","timestamp":"2025-12-30T05:07:20.070Z","event_type":"DECISION","decision_type":"review_completed","payload":{"task_id":"cell--9bnr5-mjs4eqg62nm","status":"approved","retry_count":0}}

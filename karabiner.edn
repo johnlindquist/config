@@ -218,7 +218,7 @@
  :templates           {;; Common path shortcuts (DRY principle)
                        :script "/bin/bash /Users/johnlindquist/.config/scripts/%s.sh"
                        :cursor "/usr/local/bin/cursor %s"
-
+                       :zed "/usr/local/bin/zed %s"
                        ;; Layer indicator (shows notification when layer activates)
                        :notify "osascript -e 'display notification \"%s\" with title \"Layer\"'"
 
@@ -237,7 +237,7 @@
                                      '"
                        :kit "~/.kit/kar \"%s\""
                        :focus "~/.kit/kar focus \"%s\""
-                       :launch "/bin/bash /Users/johnlindquist/.config/scripts/launch_focus_app.sh \"%s\""
+                       :launch "/Users/johnlindquist/.local/bin/launch-focus \"%s\""
                        :wezterm "/Users/johnlindquist/.config/scripts/wezterm_run.sh \"%s\""
                        :wez-trigger "/Users/johnlindquist/.config/scripts/wezterm_trigger.sh \"%s\""
                        :open-chrome "osascript -e 'tell application \"Google Chrome\"\nactivate\nopen location \"%s\"\nend tell'"
@@ -475,16 +475,17 @@
                           :rules [
                             ;; Need to figure out "froms" when adding modifiers
 
-                            [{:key :s :modi :option} [:ai-command "improve-writing-flash"]]
-                            [{:key :h :modi :option} [:raycast "raycast/raycast-ai/ai-chat?context=%7B%22preset%22:%226375022D-2B06-4DB4-A82E-8B0C96459304%22%7D"]]
+                            ;; [{:key :s :modi :option} [:raycast "johnlindquist/ai-writing/rewrite"]]
+                            ;; [{:key :h :modi :option} [:raycast "raycast/raycast-ai/ai-chat?context=%7B%22preset%22:%226375022D-2B06-4DB4-A82E-8B0C96459304%22%7D"]]
 
 
-                            [{:key :a :modi :option} [:raycast "raycast/raycast-ai/ai-chat"]]
-                            [{:key :w :modi :option} [:raycast "johnlindquist/wezterm-panes/list-panes"]]
-                            [{:key :e :modi :option} [:raycast "file-search/search-files"]]
-                            [{:key :z :modi :option} [:raycast "johnlindquist/recent-zed-projects/index"]]
-                            [{:key :m :modi :option} [:raycast "johnlindquist/copy-page-as-markdown/copy-page-as-markdown"]]
-                            [{:key :f :modi :option} [:raycast "Codely/google-chrome/search-tab"]]
+                            ;; [{:key :a :modi :option} [:raycast "raycast/raycast-ai/ai-chat"]]
+                            ;; [{:key :w :modi :option} [:raycast "johnlindquist/wezterm-panes/list-panes"]]
+                            ;; [{:key :e :modi :option} [:raycast "file-search/search-files"]]
+                            ;; [{:key :d :modi :option} [:raycast "johnlindquist/recent-zed-projects/index"]]
+                            ;; [{:key :m :modi :option} [:raycast "johnlindquist/copy-page-as-markdown/copy-page-as-markdown"]]
+                            ;; [{:key :f :modi :option} [:raycast "Codely/google-chrome/search-tab"]]
+                            ;; [{:key :c :modi :option} [:raycast "raycast/clipboard-history/clipboard-history"]]
                             ]
 
                           }
@@ -1071,7 +1072,8 @@
                         :rules [:quick-mode
                                 ;; Utility scripts triggered by Q + Key
                                 [:g ["/Users/johnlindquist/scripts/scripts/goku-notify.ts"]] ; Q+G -> Reload Karabiner via Goku
-                                [:d ["date +\"%Y-%m-%d %H:%M:%S\" | tee >(pbcopy) | /opt/homebrew/bin/terminal-notifier -sound default -message"]]]} ; Q+D -> Copy/Notify current timestamp
+                                [:d ["date +\"%Y-%m-%d %H:%M:%S\" | tee >(pbcopy) | /opt/homebrew/bin/terminal-notifier -sound default -message"]] ; Q+D -> Copy/Notify current timestamp
+                                [:-n :!TOg]]} ; Q+N (J Colemak) -> Ctrl+Opt+G
 
                        {:des   "Zero Mode (0 + Key)"
                         :rules [:zero-mode
@@ -1268,7 +1270,7 @@
                                 [:-b [:paste "😊"]] ; Z+B -> Blush
                                 [:-c [:paste "👏"]] ; Z+C -> Clap
                                 [:-d [:paste "🧐"]] ; Z+D (G Colemak) -> Monocle
-                                [:-e :emoji_picker] ; Z+E (K Colemak) -> Emoji Picker
+                                [:-e [:raycast "raycast/emoji-symbols/search-emoji-symbols"]] ; Z+E (K Colemak) -> Emoji Picker
                                 [:-f [:paste "🔥"]] ; Z+F (E Colemak) -> Fire
                                 [:-g [:paste "😬"]] ; Z+G (T Colemak) -> Grimace
                                 [:-h [:paste "😍"]] ; Z+H -> Heart Eyes
@@ -1350,7 +1352,7 @@
                         :rules [:kit-mode
                                 ;; Open projects in Cursor via N + Key
                                 [:-q [:cursor "~/dev/cdp-cli-container/cdp-cli"]]
-                                [:-s [:cursor "~/.kit"]]
+                                [:-s [:zed "~/.scriptkit"]]
                                 [:-r [:cursor "~/dev/rubrics"]]
                                 [:-d [:cursor "~/dev/kit-docs"]]
                                 [:-f [:cursor "~/dev/file-forge"]]
@@ -1499,7 +1501,7 @@
                                 [:-a [:wez-trigger "app_launcher"]] ; Launch+A -> App launcher
                                 [:-w [:wez-trigger "quick_open"]] ; Launch+T -> Quick Open picker
                                 [:-t [:launch "WezTerm"]] ; Launch+T -> Quick Open picker
-                                [:-c [:wez-trigger "quick_open_cursor"]] ; Launch+C -> Open in Cursor
+                                [:-c [:launch "Conductor"]] ; Launch+C -> Open in Cursor
                                 [:-n [:wez-trigger "notepad"]] ; Launch+N -> Notepad (auto-commits)
                                 [:-p [:wez-trigger "copy_path"]] ; Launch+N -> Notepad (auto-commits)
 

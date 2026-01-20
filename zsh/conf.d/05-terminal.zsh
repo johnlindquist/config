@@ -2,6 +2,9 @@
 # OSC 7 - Report current working directory to terminal emulator
 # This enables tab titles and status bar to show the current directory
 
+# Disable "You have new mail" notification
+unset MAILCHECK
+
 _osc7_cwd() {
   printf '\033]7;file://%s%s\033\\' "${HOST}" "${PWD}"
 }

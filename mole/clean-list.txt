@@ -1,0 +1,110 @@
+# Mole Cleanup Preview - 2026-01-07 19:12:43
+#
+# How to protect files:
+# 1. Copy any path below to ~/.config/mole/whitelist
+# 2. Run: mo clean --whitelist
+#
+# Example:
+#   /Users/*/Library/Caches/com.example.app
+#
+
+
+=== User essentials ===
+/Users/johnlindquist/Library/Caches  # 19.90GB (140 items)
+/Users/johnlindquist/Library/Application Support/Google/Chrome/Default/File System/001/p/28  # 132KB
+/Users/johnlindquist/Library/Logs  # 155.6MB (35 items)
+/Users/johnlindquist/.Trash  # 17.32GB (4505 items)
+
+=== Finder metadata ===
+
+=== macOS system caches ===
+/Users/johnlindquist/Library/Saved Application State  # 136KB (7 items)
+/Users/johnlindquist/Library/Suggestions  # 10.3MB (18 items)
+
+=== Sandboxed app caches ===
+
+=== Browsers ===
+/Users/johnlindquist/Library/Caches/com.apple.Safari/WebKitCache  # 4KB
+/Users/johnlindquist/Library/Caches/Google/Chrome  # 2.05GB (6 items)
+/Users/johnlindquist/Library/Application Support/Google/Chrome/Profile 1/GPUCache  # 545KB (5 items)
+/Users/johnlindquist/Library/Application Support/Google/Chrome/Guest Profile/GPUCache  # 545KB (5 items)
+/Users/johnlindquist/Library/Application Support/Google/Chrome/Profile 3/GPUCache  # 545KB (5 items)
+/Users/johnlindquist/Library/Application Support/Google/Chrome/Default/GPUCache  # 5.8MB (16 items)
+/Users/johnlindquist/Library/Application Support/Google/Chrome/Profile 2/GPUCache  # 545KB (5 items)
+/Users/johnlindquist/Library/Caches/company.thebrowser.dia  # 140.3MB (2 items)
+
+=== Cloud storage ===
+
+=== Office applications ===
+
+=== Developer tools ===
+/Users/johnlindquist/Library/pnpm/store  # 51.58GB (2 items)
+/Users/johnlindquist/.bun/install/cache  # 2.03GB (1408 items)
+/Users/johnlindquist/.cache/uv  # 2.54GB (7 items)
+/Users/johnlindquist/.cargo/registry/cache/index.crates.io-1949cf8c6b5b557f  # 323.2MB
+/Users/johnlindquist/.cargo/git  # 2.57GB (3 items)
+/Users/johnlindquist/.config/gcloud/logs  # 484KB (5 items)
+/Users/johnlindquist/.oh-my-zsh/cache  # 58KB (2 items)
+/Users/johnlindquist/.cache/pre-commit  # 395.8MB (11 items)
+/Users/johnlindquist/.cache/typescript  # 14.1MB (2 items)
+/Users/johnlindquist/.android/cache  # 3.0MB (42 items)
+/Users/johnlindquist/.gradle/caches  # 9.23GB (9 items)
+/Users/johnlindquist/.gradle/daemon  # 10.7MB (5 items)
+/Users/johnlindquist/.pub-cache  # 1.16GB (6 items)
+/Users/johnlindquist/Library/Caches/SentryCrash  # 68KB (17 items)
+/Users/johnlindquist/Library/Caches/Homebrew  # 1.88GB (263 items)
+
+=== Development applications ===
+/Users/johnlindquist/Library/Caches/com.apple.dt.Xcode  # 1.0MB (3 items)
+/Users/johnlindquist/Library/Developer/Xcode/DerivedData  # 1.44GB (14 items)
+/Users/johnlindquist/Library/Application Support/Code/logs  # 696KB (38 items)
+/Users/johnlindquist/Library/Application Support/Code/Cache/Cache_Data  # 76.4MB
+/Users/johnlindquist/Library/Application Support/Code/CachedData/fabdb6a30b49f79a7aba0f2ad9df9b399473380f  # 138.3MB
+/Users/johnlindquist/Library/Application Support/discord/Cache/Cache_Data  # 784.2MB
+/Users/johnlindquist/Library/Application Support/Slack/Cache  # 783.0MB (2 items)
+/Users/johnlindquist/Library/Caches/us.zoom.xos  # 3.0MB (4 items)
+/Users/johnlindquist/Library/Caches/ru.keepcoder.Telegram  # 241KB (3 items)
+/Users/johnlindquist/Library/Caches/com.openai.chat  # 14.3MB (15 items)
+/Users/johnlindquist/Library/Caches/com.anthropic.claudefordesktop  # 551KB (3 items)
+/Users/johnlindquist/Library/Logs/Claude  # 3.0MB (12 items)
+/Users/johnlindquist/Library/Caches/com.bohemiancoding.sketch3  # 9.8MB (4 items)
+/Users/johnlindquist/Library/Caches/net.telestream.screenflow10  # 3.06GB (6 items)
+/Users/johnlindquist/Library/Caches/com.apple.TV  # 1.0MB (5 items)
+/Users/johnlindquist  # 465KB (9 items)
+/Users/johnlindquist/.lesshst  # 1KB
+/Users/johnlindquist/.wget-hsts  # 1KB
+/Users/johnlindquist/Library/Caches/notion.id  # 80KB (2 items)
+
+=== Virtual machine tools ===
+
+=== Application Support ===
+
+=== Uninstalled app data ===
+/Users/johnlindquist/Library/Caches/com.charcoaldesign.swiftformat  # 8KB
+/Users/johnlindquist/Library/Caches/org.swift.swiftpm  # 1.45GB
+/Users/johnlindquist/Library/Caches/org.webkit.Playwright  # 4KB
+/Users/johnlindquist/Library/WebKit/com.electron.wispr-flow.accessibility-mac-app  # 4KB
+/Users/johnlindquist/Library/WebKit/com.johnlindquist.ontask  # 760KB
+/Users/johnlindquist/Library/WebKit/com.pieces.os  # 491.9MB
+/Users/johnlindquist/Library/WebKit/com.sony.EULA-PP-Checker  # 676KB
+/Users/johnlindquist/Library/WebKit/org.webkit.Playwright  # 364KB
+/Users/johnlindquist/Library/HTTPStorages/com.google.GoogleUpdater  # 628KB
+/Users/johnlindquist/Library/HTTPStorages/com.johnlindquist.PerfectContextCapture  # 168KB
+/Users/johnlindquist/Library/HTTPStorages/com.johnlindquist.VideoPrompting  # 508KB
+/Users/johnlindquist/Library/HTTPStorages/com.perfectcontext.capture.debug  # 100KB
+/Users/johnlindquist/Library/HTTPStorages/com.pieces.os  # 364KB
+/Users/johnlindquist/Library/HTTPStorages/com.pieces.x  # 424KB
+/Users/johnlindquist/Library/HTTPStorages/com.sony.EULA-PP-Checker  # 56KB
+
+=== Apple Silicon updates ===
+
+=== iOS device backups ===
+
+=== Time Machine incomplete backups ===
+
+# ============================================
+# Summary
+# ============================================
+# Potential cleanup: 122.51GB
+# Items: 22598
+# Categories: 68

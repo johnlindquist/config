@@ -123,7 +123,9 @@ end
 -- ============================================================================
 -- SMART NEW PANE
 -- ============================================================================
-function M.smart_new_pane(window, pane)
+-- Optional opts table: { args = { "/bin/zsh", "-ic", "cmd" } }
+function M.smart_new_pane(window, pane, opts)
+  opts = opts or {}
   local tab = window:active_tab()
   if not tab then return end
 
@@ -143,6 +145,9 @@ function M.smart_new_pane(window, pane)
   if cwd then
     split_args.cwd = cwd
   end
+  if opts.args then
+    split_args.args = opts.args
+  end
 
   local success, result = pcall(function()
     return target:split(split_args)
@@ -150,6 +155,119 @@ function M.smart_new_pane(window, pane)
 
   if success and result then
     result:activate()
+  end
+end
+
+-- ============================================================================
+-- REBALANCE PANES (equalize sizes)
+-- ============================================================================
+-- Strategy: Find vertical and horizontal split borders, move each to center
+function M.rebalance_panes(window, pane)
+  local wezterm = require 'wezterm'
+  local act = wezterm.action
+  local tab = window:active_tab()
+
+  if not tab then return end
+
+  local panes_info = tab:panes_with_info()
+  if #panes_info <= 1 then return end
+
+  -- Get tab dimensions
+  local tab_cols = 0
+  local tab_rows = 0
+  for _, p in ipairs(panes_info) do
+    local right_edge = p.left + p.width
+    local bottom_edge = p.top + p.height
+    if right_edge > tab_cols then tab_cols = right_edge end
+    if bottom_edge > tab_rows then tab_rows = bottom_edge end
+  end
+
+  -- Find unique vertical borders (left edges, excluding 0)
+  -- and horizontal borders (top edges, excluding 0)
+  local v_borders = {}  -- vertical borders (x positions)
+  local h_borders = {}  -- horizontal borders (y positions)
+
+  for _, p in ipairs(panes_info) do
+    if p.left > 0 then v_borders[p.left] = true end
+    if p.top > 0 then h_borders[p.top] = true end
+  end
+
+  -- Count borders to calculate equal spacing
+  local v_count = 0
+  local h_count = 0
+  for _ in pairs(v_borders) do v_count = v_count + 1 end
+  for _ in pairs(h_borders) do h_count = h_count + 1 end
+
+  -- For simple 2-pane layouts, just adjust the active pane
+  if #panes_info == 2 then
+    local active_info = nil
+    for _, p in ipairs(panes_info) do
+      if p.is_active then active_info = p break end
+    end
+    if not active_info then return end
+
+    -- Check if side-by-side (vertical split) or stacked (horizontal split)
+    local is_vertical_split = (panes_info[1].top == panes_info[2].top)
+
+    if is_vertical_split then
+      -- Vertical split: equalize widths
+      local target = math.floor(tab_cols / 2)
+      local diff = target - active_info.width
+      if math.abs(diff) > 2 then
+        if diff > 0 then
+          window:perform_action(act.AdjustPaneSize { "Right", math.abs(diff) }, active_info.pane)
+        else
+          window:perform_action(act.AdjustPaneSize { "Left", math.abs(diff) }, active_info.pane)
+        end
+      end
+    else
+      -- Horizontal split: equalize heights
+      local target = math.floor(tab_rows / 2)
+      local diff = target - active_info.height
+      if math.abs(diff) > 2 then
+        if diff > 0 then
+          window:perform_action(act.AdjustPaneSize { "Down", math.abs(diff) }, active_info.pane)
+        else
+          window:perform_action(act.AdjustPaneSize { "Up", math.abs(diff) }, active_info.pane)
+        end
+      end
+    end
+    return
+  end
+
+  -- For complex layouts, use a gentler approach:
+  -- Adjust only the active pane toward average size
+  local active_info = nil
+  for _, p in ipairs(panes_info) do
+    if p.is_active then active_info = p break end
+  end
+  if not active_info then return end
+
+  local avg_width = math.floor(tab_cols / (v_count + 1))
+  local avg_height = math.floor(tab_rows / (h_count + 1))
+
+  local width_diff = avg_width - active_info.width
+  local height_diff = avg_height - active_info.height
+
+  -- Apply smaller adjustments to avoid chaos
+  local max_adjust = 20
+
+  if math.abs(width_diff) > 2 then
+    local adjust = math.min(math.abs(width_diff), max_adjust)
+    if width_diff > 0 then
+      window:perform_action(act.AdjustPaneSize { "Right", adjust }, active_info.pane)
+    else
+      window:perform_action(act.AdjustPaneSize { "Left", adjust }, active_info.pane)
+    end
+  end
+
+  if math.abs(height_diff) > 2 then
+    local adjust = math.min(math.abs(height_diff), max_adjust)
+    if height_diff > 0 then
+      window:perform_action(act.AdjustPaneSize { "Down", adjust }, active_info.pane)
+    else
+      window:perform_action(act.AdjustPaneSize { "Up", adjust }, active_info.pane)
+    end
   end
 end
 
